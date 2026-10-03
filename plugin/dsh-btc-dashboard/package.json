@@ -1,0 +1,21 @@
+{
+  "name": "@local/dsh-btc-dashboard",
+  "version": "1.3.2",
+  "private": true,
+  "description": "OKX BTC 合约价格看板：最新价 + 1m/3m/15m/1h/4h/1D K 线 + 可调周期 EMA（整条序列现算）+ 生产/模拟环境切换",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}
