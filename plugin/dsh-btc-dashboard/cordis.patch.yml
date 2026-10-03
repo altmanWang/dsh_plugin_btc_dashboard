@@ -1,0 +1,5 @@
+# dsh-btc-dashboard 的 bundle 层：把 Host 半（index.js）挂进当前 profile。
+# 客户端半由 package.json 的 dsh.client 声明（id 必须等于包名 @local/dsh-btc-dashboard）。
+- insert:
+    - id: btc-dashboard
+      name: '@local/dsh-btc-dashboard'

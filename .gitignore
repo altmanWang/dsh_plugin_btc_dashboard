@@ -1,0 +1,13 @@
+# 密钥与环境
+.env
+.env.*
+!.env.example
+
+# 运行期状态（每次切环境/周期都会重写）
+.dashboard/
+
+# 依赖与杂项
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
