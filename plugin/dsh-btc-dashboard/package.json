@@ -1,8 +1,8 @@
 {
   "name": "@local/dsh-btc-dashboard",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "private": true,
-  "description": "OKX BTC 合约价格看板：最新价 + 1m/3m/15m/1h/4h/1D K 线 + 可调周期 EMA（整条序列现算）+ 生产/模拟环境切换",
+  "description": "OKX BTC 合约价格看板：最新价 + 1m/3m/15m/1h/4h/1D K 线 + 可调周期 EMA（整条序列现算）+ 最新价线与收盘倒计时 + 可编辑画线 + 生产/模拟环境切换",
   "type": "module",
   "exports": {
     ".": "./index.js",
