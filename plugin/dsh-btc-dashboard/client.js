@@ -32,13 +32,31 @@ window.__ModuleLoader__.load({
     var DOWN = 'var(--btcd-down)';
     var C_UP = '#16c784';
     var C_DOWN = '#ea3943';
-    var C_EMA20 = '#f0b90b';
-    var C_EMA480 = '#a78bfa';
-    // 与 Host 半的 EMA_FAST / EMA_SLOW 对齐（Host 只用来出图例数字，曲线在浏览器里算）
-    var DEFAULT_EMA_FAST = 20;
-    var DEFAULT_EMA_SLOW = 480;
+    // 均线的默认色板（前两个就是原来的 EMA20 黄 / EMA480 紫，保持观感不变）
+    var EMA_DEFAULT_COLORS = ['#f0b90b', '#a78bfa', '#4a8cff', '#2dd4bf', '#fb923c', '#ea3943', '#e879f9', '#94a3b8'];
     var C_GRID = 'rgba(128,140,155,0.18)';
     var C_AXIS = 'rgba(140,152,166,0.9)';
+    // ---- 画布内的浮层颜色：画布不认 CSS，只能写死。这些值是照「浅色面板」选的。
+    // 浮层底用深色半透明：对比强，落点也稳（TradingView 的 tooltip 也是深底）
+    var C_POPOVER_BG = 'rgba(18,22,27,0.92)';
+    var C_POPOVER_BG_SOFT = 'rgba(18,22,27,0.78)';
+    var C_POPOVER_TEXT = '#f2f5f8';
+    var C_POPOVER_LABEL = 'rgba(160,172,186,0.95)';
+    var C_POPOVER_EDGE = 'rgba(140,152,166,0.45)';
+    // 十字光标 / 纵横虚线 / 最新价线：**浅色面板上必须够深**，否则白底上根本看不见
+    // （这几个以前用的是 rgba(150,160,175,…)，那是照深色底选的，在浅底上等于隐形）
+    var C_CROSSHAIR = 'rgba(90,100,112,0.75)';
+    // 「当前这一列」的底带、指针实点
+    var C_BAND = 'rgba(90,100,112,0.10)';
+    var C_POINTER_DOT = 'rgba(70,80,92,0.9)';
+    // 画布光标：所有状态（默认 / 拖动中 / 画线中）统一用**纯黑十字**。
+    // 自绘而不是用系统关键字：`crosshair` 在浅色主题下是白的、`grab`/`grabbing` 是手型，
+    // 都给不了"黑色十字"。面板在浅色主题下是浅底（`--dsw-alias-bg-layer-1` 解析为白），
+    // 所以纯黑看得清 —— 本仓库没有深色主题。
+    // 光标热点 = (6, 6)，正好是十字交点。
+    var CURSOR_CROSS = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13'%3E"
+      + "%3Cpath d='M6 0H5v5H0v1h5v5h1V6h5V5H6z' fill='%23000000'/%3E"
+      + '%3C/svg%3E") 6 6, crosshair';
 
     var CSS = [
       '.btcd-ico{display:inline-flex;align-items:center;gap:6px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:transparent;border:none;color:inherit;font:inherit;font-size:12px;cursor:pointer;padding:4px 8px;border-radius:6px}',
@@ -75,9 +93,10 @@ window.__ModuleLoader__.load({
       '.btcd-toggle{background:transparent;border:none;color:var(--dsw-alias-label-secondary,#98a2ad);font-size:11px;cursor:pointer;padding:3px 6px;border-radius:6px}',
       '.btcd-toggle:hover{background:var(--dsw-alias-bg-layer-2,#2b333b)}',
       '.btcd-chart-wrap{flex:1;min-height:260px;position:relative;padding:2px 8px 0}',
-      '.btcd-canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none}',
-      '.btcd-canvas.btcd-grabbing{cursor:grabbing}',
-      '.btcd-canvas.btcd-drawmode{cursor:crosshair}',
+      // 画布光标：三种状态统一是黑色十字（需求如此）。touch-action:none 让触摸拖动不被页面滚动抢走。
+      '.btcd-canvas{display:block;width:100%;height:100%;cursor:' + CURSOR_CROSS + ';touch-action:none}',
+      // 画线模式与平移模式的光标一样，这个类只留着给"当前处于画线模式"的语义/测试用
+      '.btcd-canvas.btcd-drawmode{cursor:' + CURSOR_CROSS + '}',
       '.btcd-levels{width:150px;background:var(--dsw-alias-bg-base,#1a1f24);color:var(--dsw-alias-label-primary,#e8e8e8);border:1px solid var(--dsw-alias-border-l2,#4a535c);border-radius:6px;padding:3px 8px;font-size:11.5px;font-variant-numeric:tabular-nums;outline:none}',
       '.btcd-levels:focus{border-color:var(--dsw-alias-brand-primary,#4a8cff)}',
       '.btcd-period{width:58px;background:var(--dsw-alias-bg-base,#1a1f24);color:var(--dsw-alias-label-primary,#e8e8e8);border:1px solid var(--dsw-alias-border-l2,#4a535c);border-radius:6px;padding:3px 7px;font-size:11.5px;font-variant-numeric:tabular-nums;outline:none;text-align:right}',
@@ -98,7 +117,10 @@ window.__ModuleLoader__.load({
       '.btcd-stale{background:rgba(224,168,0,.18);color:#e0a800}',
       '.btcd-last.btcd-stale,.btcd-chg.btcd-stale{color:var(--dsw-alias-state-warn-primary,#e0a800)}',
       '.btcd-countdown b{font-weight:600;font-variant-numeric:tabular-nums}',
-      '.btcd-lbl{font-size:11px}',
+      // 工具条上的分组标签：「窗口 / 均线 / 工具」。
+      // 固定同样的小字号、同一行的行高、同一个最小宽度，并让字在框里居中 ——
+      // 这样两行工具条里"标签与后面控件"的基线一致，标签之间也左右对齐（不会一行偏上一行偏下）。
+      '.btcd-lbl{display:inline-flex;align-items:center;justify-content:center;font-size:11px;line-height:22px;height:22px;min-width:26px;color:var(--dsw-alias-label-secondary,#98a2ad);white-space:nowrap}',
       // 工具按钮：图标 + 文字，选中态用品牌色描边而不是整块填色（一行放得下更多）
       '.btcd-tool{display:inline-flex;align-items:center;gap:4px;background:transparent;border:1px solid transparent;color:var(--dsw-alias-label-secondary,#98a2ad);border-radius:6px;padding:3px 8px;font-size:11.5px;cursor:pointer}',
       '.btcd-tool:hover{background:var(--dsw-alias-bg-layer-2,#2b333b);color:var(--dsw-alias-label-primary,#e8e8e8)}',
@@ -111,6 +133,21 @@ window.__ModuleLoader__.load({
       '.btcd-spin{width:11px;height:11px;border:2px solid var(--dsw-alias-border-l2,#4a535c);border-top-color:var(--dsw-alias-brand-primary,#4a8cff);border-radius:50%;animation:btcd-rot .7s linear infinite}',
       '@keyframes btcd-rot{to{transform:rotate(360deg)}}',
       '.btcd-sel{background:rgba(74,140,255,.16);color:#4a8cff}',
+      // 工具条上的均线条目：色块 + 周期，点它开关；关掉时整条变暗
+      '.btcd-ema{padding:3px 7px}',
+      '.btcd-ema.off{opacity:.42;text-decoration:line-through}',
+      '.btcd-ema-dot{width:9px;height:9px;border-radius:2px;display:inline-block;flex:none}',
+      '.btcd-ema-dot-lg{width:14px;height:14px;cursor:pointer;border:1px solid var(--dsw-alias-border-l2,#4a535c)}',
+      // 均线管理浮层：绝对定位在面板内，不挤占图表高度
+      '.btcd-panel{position:relative}',
+      '.btcd-emapanel{position:absolute;top:96px;right:14px;z-index:4;min-width:290px;background:var(--dsw-alias-bg-overlay,#2b333b);color:var(--dsw-alias-label-primary,#e8e8e8);border:1px solid var(--dsw-alias-border-l2,#4a535c);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.32);padding:8px 10px;display:flex;flex-direction:column;gap:6px;font-size:12px}',
+      '.btcd-emapanel-head{display:flex;align-items:center;gap:8px;font-weight:600;padding-bottom:2px}',
+      '.btcd-emapanel-row{display:flex;align-items:center;gap:8px}',
+      '.btcd-emapanel-row .btcd-period{width:70px;text-align:center}',
+      '.btcd-emapanel-foot{color:var(--dsw-alias-label-secondary,#98a2ad);font-size:11px;padding-top:2px;border-top:1px solid var(--dsw-alias-border-l1,#3a4149)}',
+      '.btcd-danger:hover{color:var(--dsw-alias-state-error-primary,#ff6b6b)!important}',
+      '.btcd-mini-primary{color:var(--dsw-alias-brand-primary,#4a8cff);font-weight:600}',
+      '.btcd-mini:disabled{opacity:.45;cursor:not-allowed}',
       '.btcd-toast{position:absolute;left:50%;bottom:56px;transform:translateX(-50%);background:var(--dsw-alias-bg-overlay,#2b333b);color:var(--dsw-alias-label-primary,#e8e8e8);border:1px solid var(--dsw-alias-border-l2,#4a535c);border-radius:8px;padding:6px 14px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:3}',
       // 窄屏：工具条不换行，改成横向滚动 —— 省下的每一行都是图表的高度
       '.btcd-bar{overflow-x:auto;scrollbar-width:thin}',
@@ -271,41 +308,168 @@ window.__ModuleLoader__.load({
       return Math.min(2000, Math.round(n));
     }
 
+    // ------------------------------------------------------------------ 均线列表（支持增删改）
+    //
+    // 模型就是一条数组：`[{ id, period, color, show }, ...]`，默认 EMA20 + EMA480。
+    // 之前是写死的两条（emaFast/emaSlow + showEma20/showEma480 两套状态），
+    // 加一条就得动十几处；现在所有逻辑都按列表遍历，加几条都一样。
+
+    var EMA_DEFAULT_COLORS = ['#f0b90b', '#a78bfa', '#4a8cff', '#2dd4bf', '#fb923c', '#ea3943', '#e879f9', '#94a3b8'];
+    var EMA_MAX_LINES = 8;
+    var EMA_DEFAULT_PERIODS = [20, 480];
+    // 均线列表存哪儿：全局一份（跟周期无关，换 15m/1h 用的是同一组均线）
+    var EMA_STORE_KEY = 'dsh-btc-dashboard:emas';
+
+    /** 均线条目的新 id（够用即可：只要在这一次会话里唯一）。 */
+    var emaSeq = 0;
+    function emaNewId() {
+      emaSeq += 1;
+      return 'e' + String(Date.now().toString(36)) + String(emaSeq);
+    }
+
+    /** 给新均线挑个颜色：优先用还没被占的；占满了就按序号轮转。 */
+    function emaPickColor(list) {
+      var used = {};
+      var i;
+      for (i = 0; i < list.length; i += 1) if (list[i].color !== undefined) used[String(list[i].color)] = true;
+      for (i = 0; i < EMA_DEFAULT_COLORS.length; i += 1) {
+        if (used[EMA_DEFAULT_COLORS[i]] !== true) return EMA_DEFAULT_COLORS[i];
+      }
+      return EMA_DEFAULT_COLORS[list.length % EMA_DEFAULT_COLORS.length];
+    }
+
+    /**
+     * 把随便什么输入（localStorage 里的旧值、用户传的）规范成一份合法的均线列表。
+     * 规则：周期夹到 [2,2000]、最多 `EMA_MAX_LINES` 条、颜色缺失就分配、show 缺省为 true。
+     * 空列表是**合法**的（用户可以把均线全删掉），所以这里不做"至少留一条"的兜底 ——
+     * 但真要一条都没有时，UI 上会留一个"添加"入口让人加回来。
+     *
+     * id 的兜底生成器**必须每次都给出不同的值**：早先这里写的是 `function () { return 'e0' }`，
+     * 于是默认列表两条的 id 一模一样，删除/修改只会命中第一条（测试直接抓到了）。
+     */
+    function normalizeEmas(input, nextId) {
+      var src = Array.isArray(input) ? input : [];
+      var idGen = typeof nextId === 'function' ? nextId : emaNewId;
+      var out = [];
+      for (var i = 0; i < src.length && out.length < EMA_MAX_LINES; i += 1) {
+        var item = src[i];
+        if (item === null || item === undefined) continue;
+        var period = item.period;
+        if (typeof period === 'string') period = parsePeriod(period, null);
+        if (typeof period !== 'number' || !isFinite(period) || period < EMA_PERIOD_MIN) continue;
+        out.push({
+          id: typeof item.id === 'string' && item.id !== '' ? item.id : idGen(),
+          period: Math.min(EMA_PERIOD_MAX, Math.round(period)),
+          color: typeof item.color === 'string' && item.color !== '' ? item.color : emaPickColor(out),
+          show: item.show !== false,
+        });
+      }
+      return out;
+    }
+
+    /** 默认列表（首次打开、或读不出来时用）。id 交给 emaNewId，保证两条不同。 */
+    function defaultEmas(nextId) {
+      return normalizeEmas(
+        EMA_DEFAULT_PERIODS.map(function (period) { return { period: period }; }),
+        typeof nextId === 'function' ? nextId : emaNewId,
+      );
+    }
+
+    /** 列表操作：纯函数，不改入参，方便离线断言。 */
+    function emaAdd(list, period) {
+      var current = Array.isArray(list) ? list : [];
+      if (current.length >= EMA_MAX_LINES) return current;
+      var used = {};
+      var i;
+      for (i = 0; i < current.length; i += 1) used[current[i].period] = true;
+      // 没指定就给一个"还没被用过"的常用周期，省得新加出来是重复的
+      var next = period;
+      if (next === undefined || next === null) {
+        var candidates = EMA_DEFAULT_PERIODS.concat([10, 30, 60, 120, 240, 720, 960]);
+        for (i = 0; i < candidates.length; i += 1) {
+          if (used[candidates[i]] !== true) { next = candidates[i]; break }
+        }
+        if (next === undefined) next = 20 + current.length * 10;
+      }
+      var item = {
+        id: 'e' + String(Date.now().toString(36)) + String(current.length) + String(Math.floor(Math.random() * 1000)),
+        period: Math.min(EMA_PERIOD_MAX, Math.max(EMA_PERIOD_MIN, Math.round(Number(next) || 20))),
+        color: emaPickColor(current),
+        show: true,
+      };
+      return current.concat([item]);
+    }
+
+    function emaRemove(list, id) {
+      var out = [];
+      for (var i = 0; i < (Array.isArray(list) ? list : []).length; i += 1) {
+        if (list[i].id !== id) out.push(list[i]);
+      }
+      return out;
+    }
+
+    /** 改一条：`patch` 里可以有 period / color / show。周期不合法（<2）就忽略这一项。 */
+    function emaUpdate(list, id, patch) {
+      var out = [];
+      for (var i = 0; i < (Array.isArray(list) ? list : []).length; i += 1) {
+        var item = list[i];
+        if (item.id !== id) { out.push(item); continue }
+        var next = { id: item.id, period: item.period, color: item.color, show: item.show !== false };
+        if (patch !== null && patch !== undefined) {
+          if (patch.period !== undefined) {
+            var period = typeof patch.period === 'string' ? parsePeriod(patch.period, null) : Math.round(Number(patch.period));
+            if (typeof period === 'number' && isFinite(period) && period >= EMA_PERIOD_MIN) {
+              next.period = Math.min(EMA_PERIOD_MAX, period);
+            }
+          }
+          if (typeof patch.color === 'string' && patch.color !== '') next.color = patch.color;
+          if (patch.show !== undefined) next.show = patch.show !== false;
+        }
+        out.push(next);
+      }
+      return out;
+    }
+
+    /** 图例/提示里用的名字。 */
+    function emaLabel(item) {
+      return 'EMA' + String(item === null || item === undefined ? '' : item.period);
+    }
+
     /**
      * 「整条序列 + 窗口 + 周期」→ 这一帧要画的东西。
      * 均线在整条序列上现算，再按窗口切片，所以窗口停在哪儿，均线就跟到哪儿。
      */
-    function emaWindow(candles, win, emaFast, emaSlow, stamp) {
-      var series = emaFor(candles, emaFast, emaSlow, stamp);
-      return {
-        candles: candles.slice(win.start, win.end),
-        ema20: series.emaFast.slice(win.start, win.end),
-        ema480: series.emaSlow.slice(win.start, win.end),
-      };
+    function emaWindow(candles, win, series) {
+      var lines = [];
+      for (var i = 0; i < series.length; i += 1) {
+        lines.push({ item: series[i].item, series: series[i].series.slice(win.start, win.end) });
+      }
+      return { candles: candles.slice(win.start, win.end), lines: lines };
     }
 
     var EMA_PERIOD_MAX = 2000;
     var EMA_PERIOD_MIN = 2;
-    var EMA_CACHE_MAX = 6;
+    var EMA_CACHE_MAX = 10;
     var emaCache = new Map();
 
     /**
-     * 「整条序列 + 两个周期」→ { fast, slow, emaFast, emaSlow }，带小型缓存。
-     * 缓存键含载荷的 fetchedAt：同一段行情在拖动/缩放时反复要用，不必每次 mousemove 重算，
-     * 但每次刷新（哪怕只有最后一根在动）都得重算。
+     * 「整条序列 + 均线列表」→ `[{ item, series }, ...]`，带小型缓存。
+     * 缓存键含载荷的 fetchedAt 与**每条线的周期与颜色**：拖动/缩放时反复要用，
+     * 不必每次 mousemove 重算；但每次刷新（哪怕只有最后一根在动）都得重算。
      */
-    function emaFor(candles, fastPeriod, slowPeriod, stamp) {
+    function emaFor(candles, list, stamp) {
       var len = candles.length;
-      var fast = Math.round(clampNum(fastPeriod, EMA_PERIOD_MIN, EMA_PERIOD_MAX));
-      var slow = Math.round(clampNum(slowPeriod, EMA_PERIOD_MIN, EMA_PERIOD_MAX));
-      var key = String(len) + '|' + String(fast) + '|' + String(slow)
-        + '|' + String(stamp === undefined || stamp === null ? 0 : stamp)
+      var items = normalizeEmas(list, function () { return 'tmp'; });
+      var key = String(len) + '|' + String(stamp === undefined || stamp === null ? 0 : stamp)
         + '|' + String(len === 0 ? 0 : candles[0][0])
-        + '|' + String(len === 0 ? 0 : candles[len - 1][0]);
+        + '|' + String(len === 0 ? 0 : candles[len - 1][0])
+        + '|' + items.map(function (it) { return String(it.period) + ':' + String(it.color); }).join(',');
       var hit = emaCache.get(key);
       if (hit !== undefined) return hit;
       var closes = closesOf(candles);
-      var made = { fast: fast, slow: slow, emaFast: emaSeries(closes, fast), emaSlow: emaSeries(closes, slow) };
+      var made = items.map(function (item) {
+        return { item: item, series: emaSeries(closes, item.period) };
+      });
       if (emaCache.size >= EMA_CACHE_MAX) emaCache.clear();
       emaCache.set(key, made);
       return made;
@@ -568,8 +732,11 @@ window.__ModuleLoader__.load({
         && localY >= Math.min(yHigh, yLow) - tol && localY <= Math.max(yHigh, yLow) + tol;
     }
 
-    /** 价格轴范围：K 线高低点 + 可见均线，留 6% 余量。放不下时返回 null。 */
-    function priceRange(candles, ema20, ema480, showEma20, showEma480) {
+    /**
+     * 价格轴范围：K 线高低点 + 可见均线，留 6% 余量。放不下时返回 null。
+     * `lines` 是 `[{ item, series }]`，只有 `item.show !== false` 的那些参与贴边。
+     */
+    function priceRange(candles, lines) {
       var lo = Infinity;
       var hi = -Infinity;
       var i;
@@ -578,18 +745,14 @@ window.__ModuleLoader__.load({
         if (candles[i][3] < lo) lo = candles[i][3];
         if (candles[i][2] > hi) hi = candles[i][2];
       }
-      if (showEma20) {
-        for (i = 0; i < ema20.length; i += 1) {
-          v = ema20[i];
-          if (v !== null && v !== undefined) {
-            if (v < lo) lo = v;
-            if (v > hi) hi = v;
-          }
-        }
-      }
-      if (showEma480) {
-        for (i = 0; i < ema480.length; i += 1) {
-          v = ema480[i];
+      var list = Array.isArray(lines) ? lines : [];
+      for (i = 0; i < list.length; i += 1) {
+        if (list[i] === null || list[i] === undefined) continue;
+        if (list[i].item !== undefined && list[i].item !== null && list[i].item.show === false) continue;
+        var series = list[i].series;
+        if (!Array.isArray(series)) continue;
+        for (var j = 0; j < series.length; j += 1) {
+          v = series[j];
           if (v !== null && v !== undefined) {
             if (v < lo) lo = v;
             if (v > hi) hi = v;
@@ -847,10 +1010,10 @@ window.__ModuleLoader__.load({
     }
 
     /** 指针 → 数据坐标 { index, price }；与 drawChart 用同一套 box / range，避免线画偏。 */
-    function pointerToData(canvas, candles, ema20, ema480, showEma20, showEma480, clientX, clientY, barMs) {
+    function pointerToData(canvas, candles, lines, clientX, clientY, barMs) {
       if (candles.length === 0) return null;
       var box = plotBox(canvas, candles.length);
-      var range = priceRange(candles, ema20, ema480, showEma20, showEma480);
+      var range = priceRange(candles, lines);
       if (range === null) return null;
       var rect = canvas.getBoundingClientRect();
       var span = range.hi - range.lo || 1;
@@ -890,6 +1053,114 @@ window.__ModuleLoader__.load({
       g.beginPath();
       if (typeof g.roundRect === 'function') g.roundRect(x, y, w, h, r);
       else g.rect(x, y, w, h);
+    }
+
+    // 画布左上角 EMA 图例的几何与配色（绘制和"点它开关均线"的命中判定共用一份，
+    // 不然改一处忘一处，就会出现"看着在图例上点，却点不动"）。
+    var LEGEND = {
+      left: 4,
+      top: 2,
+      padX: 2,
+      padY: 3,
+      swatch: 12,
+      gapSwatch: 5,
+      height: 17,
+      maxWidth: 300,
+      // 图例**不画底框**（只有色块 + 文字），所以文字必须自己够深、压着 K 线也读得清
+      text: '#2f3742',
+      // 指针停在图例某一行时的底色（比"没有底框"稍亮一点，一眼能看出会开关谁）
+      hotBg: 'rgba(74,140,255,0.16)',
+      radius: 5,
+      off: 0.4,
+      font: '11px system-ui, -apple-system, "Segoe UI", sans-serif',
+    };
+
+    /**
+     * 图例的每一行（`EMA20  84,724.6`）。值取**可见窗口最后一根**上的均线值 —— 图上画到哪儿，图例就报到哪儿。
+     *
+     * **列表里的每条都算一行，隐藏的用 `shown: false` 变暗**，这一点是刻意的：
+     *   * 行号必须稳定 —— 第 i 行永远对应 `emas[i]`。
+     *     早先只列可见的那些，"关掉某条 → 它从图例里消失 → 再也没地方点回来"，
+     *     而且后面的行会整体上移，点第 1 行会去开关另一条（实测就是这么坏的）。
+     *   * 变暗而不是消失，用户才知道"这条被我关了，点一下能回来"。
+     * `lines` 是 `[{ item, series }]`（`series` 是已切片的窗口数据）。
+     */
+    function emaLegendItems(lines) {
+      var lastOf = function (series) {
+        return Array.isArray(series) && series.length > 0 ? series[series.length - 1] : null;
+      };
+      var out = [];
+      var list = Array.isArray(lines) ? lines : [];
+      for (var i = 0; i < list.length; i += 1) {
+        if (list[i] === null || list[i] === undefined) continue;
+        var item = list[i].item === undefined || list[i].item === null ? {} : list[i].item;
+        out.push({
+          key: item.id === undefined ? 'row' + String(i) : item.id,
+          label: emaLabel(item),
+          value: lastOf(list[i].series),
+          color: typeof item.color === 'string' && item.color !== '' ? item.color : EMA_DEFAULT_COLORS[0],
+          shown: item.show !== false,
+        });
+      }
+      return out;
+    }
+
+    /**
+     * 该不该画图例：至少有一条线、且序列里有数据就画。
+     * 判据是**长度 > 0**而不是"是数组" —— Host 的均线数组与 K 线等长，
+     * 序列为空时"能有值的那一根"根本不存在，画出来只会是一行破折号。
+     */
+    function legendVisible(lines) {
+      var list = Array.isArray(lines) ? lines : [];
+      for (var i = 0; i < list.length; i += 1) {
+        if (list[i] !== null && list[i] !== undefined && Array.isArray(list[i].series) && list[i].series.length > 0) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    /**
+     * 图例的**命中区**（不是画出来的框 —— 图例不画底框，只有色块和文字）。
+     * 绘制用它的 x/y 定位每一行，pointerdown 用 legendHit 判"点到了哪一行"，
+     * 两边共用同一套计算，才不会出现"看着点在图例上却点不动"。
+     * 行数固定为均线条数：隐藏的也在（变暗），行号才有稳定含义。
+     */
+    function legendRect(plotLeft, plotTop, rows) {
+      var count = clampInt(rows === undefined || rows === null ? 1 : rows, 1, EMA_MAX_LINES);
+      return {
+        x: plotLeft + LEGEND.left,
+        y: plotTop + LEGEND.top,
+        w: LEGEND.padX * 2 + LEGEND.swatch + LEGEND.gapSwatch + LEGEND.maxWidth,
+        h: count * LEGEND.height + LEGEND.padY * 2,
+      };
+    }
+
+    /**
+     * 图例的命中判定：指针落在第几行（0 起），-1 = 不在图例上。
+     * 返回值就是均线列表的下标，`Chart` 直接拿它去 `onToggleEma(index)`。
+     *
+     * 判定用**最近的文字行**，不是"落进某个格子里"：
+     * 格子的边界要跟高度、内边距、字号三个值严格对齐，任何一个改动都可能把边界挪到用户
+     * 以为的那一行之外（表现就是"点第 1 行却开关了第 0 行"）。取最近一行没有这个隐患 ——
+     * 只要指针在色块/文字上下半个行高之内，就命中那一行。
+     */
+    function legendRowAt(localY, plotTop, rows) {
+      var count = clampInt(rows === undefined || rows === null ? 1 : rows, 1, EMA_MAX_LINES);
+      var first = plotTop + LEGEND.top + LEGEND.padY + LEGEND.height / 2;
+      var row = Math.round((localY - first) / LEGEND.height);
+      if (row < 0) row = 0;
+      if (row > count - 1) row = count - 1;
+      return row;
+    }
+
+    function legendHit(plotLeft, plotTop, localX, localY, rows) {
+      var count = clampInt(rows === undefined || rows === null ? 1 : rows, 1, EMA_MAX_LINES);
+      var rect = legendRect(plotLeft, plotTop, count);
+      // 上下各留 3px：贴着上下边缘点也算点了图例
+      if (localX < rect.x || localX > rect.x + rect.w) return -1;
+      if (localY < rect.y - 3 || localY > rect.y + rect.h + 3) return -1;
+      return legendRowAt(localY, plotTop, count);
     }
 
     /**
@@ -961,7 +1232,7 @@ window.__ModuleLoader__.load({
       if (lx + labelW > geom.right()) lx = x2 - 12 - labelW;
       if (lx < geom.left()) lx = geom.left() + 2;
       var ly = clampNum((y2 + y1) / 2 - labelH / 2, geom.top() + 2, geom.top() + geom.height() - labelH - 2);
-      g.fillStyle = 'rgba(18,22,27,0.92)';
+      g.fillStyle = C_POPOVER_BG;
       g.strokeStyle = tint;
       g.lineWidth = 1;
       roundBox(g, lx, ly, labelW, labelH, 5);
@@ -971,7 +1242,7 @@ window.__ModuleLoader__.load({
       g.textBaseline = 'middle';
       g.fillStyle = tint;
       g.fillText(line1, lx + 7, ly + 10);
-      g.fillStyle = '#f2f5f8';
+      g.fillStyle = C_POPOVER_TEXT;
       g.fillText(line2, lx + 7, ly + 23);
       g.globalAlpha = 1;
     }
@@ -995,12 +1266,15 @@ window.__ModuleLoader__.load({
       var brand = cssVar('--dsw-alias-brand-primary', '#4a8cff');
       var labelColor = cssVar('--dsw-alias-label-secondary', '#98a2ad');
       var candles = Array.isArray(board.candles) ? board.candles : [];
-      var ema20 = Array.isArray(board.ema20) ? board.ema20 : [];
-      var ema480 = Array.isArray(board.ema480) ? board.ema480 : [];
+      // 均线：`board.lines` 是 `[{ item, series }]`（已按窗口切成等长），条数由用户决定
+      var lines = Array.isArray(board.lines) ? board.lines : [];
+      // 防呆：均线属于 **board**，放进 view 里是会被静默忽略的（测试里踩过一次，
+      // 表现是"图上一条均线都没有，但没有任何报错"）。这里直接喊出来。
+      if (lines.length === 0 && Array.isArray(view.lines) && view.lines.length > 0) {
+        throw new Error('drawChart: 均线要放在 board.lines 里，不是 view.lines');
+      }
       var hover = view.hover;
       var hasHover = hover !== null && hover !== undefined && hover >= 0 && hover < 1e9;
-      var showEma20 = view.showEma20 !== false;
-      var showEma480 = view.showEma480 !== false;
 
       g.font = '11px system-ui, -apple-system, "Segoe UI", sans-serif';
       if (candles.length === 0) {
@@ -1023,7 +1297,7 @@ window.__ModuleLoader__.load({
       var volTop = box.volTop;
       var step = box.step;
 
-      var range = priceRange(candles, ema20, ema480, showEma20, showEma480);
+      var range = priceRange(candles, lines);
       if (range === null) return;
       var lo = range.lo;
       var hi = range.hi;
@@ -1046,15 +1320,17 @@ window.__ModuleLoader__.load({
 
       // 未收盘那根：先用一条极淡的竖带把"当前这一列"标出来（在网格与 K 线之下）
       if (isLastClosed !== true) {
-        g.fillStyle = 'rgba(128,140,155,0.07)';
+        g.fillStyle = C_BAND;
         g.fillRect(xOf(lastIndex) - step / 2, priceTop, Math.max(step, 1), volTop + volH - priceTop);
       }
 
       // 横向网格 + 右侧价格刻度
+      // 注意变量名：别叫 lines —— 上面 `lines` 已经是"均线列表"，同函数里 var 提升会把它覆盖掉
+      // （踩过一次：均线整条都不画，且不报错，只是 `lines` 变成了数字 5）
       g.textBaseline = 'middle';
-      var lines = 5;
-      for (i = 0; i <= lines; i += 1) {
-        var price = lo + (span * i) / lines;
+      var gridLines = 5;
+      for (i = 0; i <= gridLines; i += 1) {
+        var price = lo + (span * i) / gridLines;
         var y = yOf(price);
         g.strokeStyle = C_GRID;
         g.lineWidth = 1;
@@ -1126,8 +1402,13 @@ window.__ModuleLoader__.load({
         }
         g.stroke();
       }
-      if (showEma20) drawLine(ema20, C_EMA20);
-      if (showEma480) drawLine(ema480, C_EMA480);
+      // 均线：按列表逐条画，条数与颜色都由用户决定（`item.show === false` 的不画，但仍在图例里）
+      for (i = 0; i < lines.length; i += 1) {
+        var lineItem = lines[i] === null || lines[i] === undefined ? null : lines[i];
+        if (lineItem === null || lineItem.item === undefined || lineItem.item === null) continue;
+        if (lineItem.item.show === false) continue;
+        drawLine(Array.isArray(lineItem.series) ? lineItem.series : [], lineItem.item.color || EMA_DEFAULT_COLORS[0]);
+      }
 
       // ---- 用户画的线（直线 / 斐波那契）；画在 K 线与均线之上、十字光标之下
       function xOfTs(ts) {
@@ -1272,7 +1553,7 @@ window.__ModuleLoader__.load({
         && Number(view.lastIndex) === lastIndex && isFinite(Number(view.lastPrice));
       if (drawLive) {
         var liveY = yOf(Number(view.lastPrice));
-        g.strokeStyle = 'rgba(150,160,175,0.5)';
+        g.strokeStyle = C_CROSSHAIR;
         g.setLineDash([5, 4]);
         g.lineWidth = 1;
         g.beginPath();
@@ -1298,7 +1579,7 @@ window.__ModuleLoader__.load({
           var cdW = g.measureText(cdText).width + 16;
           var cdX = padL + plotW - cdW - 4;
           var cdY = priceTop + 3;
-          g.fillStyle = 'rgba(18,22,27,0.72)';
+          g.fillStyle = C_POPOVER_BG_SOFT;
           roundBox(g, cdX, cdY, cdW, 18, 5);
           g.fill();
           g.fillStyle = '#cbd5e1';
@@ -1323,7 +1604,7 @@ window.__ModuleLoader__.load({
         if (isFinite(hy) !== true) hy = yOf(hc[4]);
         var hoverPrice = onCandle ? hc[4] : lo + (1 - (hy - priceTop) / priceH) * span;
 
-        g.strokeStyle = 'rgba(150,160,175,0.55)';
+        g.strokeStyle = C_CROSSHAIR;
         g.setLineDash([3, 3]);
         g.lineWidth = 1;
         g.beginPath();
@@ -1340,7 +1621,7 @@ window.__ModuleLoader__.load({
         if (onCandle && isFinite(Number(view.hoverY))) {
           var dotY = clampNum(Number(view.hoverY), priceTop, priceTop + priceH);
           if (Math.abs(dotY - hy) > 2) {
-            g.fillStyle = 'rgba(190,200,212,0.9)';
+            g.fillStyle = C_POINTER_DOT;
             g.beginPath();
             g.arc(hx, dotY, 2, 0, Math.PI * 2);
             g.fill();
@@ -1383,10 +1664,10 @@ window.__ModuleLoader__.load({
             hintY = priceTop + 26;
             hintX = Math.min(hintX, padL + Math.max(plotW - hintW - 6, 6));
           }
-          g.fillStyle = 'rgba(18,22,27,0.78)';
+          g.fillStyle = C_POPOVER_BG_SOFT;
           roundBox(g, hintX, hintY, hintW, 18, 5);
           g.fill();
-          g.fillStyle = '#e8edf3';
+          g.fillStyle = C_POPOVER_TEXT;
           g.textAlign = 'left';
           g.textBaseline = 'middle';
           g.fillText(hintText, hintX + 6, hintY + 9);
@@ -1400,8 +1681,14 @@ window.__ModuleLoader__.load({
             ['量', fmtVol(hc[5])],
             ['涨跌', fmtPct(hc[1] === 0 ? 0 : ((hc[4] - hc[1]) / hc[1]) * 100)],
           ];
-          if (showEma20) rows.push(['EMA' + String(view.emaFastPeriod || 20), fmtPrice(ema20[hover], digitsOf(hc[4]))]);
-          if (showEma480) rows.push(['EMA' + String(view.emaSlowPeriod || 480), fmtPrice(ema480[hover], digitsOf(hc[4]))]);
+          // 悬浮框里也把每条均线（可见的那些）列出来，跟左上角图例同一个口径
+          for (var li = 0; li < lines.length; li += 1) {
+            var lrow = lines[li];
+            if (lrow === null || lrow === undefined || lrow.item === null || lrow.item === undefined) continue;
+            if (lrow.item.show === false) continue;
+            if (!Array.isArray(lrow.series)) continue;
+            rows.push([emaLabel(lrow.item), fmtPrice(lrow.series[hover], digitsOf(hc[4]))]);
+          }
           if (hc[6] !== 1 && hc[6] !== true) rows.push(['状态', '未收盘']);
           var boxW = 132;
           var boxH = 13 * rows.length + 12;
@@ -1409,8 +1696,8 @@ window.__ModuleLoader__.load({
           if (bx + boxW > padL + plotW) bx = hx - 14 - boxW;
           if (bx < padL) bx = padL + 2;
           var by = Math.max(priceTop + 2, Math.min(hy - boxH / 2, priceTop + priceH - boxH - 2));
-          g.fillStyle = 'rgba(18,22,27,0.92)';
-          g.strokeStyle = 'rgba(150,160,175,0.35)';
+          g.fillStyle = C_POPOVER_BG;
+          g.strokeStyle = C_POPOVER_EDGE;
           g.lineWidth = 1;
           roundBox(g, bx, by, boxW, boxH, 6);
           g.fill();
@@ -1418,27 +1705,65 @@ window.__ModuleLoader__.load({
           g.font = '11px system-ui, -apple-system, "Segoe UI", sans-serif';
           for (i = 0; i < rows.length; i += 1) {
             var ty = by + 12 + i * 13;
-            g.fillStyle = 'rgba(160,172,186,0.95)';
+            g.fillStyle = C_POPOVER_LABEL;
             g.textAlign = 'left';
             g.fillText(rows[i][0], bx + 8, ty);
-            g.fillStyle = '#f2f5f8';
+            g.fillStyle = C_POPOVER_TEXT;
             g.textAlign = 'right';
             g.fillText(rows[i][1], bx + boxW - 8, ty);
           }
         }
       }
 
-      // 回看历史时的角标：提醒当前右端不是最新一根
+      // ---- 左上角图例：每条均线一行（色块 + 名称 + 当前值），专业图表的位置
+      // 画在十字光标之前，这样指针压上去时光标线还在图例之上（不会被盖住）。
+      var legendItems = legendVisible(lines) ? emaLegendItems(lines) : [];
+      if (legendItems.length > 0) {
+        var lrect = legendRect(padL, priceTop, legendItems.length);
+        g.font = LEGEND.font;
+        g.textAlign = 'left';
+        g.textBaseline = 'middle';
+        // 指针停在哪一行就高亮哪一行：点之前就能看出"这一下会开关谁"。
+        // 这一条是拿用户反馈换来的 —— 光靠命中区看不见，错位了也发现不了。
+        var hotRow = view.hoverLegendRow;
+        var hasHot = hotRow !== undefined && hotRow !== null && hotRow >= 0 && hotRow < legendItems.length;
+        // 只画色块 + 文字，**不画底框**（底框会压住后面的 K 线）。
+        // 代价是文字直接压在 K 线上，所以 LEGEND.text 选了比"次要文字"更深的颜色。
+        for (i = 0; i < legendItems.length; i += 1) {
+          var item = legendItems[i];
+          var rowY = lrect.y + LEGEND.padY + LEGEND.height * i + LEGEND.height / 2;
+          if (hasHot && i === hotRow) {
+            g.globalAlpha = 1;
+            g.fillStyle = LEGEND.hotBg;
+            roundBox(g, lrect.x, rowY - LEGEND.height / 2, lrect.w, LEGEND.height, 4);
+            g.fill();
+          }
+          // 被关掉的那条变暗但仍然在：它是"点一下能开回来"的入口
+          g.globalAlpha = item.shown ? 1 : LEGEND.off;
+          g.fillStyle = item.color;
+          g.fillRect(lrect.x + LEGEND.padX, rowY - 1.5, LEGEND.swatch, 3);
+          g.fillStyle = LEGEND.text;
+          var text = item.label + (item.value === null || item.value === undefined
+            ? '  —' : '  ' + fmtPrice(item.value, digitsOf(lastBar[4])));
+          g.fillText(text, lrect.x + LEGEND.padX + LEGEND.swatch + LEGEND.gapSwatch, rowY);
+          g.globalAlpha = 1;
+        }
+      }
+
+      // 回看历史时的角标：挪到右上角（左上角让给图例），跟倒计时胶囊上下错开
       if (view.following === false) {
         var tagText = '回看中';
+        g.font = LEGEND.font;
         var tagW = g.measureText(tagText).width + 14;
+        var tagX = padL + plotW - tagW - 4;
+        var tagY = priceTop + 24;
         g.fillStyle = 'rgba(74,140,255,0.18)';
-        roundBox(g, padL + 4, priceTop + 2, tagW, 18, 9);
+        roundBox(g, tagX, tagY, tagW, 18, 9);
         g.fill();
         g.fillStyle = brand;
         g.textAlign = 'left';
         g.textBaseline = 'middle';
-        g.fillText(tagText, padL + 11, priceTop + 11);
+        g.fillText(tagText, tagX + 7, tagY + 9);
       }
     }
 
@@ -1571,12 +1896,10 @@ window.__ModuleLoader__.load({
       var onAddRef = React.useRef(null);
       var onUpdateRef = React.useRef(null);
       var onSelectRef = React.useRef(null);
+      var onToolDoneRef = React.useRef(null);
       var hoverState = React.useState(null);
       var hover = hoverState[0];
       var setHover = hoverState[1];
-      var dragState = React.useState(false);
-      var dragging = dragState[0];
-      var setDragging = dragState[1];
       var previewState = React.useState(null);
       var preview = previewState[0];
       var setPreview = previewState[1];
@@ -1585,24 +1908,24 @@ window.__ModuleLoader__.load({
       var view = props.view;
       var tool = props.tool === undefined || props.tool === null ? 'none' : props.tool;
       var win = windowOf(candles, view);
-      // 均线：对「整条序列」现算，再切窗口 —— 所以窗口拖到哪儿，均线就画到哪儿（见上面 EMA 那一节）。
-      // 每帧最多算一次：emaFor 的结果按 (长度, 周期, fetchedAt) 缓存。
-      var slice = emaWindow(candles, win, props.emaFast, props.emaSlow, props.fetchedAt);
+      // 均线在整条序列上现算、再按窗口切片 —— 窗口拖到哪儿均线就画到哪儿（见上面「均线列表」那一节）。
+      // `lines` 从 Dashboard 传进来（已经算好），避免同一份数据在两层各算一遍。
+      var lines = Array.isArray(props.lines) ? props.lines : [];
       var board = {
-        candles: slice.candles,
-        ema20: slice.ema20,
-        ema480: slice.ema480,
+        candles: candles.slice(win.start, win.end),
+        lines: lines.map(function (line) {
+          return {
+            item: line.item,
+            series: Array.isArray(line.series) ? line.series.slice(win.start, win.end) : [],
+          };
+        }),
         meta: { barMs: props.barMs },
       };
-      var ema20 = board.ema20;
-      var ema480 = board.ema480;
       var lastIndex = candles.length === 0 ? -1 : candles.length - 1;
       // ResizeObserver 回调、指针事件与每秒重绘都要读到最新一帧的数据，统一放 ref。
       latest.current = {
         board: board,
         hover: hover,
-        showEma20: props.showEma20,
-        showEma480: props.showEma480,
         following: view.rightTs === null,
         drawings: props.drawings,
         selectedId: props.selectedId === undefined ? null : props.selectedId,
@@ -1612,8 +1935,7 @@ window.__ModuleLoader__.load({
         win: win,
         lastIndex: lastIndex,
         lastPrice: props.lastPrice,
-        emaFastPeriod: parsePeriod(props.emaFast, DEFAULT_EMA_FAST),
-        emaSlowPeriod: parsePeriod(props.emaSlow, DEFAULT_EMA_SLOW),
+        emaRows: board.lines.length,
       };
       viewRef.current = view;
       onViewRef.current = props.onView;
@@ -1624,6 +1946,7 @@ window.__ModuleLoader__.load({
       onAddRef.current = props.onAdd;
       onUpdateRef.current = props.onUpdate;
       onSelectRef.current = props.onSelect;
+      onToolDoneRef.current = props.onToolDone;
 
       /** 用 latest.current 画一帧（重绘入口只有一个，避免两处参数漂移）。 */
       function paint(nowMs) {
@@ -1635,18 +1958,15 @@ window.__ModuleLoader__.load({
           hover: h === null ? null : h.index,
           hoverY: h === null ? null : h.y,
           hoverOnCandle: h !== null && h.hit === true,
-          showEma20: l.showEma20,
-          showEma480: l.showEma480,
+          // 指针停在哪一行图例上（-1 = 没停）
+          hoverLegendRow: legendRowRef.current,
           following: l.following,
           drawings: l.drawings,
           selectedId: l.selectedId,
           preview: l.preview,
           snapTag: l.snapTag,
-          emaFastPeriod: l.emaFastPeriod,
-          emaSlowPeriod: l.emaSlowPeriod,
           // following 同时是「回看中」角标的开关和「画最新价线/倒计时」的开关：
           // 跟随最新（rightTs === null）时窗口右端必定就是序列最后一根。
-          following: l.following,
           lastIndex: l.lastIndex,
           lastPrice: l.lastPrice,
           nowMs: nowMs,
@@ -1662,7 +1982,7 @@ window.__ModuleLoader__.load({
         var observer = new ResizeObserver(redraw);
         observer.observe(canvas);
         return function () { observer.disconnect(); };
-      }, [win.start, win.end, candles, slice, props.showEma20, props.showEma480, hover, view.rightTs,
+      }, [win.start, win.end, candles, lines, hover, view.rightTs,
         props.drawings, props.selectedId, preview]);
 
       /**
@@ -1701,8 +2021,7 @@ window.__ModuleLoader__.load({
         if (canvas === null || latest.current === null) return null;
         var l = latest.current;
         return pointerToData(
-          canvas, l.board.candles, l.board.ema20, l.board.ema480,
-          l.showEma20, l.showEma480, clientX, clientY, l.barMs,
+          canvas, l.board.candles, l.board.lines, clientX, clientY, l.barMs,
         );
       }
 
@@ -1733,7 +2052,7 @@ window.__ModuleLoader__.load({
         var l = latest.current;
         if (l === null || l.board === null || l.board.candles.length === 0) return null;
         var box = plotBox(canvasRef.current, l.board.candles.length);
-        var range = priceRange(l.board.candles, l.board.ema20, l.board.ema480, l.showEma20, l.showEma480);
+        var range = priceRange(l.board.candles, l.board.lines);
         if (range === null) return null;
         var barMsLocal = l.barMs;
         var span = range.hi - range.lo || 1;
@@ -1755,7 +2074,6 @@ window.__ModuleLoader__.load({
         if (typeof document !== 'undefined' && document.body !== undefined) document.body.style.userSelect = '';
         dragRef.current = null;
         snapTagRef.current = null;
-        setDragging(false);
         setPreview(null);
       }
 
@@ -1803,6 +2121,25 @@ window.__ModuleLoader__.load({
         var geo = geometryAt(event.clientX);
         if (local === null || geo === null) return;
 
+        // 点在左上角图例上 → 开关那一行对应的均线（不是画线、也不是平移）。
+        // 行号就是均线列表的下标，与隐藏与否无关（隐藏的仍在图例里，只是变暗）——
+        // 这正是"关掉还能开回来"的关键。
+        //
+        // 行数**不能只信 latest.current.emaRows**：那个 ref 在某些渲染顺序下还是 0，
+        // 于是行数被夹到 1，第 1 行永远点不到（EMA480 点不开 —— 又踩了一次同一个坑）。
+        // 按可靠性依次兜底：ref → props 上的列表 → 至少两行（宁可命中区高一点，也不能点不到）。
+        var legendRows = 2;
+        if (latest.current !== null && latest.current.emaRows > 0) {
+          legendRows = latest.current.emaRows;
+        } else if (Array.isArray(props.lines) && props.lines.length > 0) {
+          legendRows = props.lines.length;
+        }
+        var legendRow = legendHit(PAD_LEFT, geo.box.priceTop, local.x, local.y, legendRows);
+        if (legendRow >= 0 && typeof props.onToggleEma === 'function') {
+          props.onToggleEma(legendRow);
+          return;
+        }
+
         // 落在价格轴 / 时间轴上 → 按住拖动 = 缩放（专业图表的老习惯，双击同一区域 = 复位）
         if (local.x > PAD_LEFT + geo.plotWidth || local.y > geo.box.volTop + geo.box.volH) {
           dragRef.current = {
@@ -1810,7 +2147,6 @@ window.__ModuleLoader__.load({
             anchor: clampNum((local.x - PAD_LEFT) / geo.plotWidth, 0, 1),
           };
           setHover(null);
-          setDragging(true);
           capture(event);
           return;
         }
@@ -1829,7 +2165,6 @@ window.__ModuleLoader__.load({
           };
           snapTagRef.current = start.snapped;
           setHover(null);
-          setDragging(true);
           setPreview({ kind: currentTool, t1: start.ts, p1: start.price, t2: start.ts, p2: start.price, levels: levelsRef.current });
         } else if (props.editable !== false && Array.isArray(props.drawings) && props.drawings.length > 0) {
           // 无工具时按下：点在已有的画线上就进"编辑"，否则才是平移
@@ -1846,19 +2181,16 @@ window.__ModuleLoader__.load({
             };
             if (typeof onSelectRef.current === 'function') onSelectRef.current(shape.id === undefined ? null : shape.id);
             setHover(null);
-            setDragging(true);
           } else {
             if (typeof onSelectRef.current === 'function' && props.selectedId !== null && props.selectedId !== undefined) {
               onSelectRef.current(null);
             }
             dragRef.current = { mode: 'pan', startX: event.clientX, startView: viewRef.current, step: geo.step, delta: 0, moved: false };
             setHover(null);
-            setDragging(true);
           }
         } else {
           dragRef.current = { mode: 'pan', startX: event.clientX, startView: viewRef.current, step: geo.step, delta: 0, moved: false };
           setHover(null);
-          setDragging(true);
         }
         capture(event);
       }
@@ -1907,7 +2239,7 @@ window.__ModuleLoader__.load({
         endDrag();
         if (drag.mode !== 'draw') return;
         var at = shapePoint(event.clientX, event.clientY);
-        // 只是点一下（没拖动）不算一条线，免得误触画出一堆点
+        // 只是点一下（没拖动）不算画完：既不留线，也不退出工具（否则误点一下工具就没了）
         if (drag.moved !== true || at === null) return;
         if (typeof onAddRef.current === 'function') {
           onAddRef.current({
@@ -1919,6 +2251,10 @@ window.__ModuleLoader__.load({
             p2: at.price,
             levels: drag.kind === 'fib' ? levelsRef.current.slice() : undefined,
           });
+          // 一刀切：直线 / 斐波那契 / 尺子都是"画一条就收工"，画完自动回到平移模式。
+          // 不这样的话每条线都要手动按一下 Esc（或再点一次「平移」），连画三条就是三次多余操作；
+          // 而且画完还停在画线模式时，下一次拖动会意外又拉出一条线。
+          if (typeof onToolDoneRef.current === 'function') onToolDoneRef.current();
         }
       }
 
@@ -1939,6 +2275,22 @@ window.__ModuleLoader__.load({
        *   * 指针在画布空白处（含成交量区）→ 只画十字光标 + 右轴标出「该 y 对应的价格」
        * 缩得很小时容差会按每根宽度放宽（`hitTolerance`），否则 0.6px 宽的实体根本点不中。
        */
+      /** 指针停在哪一行图例上（-1 = 没停）。放 ref 里，重绘时直接读，不必过 React。 */
+      var legendRowRef = React.useRef(-1);
+      /** 立刻重画一帧（图例高亮、光标切换这种即时反馈用）。 */
+      function draw() { paint(Date.now()); }
+
+      /** 指针在图例的哪一行（-1 = 不在图例上）。用当前帧的行数，保证跟画出来的一致。 */
+      function legendRowUnder(event) {
+        var canvas = canvasRef.current;
+        if (canvas === null) return -1;
+        var box = plotBox(canvas, 1);
+        var rect = canvas.getBoundingClientRect();
+        // 行数优先用"这一帧真的画了几行"，退回 props 上的列表长度
+        var rows = props.lines !== undefined && Array.isArray(props.lines) ? props.lines.length : 0;
+        return legendHit(PAD_LEFT, box.priceTop, event.clientX - rect.left, event.clientY - rect.top, rows);
+      }
+
       function hoverAt(event) {
         var canvas = canvasRef.current;
         if (canvas === null) return null;
@@ -1949,8 +2301,8 @@ window.__ModuleLoader__.load({
         var localX = event.clientX - rect.left;
         var localY = event.clientY - rect.top;
         if (localX < PAD_LEFT) return null;
-        var slice = latest.current === null ? { candles: [], ema20: [], ema480: [] } : latest.current.board;
-        var range = priceRange(slice.candles, slice.ema20, slice.ema480, true, true);
+        var slice = latest.current === null ? { candles: [], lines: [] } : latest.current.board;
+        var range = priceRange(slice.candles, slice.lines);
         var index = clampInt(Math.floor((localX - PAD_LEFT) / box.step), 0, count - 1);
         return {
           index: index,
@@ -1960,6 +2312,15 @@ window.__ModuleLoader__.load({
       }
 
       function onMove(event) {
+        // 图例高亮：指针压在图例上时，光标也换成手型（"这里能点"）
+        var row = legendRowUnder(event);
+        if (row !== legendRowRef.current) {
+          legendRowRef.current = row;
+          if (canvasRef.current !== null) {
+            canvasRef.current.style.cursor = row >= 0 ? 'pointer' : '';
+          }
+          draw();
+        }
         var at = hoverAt(event);
         if (at === null) {
           if (hover !== null) setHover(null);
@@ -2008,7 +2369,7 @@ window.__ModuleLoader__.load({
 
       return React.createElement('canvas', {
         ref: canvasRef,
-        className: 'btcd-canvas' + (dragging ? ' btcd-grabbing' : '') + (tool !== 'none' ? ' btcd-drawmode' : ''),
+        className: 'btcd-canvas' + (tool !== 'none' ? ' btcd-drawmode' : ''),
         tabIndex: 0,
         role: 'img',
         'aria-label': ariaText,
@@ -2044,6 +2405,8 @@ window.__ModuleLoader__.load({
       // 尺子：一把斜放的直尺 + 两端刻度
       ruler: ['M1 8.6 8.6 1', 'M1.9 9.6 9.6 1.9', 'M2.6 6.6l1.3 1.3', 'M4.6 4.6l1.3 1.3', 'M6.6 2.6l1.3 1.3'],
       magnet: ['M3 9.8V5.2a3 3 0 0 1 6 0v4.6', 'M3 7.6h6', 'M2 9.8h2', 'M8 9.8h2'],
+      plus: ['M6 2v8', 'M2 6h8'],
+      sliders: ['M2 3.4h8', 'M2 8.6h8', 'M4.6 3.4v2.4', 'M7.4 6.2v2.4'],
       pin: ['M6 1.2v9.6', 'M2.2 4.4h7.6'],
       undo: ['M3.2 4.4H7a2.6 2.6 0 1 1 0 5.2H4.4', 'M5 2.2 2.6 4.4 5 6.6'],
       trash: ['M2.2 3.4h7.6', 'M4.6 3.4V2.2h2.8v1.2', 'M3.4 3.4l.5 6.2h4.2l.5-6.2'],
@@ -2062,10 +2425,15 @@ window.__ModuleLoader__.load({
       var autoState = React.useState(true);
       var auto = autoState[0];
       var setAuto = autoState[1];
-      var emaState = React.useState([true, true]);
-      var showEma20 = emaState[0][0];
-      var showEma480 = emaState[0][1];
-      var setEma = emaState[1];
+      // 均线列表：`[{ id, period, color, show }]`，默认 EMA20 + EMA480，可增删改。
+      // 首次渲染先用默认列表，挂载后再从 localStorage 读（读盘不能放在渲染里）。
+      var emaState = React.useState(function () { return defaultEmas(emaNewId); });
+      var emas = emaState[0];
+      var setEmas = emaState[1];
+      var savedEmaRef = React.useRef(null);
+      var emaPanelState = React.useState(false);
+      var showEmaPanel = emaPanelState[0];
+      var setShowEmaPanel = emaPanelState[1];
       var epochState = React.useState(0);
       var setEpoch = epochState[1];
       var viewState = React.useState({ size: DEFAULT_WINDOW, rightTs: null });
@@ -2084,12 +2452,6 @@ window.__ModuleLoader__.load({
       var snapState = React.useState(true);
       var snap = snapState[0];
       var setSnap = snapState[1];
-      // 均线周期（文本 + 生效值）：输入框每敲一下都重算，所以「动态更新」是即时的
-      var periodState = React.useState([String(DEFAULT_EMA_FAST), String(DEFAULT_EMA_SLOW)]);
-      var periodText = periodState[0];
-      var setPeriodText = periodState[1];
-      var emaFast = parsePeriod(periodText[0], DEFAULT_EMA_FAST);
-      var emaSlow = parsePeriod(periodText[1], DEFAULT_EMA_SLOW);
       var drawState = React.useState([]);
       var drawings = drawState[0];
       var setDrawings = drawState[1];
@@ -2129,7 +2491,36 @@ window.__ModuleLoader__.load({
       var selectedRef = React.useRef(selectedId);
       selectedRef.current = selectedId;
 
-      /** 画线增删改的三个入口都走 ref，Chart 里读到的永远是最新实现。 */
+      /**
+       * 顶部键盘快捷键与"画完一条就退出工具"都要在**只注册一次**的回调里改状态，
+       * 所以这些入口统一走 ref：直接调会闭包到首帧的旧值。逻辑只有一份，ref 只是指向它。
+       */
+      var barIdsRef = React.useRef(BAR_IDS);
+      if (data.board !== null && data.board !== undefined && Array.isArray(data.board.bars)) {
+        barIdsRef.current = data.board.bars.map(function (item) { return item.id; });
+      }
+      var switchBarRef = React.useRef(null);
+      var deleteSelectedRef = React.useRef(null);
+      var toggleAllEmaRef = React.useRef(null);
+      var setToolRef = React.useRef(null);
+      var setSelectedRef = React.useRef(null);
+      // 键盘处理只注册一次，读状态要走 ref（否则闭包到首帧的旧值）
+      var showEmaPanelRef = React.useRef(false);
+      showEmaPanelRef.current = showEmaPanel;
+      var setShowEmaPanelRef = React.useRef(null);
+      setShowEmaPanelRef.current = setShowEmaPanel;
+      // Alt+H：一键开关**所有**均线（以前是两条；现在条数不定，所以按"整体"来）
+      toggleAllEmaRef.current = function () {
+        setEmas(function (prev) {
+          var anyOn = false;
+          for (var i = 0; i < prev.length; i += 1) if (prev[i].show !== false) anyOn = true;
+          return prev.map(function (item) { return Object.assign({}, item, { show: !anyOn }); });
+        });
+      };
+      setToolRef.current = setTool;
+      setSelectedRef.current = function (id) { setSelectedId(id === undefined ? null : id); };
+
+      /** 画线的增删改入口（都走 ref，Chart 里读到的永远是最新实现）。 */
       var drawApiRef = React.useRef(null);
       drawApiRef.current = {
         add: function (shape) { setDrawings(function (prev) { return prev.concat([shape]); }); },
@@ -2141,26 +2532,22 @@ window.__ModuleLoader__.load({
           });
         },
         select: function (id) { setSelectedId(id === undefined ? null : id); },
+        /** 一条画完：退出画线工具回到平移模式（一次一个，不连续绘） */
+        toolDone: function () { setToolRef.current('none'); },
+        /**
+         * 点画布左上角的图例第 index 行：开关那条均线。
+         * 用**函数式更新**（`prev` 而不是渲染期的 `emas`）：快速连点时闭包里的列表可能已经过期。
+         */
+        toggleEma: function (index) {
+          setEmas(function (prev) {
+            var out = [];
+            for (var i = 0; i < prev.length; i += 1) {
+              out.push(i === index ? Object.assign({}, prev[i], { show: prev[i].show === false }) : prev[i]);
+            }
+            return out;
+          });
+        },
       };
-
-      /**
-       * 顶部键盘快捷键的依赖全部走 ref：
-       * 这个监听只注册一次（[] 依赖），但里面读到的必须永远是「当前」的周期、画线、工具状态。
-       */
-      var barIdsRef = React.useRef(BAR_IDS);
-      if (data.board !== null && data.board !== undefined && Array.isArray(data.board.bars)) {
-        barIdsRef.current = data.board.bars.map(function (item) { return item.id; });
-      }
-      // 面板级键盘监听只注册一次（[] 依赖），所以它调用的函数必须走 ref —— 直接调会闭包到首帧的旧值。
-      // 这几个 ref 都指向下面定义的同名函数，逻辑只有一份。
-      var switchBarRef = React.useRef(null);
-      var deleteSelectedRef = React.useRef(null);
-      var toggleEmaRef = React.useRef(null);
-      var setToolRef = React.useRef(null);
-      var setSelectedRef = React.useRef(null);
-      toggleEmaRef.current = function () { setEma(function (prev) { return [!prev[0], !prev[1]]; }); };
-      setToolRef.current = setTool;
-      setSelectedRef.current = function (id) { setSelectedId(id === undefined ? null : id); };
 
       React.useEffect(function () {
         if (toast === null) return undefined;
@@ -2212,6 +2599,11 @@ window.__ModuleLoader__.load({
               setSelectedRef.current(null);
               return;
             }
+            // 均线管理看板开着就先收它，再按才关整个看板
+            if (showEmaPanelRef.current === true) {
+              setShowEmaPanelRef.current(false);
+              return;
+            }
             closeRef.current();
             return;
           }
@@ -2221,7 +2613,7 @@ window.__ModuleLoader__.load({
             return;
           }
           if (event.altKey === true && (event.key === 'h' || event.key === 'H')) {
-            toggleEmaRef.current();
+            toggleAllEmaRef.current();
             event.preventDefault();
             return;
           }
@@ -2262,6 +2654,21 @@ window.__ModuleLoader__.load({
         savedRef.current = text;
         saveStored(drawStoreKey, drawings);
       }, [drawStoreKey, drawings]);
+
+      // 均线列表的持久化：全局一份（它跟周期无关，换 15m/1h 用的还是同一组均线）
+      React.useEffect(function () {
+        var raw = loadStored(EMA_STORE_KEY, null);
+        if (raw !== null && raw !== undefined) {
+          setEmas(normalizeEmas(raw, emaNewId));
+        }
+      }, []);
+
+      React.useEffect(function () {
+        var text = JSON.stringify(emas);
+        if (savedEmaRef.current === text) return;
+        savedEmaRef.current = text;
+        saveStored(EMA_STORE_KEY, emas);
+      }, [emas]);
 
       function undoDrawing() {
         setDrawings(function (prev) { return prev.slice(0, Math.max(0, prev.length - 1)); });
@@ -2351,16 +2758,21 @@ window.__ModuleLoader__.load({
       var warnings = board === null || board.meta === undefined || board.meta === null ? [] : (board.meta.warnings || []);
       var fullCandles = board === null ? [] : (board.candles || []);
       // 均线在这里算一次（整条序列），图例数字、价距均线、图上的曲线都取自它，口径一致。
-      // 序列一变（每 5 秒刷新/切周期）或周期一改，就重算 —— 这就是「动态更新」。
-      var emaNow = emaFor(fullCandles, emaFast, emaSlow, board === null ? 0 : board.fetchedAt);
-      var lastFast = emaNow.emaFast.length === 0 ? null : emaNow.emaFast[emaNow.emaFast.length - 1];
-      var lastSlow = emaNow.emaSlow.length === 0 ? null : emaNow.emaSlow[emaNow.emaSlow.length - 1];
+      // 序列一变（每 5 秒刷新/切周期）或均线列表一改，就重算 —— 这就是「动态更新」。
+      var emaLines = emaFor(fullCandles, emas, board === null ? 0 : board.fetchedAt);
       var lastClose = fullCandles.length === 0 ? null : fullCandles[fullCandles.length - 1][4];
       var barMs = board === null || board.meta === undefined || board.meta === null ? 0 : Number(board.meta.barMs || 0);
-      var vsFast = lastClose === null || lastFast === null || lastFast === 0
-        ? null : Number((((lastClose - lastFast) / lastFast) * 100).toFixed(3));
-      var vsSlow = lastClose === null || lastSlow === null || lastSlow === 0
-        ? null : Number((((lastClose - lastSlow) / lastSlow) * 100).toFixed(3));
+      // 价格行里的「价距 EMA」：每条均线一个，取序列最后一根上的值
+      var emaVs = emaLines.map(function (line) {
+        var series = line.series;
+        var value = series.length === 0 ? null : series[series.length - 1];
+        return {
+          item: line.item,
+          value: value,
+          pct: lastClose === null || value === null || value === 0
+            ? null : Number((((lastClose - value) / value) * 100).toFixed(3)),
+        };
+      });
 
       // ---- 可视区间的统计：Host 每 5 秒都算好了（windowHigh/windowLow/windowVolume/windowChangePct），
       //      以前一个都没显示；可视根数一变就自己在本地的整条序列上重算，跟视野完全同步。
@@ -2457,13 +2869,19 @@ window.__ModuleLoader__.load({
             className: 'btcd-countdown', key: 'cd',
             title: '距离本根 ' + (bar === null ? '15m' : bar) + ' K 线收盘还有 ' + fmtDur(countdownMs),
           }, '距收盘 ', React.createElement('b', null, fmtDur(countdownMs))),
-          React.createElement('span', null, 'EMA ',
-            React.createElement('b', null, String(emaFast) + ': ' + fmtPrice(lastFast) + ' / ' + String(emaSlow) + ': ' + fmtPrice(lastSlow))),
-          React.createElement('span', null,
-            '价距EMA' + String(emaFast) + ' ',
-            React.createElement('b', { className: vsFast === null || vsFast < 0 ? 'btcd-down' : 'btcd-up' }, fmtPct(vsFast)),
-            ' 距EMA' + String(emaSlow) + ' ',
-            React.createElement('b', { className: vsSlow === null || vsSlow < 0 ? 'btcd-down' : 'btcd-up' }, fmtPct(vsSlow))),
+          React.createElement('span', { key: 'ema', title: '每条均线的当前值与「现价距它多少」' }, 'EMA ',
+            React.createElement('b', null, emaVs.length === 0 ? '（无）' : emaVs.map(function (line) {
+              return String(line.item.period) + ': ' + fmtPrice(line.value);
+            }).join(' / '))),
+          emaVs.length === 0 ? null : React.createElement('span', { key: 'vs' },
+            '价距 ',
+            emaVs.map(function (line, index) {
+              return React.createElement('span', { key: 'v' + index },
+                index > 0 ? '  ' : '',
+                String(line.item.period) + ' ',
+                React.createElement('b', { className: line.pct === null || line.pct < 0 ? 'btcd-down' : 'btcd-up' },
+                  fmtPct(line.pct)));
+            })),
           submitting ? React.createElement('span', { className: 'btcd-hint' }, '刷新中…') : null),
       ];
       children.push(React.createElement('div', { className: 'btcd-price-row', key: 'price' }, priceKids));
@@ -2492,27 +2910,28 @@ window.__ModuleLoader__.load({
         React.createElement('div', { className: 'btcd-spacer' }),
         React.createElement('div', { className: 'btcd-tabs' }, rangeKids)));
 
-      // 均线周期 + 画线工具（同一行）
+      // 均线：工具条上就一个「均线」按钮 —— 点开就是**管理看板**（增 / 删 / 改 / 显隐全在里面）。
+      // 画布左上角的图例只负责逐条显隐（点一下开关），不放任何编辑入口。
       var emaKids = [
         React.createElement('span', { key: 'lbl', className: 'btcd-lbl' }, '均线'),
-        React.createElement(PeriodEditor, {
-          key: 'fast', value: emaFast, title: '快线周期（默认 20，2–' + String(EMA_PERIOD_MAX) + '）',
-          onCommit: function (text) { setPeriodText([text, periodText[1]]); },
-        }),
-        React.createElement('span', { key: 'sep', className: 'btcd-lbl' }, '/'),
-        React.createElement(PeriodEditor, {
-          key: 'slow', value: emaSlow, title: '慢线周期（默认 480，2–' + String(EMA_PERIOD_MAX) + '）',
-          onCommit: function (text) { setPeriodText([periodText[0], text]); },
-        }),
+        React.createElement('button', {
+          key: 'manage',
+          className: 'btcd-tool' + (showEmaPanel ? ' on' : ''),
+          title: '均线管理：新增 / 删除 / 改周期 / 换颜色 / 显隐（画布左上角的图例也能点着开关）',
+          'aria-pressed': showEmaPanel,
+          'aria-expanded': showEmaPanel,
+          onClick: function () { setShowEmaPanel(!showEmaPanel); },
+        }, ico(ICON.sliders), React.createElement('span', null,
+          emas.length === 0 ? '均线管理' : '均线管理（' + String(emas.length) + '）')),
         React.createElement('span', { key: 'sp', className: 'btcd-spacer' }),
       ];
       var TOOLS = [
         ['none', '平移', '平移 / 缩放模式（拖动=平移，滚轮=缩放，双击=复位）', ICON.hand],
-        ['line', '直线', '在图上按住拖动，画一条直线；画完后可直接拖动/点选它', ICON.line],
-        ['fib', '斐波那契', '在图上按住拖动：起点→终点决定区间，默认画 0 / 0.5 / 1 / 1.5 / 2', ICON.fib],
-        ['measure', '尺子', '在图上按住拖动量一段：价格差、涨跌比例、时长（端点会吸附到 OHLC）', ICON.ruler],
+        ['line', '直线', '按住拖动画一条直线。画完自动回到平移（一次一条）；之后可直接拖动/点选已画的线', ICON.line],
+        ['fib', '斐波那契', '按住拖动：起点→终点决定区间，默认画 0 / 0.5 / 1 / 1.5 / 2。画完自动回到平移（一次一条）', ICON.fib],
+        ['measure', '尺子', '按住拖动量一段：价格差、涨跌比例、时长。端点会吸附到 OHLC；画完自动回到平移（一次一条）', ICON.ruler],
       ];
-      var toolKids = [React.createElement('span', { key: 'lbl', className: 'btcd-lbl' }, '画线')];
+      var toolKids = [React.createElement('span', { key: 'lbl', className: 'btcd-lbl' }, '工具')];
       for (var t = 0; t < TOOLS.length; t += 1) {
         toolKids.push(React.createElement('button', {
           key: TOOLS[t][0],
@@ -2577,27 +2996,102 @@ window.__ModuleLoader__.load({
         React.createElement('div', { className: 'btcd-tabs', style: { flex: '1 1 auto' } }, emaKids),
         React.createElement('div', { className: 'btcd-tabs' }, toolKids)));
 
+      // 均线管理看板：新增 / 删除 / 改周期 / 换颜色 / 显隐 / 恢复默认，全在这里。
+      // 做成浮层而不是常驻一行：日常只是开关均线（点画布图例就够了），
+      // 常驻会把"改周期"这种低频操作一直摆在眼前占地方。
+      if (showEmaPanel) {
+        var emaPanelKids = [
+          React.createElement('div', { className: 'btcd-emapanel-head', key: 'head' },
+            React.createElement('span', null, '均线管理'),
+            React.createElement('span', { className: 'btcd-spacer' }),
+            React.createElement('button', {
+              key: 'add', className: 'btcd-mini btcd-mini-primary',
+              title: emas.length >= EMA_MAX_LINES
+                ? '最多 ' + String(EMA_MAX_LINES) + ' 条'
+                : '新增一条均线（自动给一个还没用过的周期与颜色）',
+              disabled: emas.length >= EMA_MAX_LINES,
+              onClick: function () { setEmas(function (prev) { return emaAdd(prev); }); },
+            }, '＋ 新增'),
+            React.createElement('button', {
+              key: 'reset', className: 'btcd-mini',
+              title: '恢复默认（EMA' + EMA_DEFAULT_PERIODS.join(' + EMA') + '）',
+              onClick: function () { setEmas(defaultEmas(emaNewId)); },
+            }, '恢复默认'),
+            React.createElement('button', {
+              key: 'close', className: 'btcd-mini',
+              title: '收起（Esc 也可以）',
+              onClick: function () { setShowEmaPanel(false); },
+            }, '收起')),
+        ];
+        for (var mi = 0; mi < emas.length; mi += 1) {
+          emaPanelKids.push(React.createElement('div', { className: 'btcd-emapanel-row', key: 'r' + emas[mi].id },
+            React.createElement('button', {
+              key: 'color',
+              className: 'btcd-ema-dot btcd-ema-dot-lg',
+              style: { background: emas[mi].color },
+              title: '换颜色（在调色板里轮换）',
+              'aria-label': '切换 EMA' + String(emas[mi].period) + ' 的颜色',
+              onClick: function (index) { return function () {
+                setEmas(function (prev) {
+                  var cur = prev[index];
+                  if (cur === undefined) return prev;
+                  var at = EMA_DEFAULT_COLORS.indexOf(cur.color);
+                  return emaUpdate(prev, cur.id, { color: EMA_DEFAULT_COLORS[(at + 1) % EMA_DEFAULT_COLORS.length] });
+                });
+              }; }(mi),
+            }),
+            React.createElement(PeriodEditor, {
+              key: 'period',
+              value: emas[mi].period,
+              title: 'EMA' + String(emas[mi].period) + ' 的周期（' + String(EMA_PERIOD_MIN) + '–' + String(EMA_PERIOD_MAX) + '）',
+              onCommit: function (id) { return function (text) { setEmas(function (prev) { return emaUpdate(prev, id, { period: text }); }); }; }(emas[mi].id),
+            }),
+            React.createElement('button', {
+              key: 'show', className: 'btcd-mini' + (emas[mi].show !== false ? ' on' : ''),
+              title: emas[mi].show !== false ? '当前显示，点击隐藏' : '当前隐藏，点击显示',
+              onClick: function (index) { return function () { drawApiRef.current.toggleEma(index); }; }(mi),
+            }, emas[mi].show !== false ? '显示中' : '已隐藏'),
+            React.createElement('button', {
+              key: 'del', className: 'btcd-mini btcd-danger',
+              title: '删除这条均线',
+              onClick: function (id) { return function () { setEmas(function (prev) { return emaRemove(prev, id); }); }; }(emas[mi].id),
+            }, '删除')));
+        }
+        if (emas.length === 0) {
+          emaPanelKids.push(React.createElement('div', { className: 'btcd-emapanel-row', key: 'empty' },
+            React.createElement('span', { className: 'btcd-hint' },
+              '一条均线都没有。点右上角的「＋ 新增」加一条，或「恢复默认」加回 EMA20 / EMA480。')));
+        } else {
+          emaPanelKids.push(React.createElement('div', { className: 'btcd-emapanel-foot', key: 'foot' },
+            '共 ' + String(emas.length) + ' / ' + String(EMA_MAX_LINES) + ' 条 · 周期范围 '
+            + String(EMA_PERIOD_MIN) + '–' + String(EMA_PERIOD_MAX)
+            + ' · 显隐也可以直接点画布左上角的图例'));
+        }
+        children.push(React.createElement('div', { className: 'btcd-emapanel', key: 'emapanel' }, emaPanelKids));
+      }
+
       // 图表：拖动平移、滚轮缩放、双击回最新（触摸同样走 pointer 事件）
       var chartWrapKids = [React.createElement(Chart, {
         key: 'chart',
         candles: fullCandles,
-        // 均线不再取 Host 发来的数组（那只有展示窗口那一段），Chart 内部按周期现算
-        emaFast: emaFast,
-        emaSlow: emaSlow,
-        fetchedAt: board === null ? 0 : board.fetchedAt,
+        // 均线：整条序列（含预热）在这里算好，Chart 负责按窗口切片。
+        // 不再取 Host 发来的 ema20/ema480 —— 那是写死两条、且只有展示窗口那一段。
+        lines: emaLines,
         barMs: barMs,
         view: view,
         onView: setView,
-        showEma20: showEma20,
-        showEma480: showEma480,
         tool: tool,
         levels: parseFibLevels(levelsText),
         snap: snap,
+        // 画布左上角图例：点它会回调这里来开关对应的均线
+        onToggleEma: drawApiRef.current.toggleEma,
         drawings: drawings,
         selectedId: selectedId,
         onAdd: drawApiRef.current.add,
         onUpdate: drawApiRef.current.update,
         onSelect: drawApiRef.current.select,
+        // 画完一条就退出工具（回到平移），见 Chart 的 onPointerUp
+        onToolDone: drawApiRef.current.toolDone,
         lastIndex: fullCandles.length === 0 ? -1 : fullCandles.length - 1,
         lastPrice: lastClose,
         // 不传 nowMs：图表里的倒计时由 Chart 自己的每秒计时器直接重画 canvas 驱动，
@@ -2620,20 +3114,14 @@ window.__ModuleLoader__.load({
       }
       children.push(React.createElement('div', { className: 'btcd-chart-wrap', key: 'chart-wrap' }, chartWrapKids));
 
-      // 图例 + 可视区间统计（统计以前是 Host 白算的：windowHigh/Low/Volume/ChangePct 一个都没显示）
+      // 底部这一行只留「可视区间统计」与操作提示 ——
+      // EMA 的图例（色块 + 名称 + 当前值）已经画在**画布左上角**（点它可开关），
+      // 这里再放一份就是重复信息。
       var legendKids = [
-        React.createElement('button', {
-          key: 'ema-fast',
-          className: showEma20 ? '' : 'off',
-          onClick: function () { setEma([!showEma20, showEma480]); },
-          title: '显示/隐藏 EMA' + String(emaFast) + '（Alt+H 两条一起切换）',
-        }, React.createElement('span', { className: 'btcd-dot', style: { background: C_EMA20 } }), 'EMA' + String(emaFast) + ' ', fmtPrice(lastFast)),
-        React.createElement('button', {
-          key: 'ema-slow',
-          className: showEma480 ? '' : 'off',
-          onClick: function () { setEma([showEma20, !showEma480]); },
-          title: '显示/隐藏 EMA' + String(emaSlow) + '（Alt+H 两条一起切换）',
-        }, React.createElement('span', { className: 'btcd-dot', style: { background: C_EMA480 } }), 'EMA' + String(emaSlow) + ' ', fmtPrice(lastSlow)),
+        React.createElement('span', { key: 'ema-hint', className: 'btcd-hint' },
+          emas.length === 0
+            ? '没有均线：点工具条上的「新增」加一条'
+            : '左上角图例可点击开关均线（共 ' + String(emas.length) + ' 条）'),
         React.createElement('span', { className: 'btcd-spacer', key: 'sp' }),
       ];
       if (visible > 1 && vHigh !== null) {
@@ -2654,7 +3142,7 @@ window.__ModuleLoader__.load({
           fmtTime(fullCandles[viewWindow.start][0], 0, true) + ' → ' + fmtTime(fullCandles[viewWindow.end - 1][0], 0, true)));
       }
       legendKids.push(React.createElement('span', { key: 'keys', className: 'btcd-hint' },
-        '拖动平移 · 滚轮缩放 · 双击复位 · ←→ 平移 · Ctrl+↑↓ 缩放 · 1-6 切周期'));
+        '拖动平移 · 滚轮缩放 · 双击复位 · ←→ 平移 · Ctrl+↑↓ 缩放 · 1-6 切周期 · Alt+H 开关均线'));
       children.push(React.createElement('div', { className: 'btcd-legend', key: 'legend' }, legendKids));
 
       // 页脚：数据源 / 通道 + 告警
@@ -2788,6 +3276,30 @@ window.__ModuleLoader__.load({
         snapPriceToOhlc: snapPriceToOhlc,
         ohlcLabelOf: ohlcLabelOf,
         measureStats: measureStats,
+        emaLegendItems: emaLegendItems,
+        legendVisible: legendVisible,
+        legendRowAt: legendRowAt,
+        legendRect: legendRect,
+        legendHit: legendHit,
+        LEGEND: LEGEND,
+        // 均线列表：模型与增删改
+        normalizeEmas: normalizeEmas,
+        defaultEmas: defaultEmas,
+        emaAdd: emaAdd,
+        emaRemove: emaRemove,
+        emaUpdate: emaUpdate,
+        emaPickColor: emaPickColor,
+        emaLabel: emaLabel,
+        emaNewId: emaNewId,
+        EMA_DEFAULT_COLORS: EMA_DEFAULT_COLORS,
+        EMA_DEFAULT_PERIODS: EMA_DEFAULT_PERIODS,
+        EMA_MAX_LINES: EMA_MAX_LINES,
+        EMA_PERIOD_MAX: EMA_PERIOD_MAX,
+        EMA_PERIOD_MIN: EMA_PERIOD_MIN,
+        EMA_STORE_KEY: EMA_STORE_KEY,
+        emaFor: emaFor,
+        emaSeries: emaSeries,
+        emaWindow: emaWindow,
         SNAP_PX: SNAP_PX,
         pointToSegment: pointToSegment,
         segmentT: segmentT,
@@ -2799,19 +3311,34 @@ window.__ModuleLoader__.load({
         bodyOf: bodyOf,
         roundBox: roundBox,
         paintMeasure: paintMeasure,
+        // 画布上写死的颜色常量：导出是为了让测试能验"它们到底解析成什么值"。
+        // 之前踩过：一次批量替换把 `var C_POPOVER_BG = 'rgba(...)'` 改成了
+        // `var C_POPOVER_BG = C_POPOVER_BG`（自引用，运行期直接 ReferenceError），
+        // 而当时所有断言只检查"画了圆角矩形/写了文字"，一个都没碰值，所以全绿通过。
+        COLORS: {
+          C_UP: C_UP,
+          C_DOWN: C_DOWN,
+          C_GRID: C_GRID,
+          C_AXIS: C_AXIS,
+          C_POPOVER_BG: C_POPOVER_BG,
+          C_POPOVER_BG_SOFT: C_POPOVER_BG_SOFT,
+          C_POPOVER_TEXT: C_POPOVER_TEXT,
+          C_POPOVER_LABEL: C_POPOVER_LABEL,
+          C_POPOVER_EDGE: C_POPOVER_EDGE,
+          C_CROSSHAIR: C_CROSSHAIR,
+          C_BAND: C_BAND,
+          C_POINTER_DOT: C_POINTER_DOT,
+          CURSOR_CROSS: CURSOR_CROSS,
+          EMA_DEFAULT_COLORS: EMA_DEFAULT_COLORS,
+        },
         fmtDur: fmtDur,
         fmtAgo: fmtAgo,
         fmtPrice: fmtPrice,
         fmtPct: fmtPct,
         fmtVol: fmtVol,
         fmtTime: fmtTime,
-        emaSeries: emaSeries,
-        emaFor: emaFor,
-        emaWindow: emaWindow,
         closesOf: closesOf,
         parsePeriod: parsePeriod,
-        DEFAULT_EMA_FAST: DEFAULT_EMA_FAST,
-        DEFAULT_EMA_SLOW: DEFAULT_EMA_SLOW,
         DEFAULT_WINDOW: DEFAULT_WINDOW,
         MIN_WINDOW: MIN_WINDOW,
         RANGES: RANGES,
