@@ -24,9 +24,9 @@
     "backtest"
   ],
   "files": [
+    "cordis.patch.yml",
     "plugin/dsh-btc-dashboard/index.js",
     "plugin/dsh-btc-dashboard/client.js",
-    "plugin/dsh-btc-dashboard/cordis.patch.yml",
     "backtest/run.mjs",
     "backtest/lib",
     "backtest/strategies",
@@ -43,7 +43,7 @@
   },
   "dsh": {
     "bundle": {
-      "patch": "./plugin/dsh-btc-dashboard/cordis.patch.yml"
+      "patch": "./cordis.patch.yml"
     },
     "client": {
       "platform": "web",

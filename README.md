@@ -7,10 +7,10 @@ OKX BTC / ETH 合约价格看板的 DSH 插件工程。
 .env.example                            # 密钥模板（只有占位符；行情接口本身不需要密钥）
 .dashboard/state.json                   # 插件持久化的选择（环境 + 周期），已被 .gitignore 忽略
 package.json                            # 包清单：dsh.bundle.patch + dsh.client（npm / GitHub 安装的入口）
+cordis.patch.yml                        # bundle 层：把 Host 半（plugin/dsh-btc-dashboard/index.js）挂进 profile
 plugin/dsh-btc-dashboard/               # 插件代码（包根在仓库根；安装后位于包内）
   ├─ index.js                           # Host 半：取数、代理隧道、EMA、路由、回测 job
   ├─ client.js                          # 浏览器半：canvas 看图 + 周期/环境切换 + 画线
-  ├─ cordis.patch.yml                   # bundle 层：把 Host 半挂进 profile
   └─ README.md                          # 实现细节、参数、路由、环境语义
 backtest/                               # 回测框架（随 npm 包一起发布；CLI 与看板共用同一份）
   ├─ run.mjs                            # CLI 入口（--strategy/--start/--end/--bar/--leverage/--maker/--taker…）
