@@ -1,8 +1,13 @@
 # dsh-btc-dashboard
 
-DSH 插件：**OKX BTC 合约价格看板**。侧边栏一个按钮，点开是一个全屏面板：
+DSH 插件：**OKX 合约价格看板（BTC / ETH 永续）**。侧边栏一个按钮，点开是一个全屏面板：
 
-- **最新价格**：OKX `BTC-USDT-SWAP` 的 last / 24h 涨跌 / 买卖价 / 24h 高低 / 24h 量（5 秒级刷新）
+- **多合约**：`BTC-USDT-SWAP` / `ETH-USDT-SWAP`，顶部 `BTC / ETH` 分段按钮切换；
+  选择记在 localStorage `dsh-btc-dashboard:inst`（默认 BTC）。切换后 K 线/价格/均线/画线/预警判定/
+  回测面板默认标的都跟着当前合约走（画线本来就按「合约 + 周期」分开存）。
+  白名单在 Host 半（`SUPPORTED_INSTS`），前端只是渲染按钮 —— 非法 instId 一律回落默认 BTC。
+  注意：**收线预警规则没有合约维度**，跟着看板当前合约判定（切到 ETH 后同一批规则在 ETH 上判）。
+- **最新价格**：OKX `BTC-USDT-SWAP` / `ETH-USDT-SWAP` 的 last / 24h 涨跌 / 买卖价 / 24h 高低 / 24h 量（5 秒级刷新）
 - **多周期 K 线**：`1m` `3m` `15m` `1h` `4h` `1D`，点标签切换（数字键 `1`–`6` 也行）
 - **均线：任意条数，可增删改**。默认 **EMA20 + EMA480**。模型就是一条数组
   `[{ id, period, color, show }]`，所有逻辑（计算 / 绘制 / 图例 / 持久化）都按列表遍历，加几条都一样。
@@ -13,6 +18,92 @@ DSH 插件：**OKX BTC 合约价格看板**。侧边栏一个按钮，点开是�
   - 上限 `EMA_MAX_LINES = 8` 条；周期范围 2–2000；**允许把均线全删光**（看板里留「＋ 新增」与「恢复默认」）
   - 单独存在 localStorage `dsh-btc-dashboard:emas`（全局一份，换周期不换均线配置）；脏数据会被 `normalizeEmas` 清成合法列表
   - `Alt+H` 一键开关**所有**均线
+- **收线预警**：可指定「K 线**收线**后收盘价上穿 / 下穿某条均线」时提示。
+  - 工具条上一格「均线」右边就是「预警」按钮，点开是规则看板：`＋ 新增规则` / 切方向 / 暂停 / 删除 / 恢复
+  - 规则 = **方向（上穿 / 下穿）+ 均线（点 `EMAn` 按钮在当前所有均线之间轮换）+ 绑定周期**。
+    - **每条规则固定绑在它被创建时的周期**上：在 3m 建的规则就一直在 3m 上判，切到 15m 不会重绑
+      （面板那一格会从「本周期 3m」变成「3m」，并变淡提示"它绑在别的周期"）。
+    - 拿不到周期时（面板还在取数）**拒绝创建**并提示，而不是建一条"周期未知"的死规则；
+      `normalizeAlerts` 也**绝不**用"当前周期"去补空缺 —— 早先就是这条让它跟着周期跑的。
+    - 改方向 / 改绑均线 / 暂停启用都不会动周期。
+  - **只在收线那一刻判一次**（新出现一根已收盘的 K 线），不是每 5 秒刷新都判 ——
+    否则盘中价格来回穿会反复弹提示。判定条件：上一根收盘在均线**另一侧**、这一根穿了过来；一直贴着不算
+  - 命中后走**三条通道**：① 面板内 toast（3.2 秒）② 价格行里常驻一条「🔔 收线上穿 EMA20 · 收盘 … / 均线 …」
+    ③ 看板里留最近 5 条记录。另外两条"人不在看屏幕也能察觉"的渠道可在看板里开关：
+    - **桌面通知**（`Notification`）：标签页在后台也能弹系统通知。**打开开关时才申请授权**（不在页面加载时就弹框骚扰）。
+      浏览器拒绝过权限的话要在地址栏左边的站点设置里改回来。
+    - **提示音**（WebAudio 合成两声，不带音频文件）：浏览器要求先与页面交互过，
+      所以挂了一次性的 `pointerdown`/`keydown` 解锁；没解锁时只是"没响"，不影响别的通道。
+    - 看板里有「试一下」按钮：响一声 + 弹一条测试通知；**邮件提醒开着时同时发一封测试邮件**
+      —— 一条按钮把三个通道都验掉。测试邮件走**与真实预警完全相同的组装路径**
+      （后端只把数据换成 `sampleAlertPayload()`），避免"测试邮件长这样、真预警邮件长那样"的偏差。
+    - 两个开关都存 localStorage `dsh-btc-dashboard:notify`
+    - **邮件提醒**（第四条通道，可选）：填一个收件邮箱 → **确认一次** → 之后每次命中
+      自动把「规则 / 周期 / 收线时间 / 收盘价 / 均线值 / 触发那根 K 线的 OHLCV」发到该邮箱。
+      发信走 `dsh-qq-email` 插件提供的**宿主侧服务 `ctx.qqEmail`**（用你已授权的 QQ 邮箱）。
+      - 授权时机在**填地址**那一步：面板里点开关时会弹一次确认框（"确认用这个地址接收吗"），
+        同意后宿主才把它记成**已确认地址**；之后只允许发往这个地址。
+        地址改掉 → `authorized` 立刻变 false → 必须重新确认一次。
+      - 为什么不用 DSH 的 `approval` 服务：`approval.request()` 要求 `req.agent.session`
+        且**必须在打开的 turn 内**（`user-approval/src/index.ts`：`outside an open turn` 直接抛），
+        而宿主插件没有 agent 上下文、预警又是自动触发的、没有 turn 可依附。
+        所以这里用 `qqEmail.send(..., { confirmedByCaller: true })` —— 这正是服务层为
+        "调用方自己管确认"设计的口子（不传 `agent` 时必须显式声明，把"忘了确认"变成一次失败）。
+      - 没装 `dsh-qq-email` 时面板会直接说"没有找到 qqEmail 服务"，不会干瞪眼。
+      - 地址本地缓存键 `dsh-btc-dashboard:email`；**权威值在宿主**（`state.json` 的 `email` 字段）。
+      - ⚠️ 踩过的两个界面坑（都有回归测试）：
+        ①**地址不回填**：输入框的值原先写成"草稿为 null 就取配置值"，而面板可能在配置
+        还没回来时就挂载了，那个 null 把空值**锁住**；再加上测试替身只认 `/price`、
+        其余 URL 一律返回 K 线载荷，`/email` 的响应根本没有 `email` 字段，配置永远同步不回来。
+        现在按"用户是否正在编辑"二选一：没在编辑就跟着服务端的值走，打开面板时还会主动拉一次。
+        ②**点开关把地址清空**：关掉时前端把地址当空串提交。现在关闭时**不带 `to`**，
+        后端在地址为空时也不改动已存的值 —— "关闭"不等于"清空"。
+      - 开关按钮**只有两种状态**，颜色与文案一起说清当前情况：
+        `active = enabled 且 authorized`（开关开着 **且** 当前地址确实被确认过）
+        → 绿色「关闭邮件提醒」；否则 → 红色「开启邮件提醒」（点击会先弹一次确认）。
+        - ⚠️ 早先按钮只看 `enabled`，于是"开着但地址改过、授权已失效"时按钮写的是"关闭"，
+          点一下只会把 `enabled` 设成 false —— 用户看到的正是**"填了地址却没有开启的按钮"**。
+          现在这种中间态按钮回到"开启"，点下去会**重新确认并开启**（`confirm: true`），
+          文案也补了说明"当前地址还没被确认（地址改过？）"。
+      - ⚠️ **`saveEmailConfig` 必须有 `.catch`**：早先只写了 `.then`，一旦 fetch 失败或回调里抛异常，
+        调用方的 `setEmailBusy(false)` 就永远执行不到 —— 按钮卡在 `disabled`，
+        表现为**"点一下变灰、再也关不掉"**（真踩过）。现在函数内 catch + 调用处再兜一层，
+        保证按钮无论如何都会恢复可点。
+      - ⚠️ **保存失败时不要清草稿**：早先成功失败都 `setEmailDraft(null)` + 清编辑标记，
+        失败时输入框会打回服务端的旧值（甚至空值）→ 看起来就是**"地址丢了"**。
+        现在只有成功才交回服务端值，失败保留用户刚敲的内容。
+      - ⚠️ **重开面板要清编辑标记**：`emailEditedRef` 是"用户正在改"的标记，面板重开是一次
+        全新交互；不清它的话输入框会被钉在上一轮的旧草稿上 —— 又一种"地址丢了"。
+      - 已知测试限制：邮件地址输入框在 jsdom harness 里**驱动不了 React 的 `onChange`**
+        （`dom.type()` 对同源测试里的其他输入框有效，这个不生效，原因没查出）。所以那段界面
+        测试只断言可观测部分（按钮不卡死、有可见反馈），地址文本本身靠手工验证。
+  - ✅ **判定是常驻的**：引擎 `<AlertEngine />` 挂在 `shell.overlay` 槽上（**永远挂载、只渲染 null**），
+    它自己按"有规则的周期"去拉 `/board`，**不依赖看板是否打开**。
+    所以关掉看板、切到别的标签页，规则照样在盯，桌面通知和提示音照样响。
+    - 判定进度与结果写进模块级单例 `ALERT_STORE`，侧边栏按钮与看板用
+      `useSyncExternalStore` 订阅**同一份**数据（不再各存一份互相同步）。
+      侧边栏按钮标题也会显示"收线预警常驻执行中（N 条规则）"，未读数直接标在按钮上。
+    - 引擎按"有启用规则的周期"分别取数（1m 一条规则就只拉 1m），不为无关周期浪费请求。
+  - **判据日志（dfx 用）**：每次判定都留一条**判据**，回答"为什么中 / 为什么没中"。
+    判定结果不再只是"中/不中"，而是带原因：`hit`（命中）、`side-same`（上一根就已经在这一侧，
+    没有"穿"的动作）、`side-crossed-wrong-way`（这一根没穿过去）、`no-ema`（这条均线还没预热出值）、
+    `bad-index` / `bad-close` / `off`（暂停）/ `other-bar`（规则绑的是别的周期）……
+    每条判据都带**前收 / 今收 / 前均 / 今均**四个数字，看板里列最近 10 条，存最近
+    `ALERT_MAX_EVALS = 40` 条（localStorage `dsh-btc-dashboard:alert-eval`，刷新不丢）；可清空。
+  - 看板里有 **「复制自检」**：把"载荷健康度 + 游标 + 已判定次数 + 最近 20 条判据"整理成纯文本
+    放进剪贴板（`navigator.clipboard` 不可用时退回 `execCommand`），排障时直接贴给别人看。
+  - ⚠️ 这类功能的失败模式是"**什么都没发生**"，所以"能说话"是硬要求：`candleHealth` 自检块 +
+    判据日志 + "没带 done 只提醒一次的 `console.warn`" 都是为这个加的
+    （真踩过：宿主少发一位 `done`，预警静默失效，查了几轮都以为是判定逻辑的问题）。
+  - **预警记录**：每次命中都留一条，**存在 localStorage 里**（关掉看板、刷新页面都还在），可一键**清空**。
+    - 记的是"事实"（规则 id、方向、周期、收线时刻、收盘价、均线值），不是拼好的文案 ——
+      文案在渲染时按当前格式生成，以后改措辞不会让老记录变成一坨旧字符串
+    - 去重按 `规则id@收线时刻`：同一条规则同一根 K 线只记一次（`alertLogAdd` 发现没新增就返回原数组，连写入都省了）
+    - 最多留 `ALERT_MAX_HISTORY = 60` 条，超出丢最老的；看板里只列**最近 12 条**，更早的仍在存储里
+    - 工具条按钮上带未读数小圆点（红底数字），打开看板即清零
+  - 刚打开面板时**只登记游标不判定**：不会把历史上最后一次穿越报成"刚刚发生"
+  - 游标记的是**收线时刻**（不是下标）：刷新时历史从左边滑走、下标会漂，时刻不会
+  - 规则存 localStorage `dsh-btc-dashboard:alerts`（最多 6 条）；判定出错只记日志、不把面板带崩
 - **图例在画布左上角**：`EMA20 84,724.6` / `EMA480 84,427.1`，带色块，**点它就能开关对应的均线**。
   **只有色块和文字，没有矩形底框**（底框会压住后面的 K 线）；代价是文字直接压在 K 线上，
   所以 `LEGEND.text` 选了比"次要文字"更深的 `#2f3742`。
@@ -39,15 +130,41 @@ DSH 插件：**OKX BTC 合约价格看板**。侧边栏一个按钮，点开是�
 - **无障碍**：面板是 `role="dialog" aria-modal="true"`，打开时焦点进面板、Tab 圈在面板内、关闭后焦点还原；canvas 带 `role="img"` 与描述当前视图的 `aria-label`；「数据陈旧」这类离散状态才挂 `aria-live`（价格更新不播报）
 - **陈旧数据标记**：连续刷新失败超过 2.5 个轮询周期时，价格转为中性色并出现「数据 mm:ss 未更新」角标
 - **生产 / 模拟环境切换**：面板顶部「模拟 / 生产」分段按钮，选择同样被记住
+- **回测面板**：工具条「预警」右边多了「回测」按钮 —— 选策略 / 周期 / 时间范围 / 初始资金 / 杠杆 / 费率，
+  点「开始回测」就在看板里看结果（KPI + 资金曲线（含 Buy&Hold 基准与回撤）+ 交易明细），
+  还能「打开完整报告」（自包含 HTML，含**价格 K 线图 + 持仓底纹 + 开/平仓标记**、资金/回撤曲线、交易表）
+  和「下载 JSON」。
+  - 底层就是仓库里的 `backtest/` 框架，Host 半按需动态 import，**不是第二份实现**：
+    标的白名单 `BTC-USDT-SWAP` / `ETH-USDT-SWAP`（面板「标的」下拉，默认跟随看板当前合约；
+    数据缓存与报告按所选标的自动分目录/命名），周期 1m–1D，默认 **1 倍杠杆、挂单 0.0200% / 吃单 0.0500%**
+  - **资金费率（funding，1.7.0 起）默认计入**：每 8 小时结算一次（多头付/空头收）；历史费率来自 OKX
+    公开接口（只保留最近约 3 个月），更早区间按固定估算费率补（默认 0.01%/8h）——完整报告里会标注
+    历史/估算次数，不会把估算当历史。报告页脚「报告格式 v3」= 含 K 线 + 资金费率。
+  - 策略下拉框来自 `backtest/strategies/` 目录：目前有 `buy-hold`（基线）、`sma-cross`（示例）、
+    **`breakout-hold`（推荐主策略：突破入场 + 均线滞回出场，建议配 4h —— 只在突破时买、
+    回调不深就一直拿着，二次上涨不会踏空）**、`ma-hysteresis`（纯均线滞回）、
+    `donchian-trend`（唐奇安突破型）、`ema-regime`（备选）。
+    **新增策略文件后不用重启宿主**，重开面板就会出现在下拉里（Host 每次请求都重新扫描目录）。
+    参数与结果口径见 [backtest/README.md 的「内置策略与推荐预设」](../../backtest/README.md#内置策略与推荐预设)
+  - 回测是 Host 侧**异步 job**：POST 立刻返回 jobId，浏览器 800ms 轮询进度
+    （抓取页数 → 回放 K 线 → 算指标 → 生成报告）；同一时间只允许一个回测，可取消
+  - 历史 K 线走 `backtest/data/` 磁盘缓存：同一段区间第二次跑秒出；首次长区间要等抓取
+    （面板会给「预计 N 根 K 线」提示）
+  - 表单存 localStorage `dsh-btc-dashboard:backtest`；报告 HTML 响应带严格 CSP，
+    客户端拿 **blob URL** 在新标签打开（报告里的内容不在本站源里执行）
+  - ⚠️ **Host 半新增了 5 条路由，升级到 1.6.0 后必须重启宿主；1.7.0 的回测服务也改了 Host 半，
+    升级到 1.7.0 后同样要重启宿主；1.8.0 的多合约（BTC/ETH）改了 board/price/backtest/health 的
+    Host 半白名单，升级后必须重启宿主**；客户端半刷新页面即可
 
 图表是原生 canvas 画的（蜡烛 + 影线 + 成交量 + 双均线 + 最新价线 + 十字光标浮层），不依赖任何图表库。
 
 ## 安装状态
 
-已经通过 `plugin_manager` 的 `install_bundle` 装进当前 profile，`package.json` 里是一条链接依赖：
+通过 `plugin_manager` 的 `install_bundle` 装进 profile 后，profile 的 `package.json` 里是一条
+链接依赖，`link:` 指向你 clone 下来的仓库路径：
 
 ```
-@local/dsh-btc-dashboard  link:D:/codes/dsh/btc_dashboard/plugin/dsh-btc-dashboard
+@local/dsh-btc-dashboard  link:<仓库根目录>/plugin/dsh-btc-dashboard
 ```
 
 所以**改这个目录里的代码就是改线上插件**（客户端半由宿主按原样读取文件字节发给浏览器，改完刷新页面即可；Host 半是已加载的 ESM 模块，代码改动需要重启宿主才生效）。
@@ -250,9 +367,51 @@ Host 侧取 1800 根 = `/market/candles` 最近 300 根 + `/market/history-candl
 
 
 
-## 私有接口（账户 / 持仓）：已移除
+## 回测面板（1.7.0，接的是仓库里的 `backtest/` 框架）
 
-1.3.2 把账户与持仓那整条链路删掉了 —— 路由 `/dsh-btc/account`、签名（`okxSign`）、
+看板工具条「预警」右边是「回测」按钮。点开是一个浮层面板：策略 / 周期 / 时间范围（含近 7/30/90 天、
+近一年快捷）/ 初始资金 / 杠杆 / 挂单费率 / 吃单费率，参数按策略动态渲染；点「开始回测」后
+面板先显示进度（数据抓取页数 → 回放 K 线 → 算指标 → 生成报告），完成后就地展示：
+
+- KPI：总收益 / 年化收益 / 最大回撤 / 夏普 / 胜率 / 交易次数 / 手续费 / Buy&Hold 基准
+- **资金曲线**（canvas）：权益线 + Buy&Hold 虚线 + 回撤面积
+- 交易明细表（最多 100 行：`# / 方向 / 开仓 / 平仓 / 盈亏 / 手续费 / 原因`）
+- 「打开完整报告」（自包含 HTML：内联 SVG、零脚本零外链）与「下载 JSON」（全量曲线/成交/交易）
+
+**为什么不是"在浏览器里跑回测"**：回测要读几百页历史 K 线、跑引擎、生成报告，这些都在 Host 侧做；
+浏览器只负责表单与轮询。Host 半**动态 import** 仓库里的 `backtest/lib/*.mjs`（CLI 与看板是同一份实现，
+策略只写一遍），路径按 `DSH_BTC_BACKTEST_DIR` → `<工作区>/backtest` → 插件上两级/backtest 找。
+
+### 5 条路由（全部过信任栅栏）
+
+| 路由 | 用途 |
+|---|---|
+| `GET /dsh-btc/backtest/strategies` | 内置策略 + 默认参数、周期列表、**可选标的 `insts`（BTC/ETH）**、默认口径（资金/杠杆/费率/区间）、limits、最近一次 job 状态 |
+| `POST /dsh-btc/backtest/run` | body `{instId?, strategy, params, bar, start, end, initialCapital, leverage, makerFeeRate, takerFeeRate}`（`instId` 可选，白名单 BTC-USDT-SWAP / ETH-USDT-SWAP，缺省 BTC；时间为毫秒 UTC，`end` 右开；也接受 `YYYY-MM-DD`）。立刻返回 job，后台执行；**同时只允许一个任务** |
+| `GET /dsh-btc/backtest/status[?jobId=]` | job 状态机（`running/done/error/cancelled`）+ 进度文案 + `summary`（equity 降采样 ≤600 点、trades ≤500 条、完整 metrics、报告链接）；省略 jobId 返回最近一次 |
+| `GET /dsh-btc/backtest/report?jobId=&format=html\|json` | 完整报告。HTML 响应带 `content-security-policy: default-src 'none'; …` 与 `nosniff` |
+| `POST /dsh-btc/backtest/cancel` | body `{jobId}`；只能取消运行中的任务。数据抓取阶段无法真正 abort，会在阶段边界转 `cancelled` |
+
+设计/安全要点：
+
+- **策略白名单**：只认 `backtest/strategies/` 里的内置名，**不接受路径**（否则等于给浏览器一个任意 import 的口子）；
+  参数只接受扁平对象里的数字/布尔/短字符串。`instId` 可选，只认白名单 `BTC-USDT-SWAP` / `ETH-USDT-SWAP`
+  （默认 BTC；非法值直接报「不支持的标的」，不会拿任意 instId 去拉 OKX 数据）。
+- **不关宿主隧道**：回测的 fetcher 用 `closeTunnels:false` —— 宿主与看板共用插件的 keep-alive 隧道池，
+  回测收尾若调 `closeTransport()` 会把正在进行的看板刷新一起弄失败。
+- **报告不在同源执行**：客户端 fetch HTML → `Blob` → `URL.createObjectURL` → `window.open`；
+  Host 响应再加一道 CSP 头。报告本身零脚本、零外链。
+- **单任务 + 超时**：同一时间只跑一个回测（共享隧道/限速），默认 20 分钟超时；内存只保留最近 5 个 job。
+- **可测试**：`index.js` 导出 `createBacktestService({ lib })`，`apply(ctx, { backtestService })` 可注入；
+  `tests/backtest-route-test.mjs` 用合成 K 线 + 真 engine/metrics/report 离线跑完 5 条路由。
+
+已知限制（与 `backtest/README.md` 一致）：资金费率已计入，但 OKX 历史只覆盖最近约 3 个月、
+更早区间按 0.01%/8h 估算（报告标注次数）；撮合/爆仓是近似模型、
+无盘口深度与部分成交；**面板单次最多抓 `BACKTEST_MAX_PAGES = 2000` 页（每页 100 根）** ——
+启动前按区间估算，超了直接返回「区间太大」而不是跑 20 分钟再超时（1m 建议 ≤ 近 90 天，1 年请用 1h/4h；
+带缓存的超长区间可继续用 CLI/`--offline`）；仅供研究，不构成投资建议。
+
+## 私有接口（账户 / 持仓）：已移除1.3.2 把账户与持仓那整条链路删掉了 —— 路由 `/dsh-btc/account`、签名（`okxSign`）、
 私有请求（`okxPrivateApi`）、余额与持仓的字段整理（`normalizeBalance` / `normalizePositions`）
 以及 `passphrase` 相关的环境变量全部不再存在。原因是**看板不需要账户信息**，而它是唯一
 会发签名私有请求、唯一需要 `passphrase` 的部分；删掉之后这个插件的网络行为收敛成
@@ -268,16 +427,32 @@ Host 侧取 1800 根 = `/market/candles` 最近 300 根 + `/market/history-candl
 | 路由 | 用途 |
 |---|---|
 | `GET /dsh-btc/board?bar=15m&limit=180[&force=1][&instId=...]` | 看板主数据：价格 + **整条序列**（`candles` / `ema20` / `ema480` 等长）+ 统计 + 元信息。`limit` 现在不影响载荷长度（永远发整条序列，否则浏览器没法在窗口外算均线）。每根 K 线是 `[t, o, h, l, c, v, done]` —— 第 7 位 `done`（1 = 已收盘）用来把「还在动的这一根」画成半透明 + 描边 |
-| `GET /dsh-btc/price[?force=1]` | 只要最新价（侧边栏按钮用，轻量） |
+
+> ⚠️ **`candles` 的每根必须是 7 位，第 7 位是 `done`（0/1）。** 这是宿主半与浏览器半之间最容易漏的契约：
+> 少了它，客户端读到的 `candles[i][6]` 是 `undefined`，于是一整片功能**静默失效**——
+> 「收线预警」永远不判（`closedAlertCursor` 找不到"已收盘的那根"）、未收盘 K 线的描边与
+> 「当前这一列」底带也不画，而控制台**什么都没有**。这条曾经真的漏过（1.4.0 只发了 6 位），
+> 所以 `host-test` 现在会直接断言形状，客户端也会打一条只此一次的 `console.warn`。
+| `GET /dsh-btc/price[?force=1][&instId=...]` | 只要最新价（侧边栏按钮用，轻量；`instId` 走白名单，缺省用 Host 配置的默认标的） |
 | `POST /dsh-btc/env`（body `{"env":"prod"}`） | 切换环境并持久化。**只接受 POST** —— 它是唯一的写操作，而「GET 也能改状态」正是 CSRF 想要的效果，所以把 GET 关掉 |
-| `GET /dsh-btc/health` | 自检：环境、密钥指纹、通道、代理、缓存、序列目标 |
+| `GET /dsh-btc/health` | 自检：环境、密钥指纹、通道、代理、缓存、序列目标（不回本机绝对路径） |
+| `GET /dsh-btc/email` | 预警邮件配置（`enabled` / `to` / `confirmed` / `authorized` / `available` / `sentCount` / `lastError`） |
+| `POST /dsh-btc/email` | 保存预警邮件配置。body `{enabled, to, confirm}`。**`confirm: true` 才把地址记为"已确认"**（这就是自动发信的授权时机）；缺它时返回 `needsConfirm: true` 让界面去问用户 |
+| `POST /dsh-btc/notify-email` | 发一封预警邮件。body 是客户端组好的载荷（规则 / 周期 / 收线时间 / K 线 OHLCV / 规则清单）。三重门：配置开着、地址已确认、`ctx.qqEmail` 可用 —— 任一不满足都返回明确原因（客户端的判据日志会记下来） |
+| `GET /dsh-btc/backtest/strategies` | 回测面板初始化：内置策略 + 默认参数、周期列表、可选标的 `insts`（BTC/ETH）、默认口径（1x / 0.0200% / 0.0500% / 10000 USDT / 近 30 天）、limits、最近一次 job |
+| `POST /dsh-btc/backtest/run` | 启动一次回测（异步 job；body 可带 `instId`（白名单 BTC-USDT-SWAP / ETH-USDT-SWAP，缺省 BTC），立刻返回 jobId；同一时间只允许一个任务） |
+| `GET /dsh-btc/backtest/status[?jobId=]` | 回测进度与结果 summary（省略 jobId 返回最近一次） |
+| `GET /dsh-btc/backtest/report?jobId=&format=html\|json` | 完整回测报告（HTML 带 CSP 安全头） |
+| `POST /dsh-btc/backtest/cancel` | 取消运行中的回测 |
 
-选择（环境 + 周期）持久化在 `<workspace>/.dashboard/state.json`（该目录已被 `.gitignore` 忽略）。
+选择（环境 + 周期）持久化在 `<workspace>/.dashboard/state.json`（该目录已被 `.gitignore` 忽略）；
+看板当前合约存在浏览器 localStorage `dsh-btc-dashboard:inst`（默认 BTC）。
 
-> **这四条路由都过了 `connection.requestRejection`**（1.3.2 起）。这条栅栏一次管三件事：
+> **这些路由都过了 `connection.requestRejection`**（1.3.2 起）。这条栅栏一次管三件事：
 > Host 校验（防 DNS rebinding）、`sec-fetch-site: cross-site` 与 Origin 校验（跨站页面发起的
 > 请求一律拒），以及浏览器鉴权（同源请求带的签名 HttpOnly cookie）。判定服务不可用时**返回 503
 > 而不是放行** —— 这是安全边界，宁可面板报错也不能静默降级。
+> 回测的「启动 / 取消」在语义上是**写操作**（消耗宿主资源），所以只接受 POST，GET 变体返回 405。
 >
 > 残余风险：默认绑定是回环 `127.0.0.1`，所以局域网访问不到；但**不要用 `--host 0.0.0.0` 把 DSH
 > 暴露出去**，栅栏虽然会挡住跨站请求，同网段直连仍是可达面。接口只返回公开行情与密钥掩码，不含 secret。
@@ -320,6 +495,11 @@ Host 侧取 1800 根 = `/market/candles` 最近 300 根 + `/market/history-candl
 | `EMA_DEFAULT_COLORS` | 8 色 | 均线调色板（前两个就是原来的金 / 紫），新增时优先用没被占的颜色 |
 | `EMA_DEFAULT_PERIODS` | `[20, 480]` | 默认均线；`EMA_MAX_LINES` 是条数上限 |
 | `EMA_STORE_KEY` | `dsh-btc-dashboard:emas` | 均线列表在 localStorage 里的键（全局一份，与周期无关） |
+| `ALERT_STORE_KEY` | `dsh-btc-dashboard:alerts` | 收线预警规则（最多 `ALERT_MAX = 6` 条） |
+| `ALERT_LOG_KEY` | `dsh-btc-dashboard:alert-log` | 预警记录（最多 `ALERT_MAX_HISTORY = 60` 条，可清空） |
+| `ALERT_EVAL_KEY` | `dsh-btc-dashboard:alert-eval` | 判据日志（最多 `ALERT_MAX_EVALS = 40` 条，可清空） |
+| `NOTIFY_STORE_KEY` | `dsh-btc-dashboard:notify` | 桌面通知 / 提示音两个开关 |
+| `ALERT_DIRS` | `up` / `down` | 预警方向：收盘上穿 / 下穿 |
 
 工作区（`.env` 与 `.dashboard/` 的所在目录）按这个顺序解析：环境变量 `DSH_BTC_WORKSPACE` →
 插件位置往上两级（能同时看到 `.env` 或 `plugin/` 时认定）→ 当前工作目录。所以仓库 clone 到任何
@@ -372,9 +552,18 @@ profile 位置读 `DSH_PROFILE_DIR`（或 `DSH_HOME` / `DSH_PROFILE`），
 | 浮层颜色全是 undefined（`var C_POPOVER_BG = C_POPOVER_BG`） | 一次批量替换把字符串字面量换成了变量自引用，运行期直接 ReferenceError；当时所有断言只看"画了圆角矩形/写了文字"，没一个碰过颜色的值 | 导出 `debug.COLORS`，测试逐个校验"是合法颜色字符串 + 彼此不重复" |
 | 改成均线列表后"画布图例点了没反应" | 图例本身的开关是好的，是**测试**没逼 React 提交：在 React 18 里自己派发的 pointer 事件引起的 setState 是异步的，断言跑在提交之前，读到的还是旧状态 | 测试里派发事件用 `dom7.flushSync(...)` 包一层；并且加了"整面板点画布图例 → 真的隐藏/恢复"的回归（真渲染 + 真 pointer） |
 | 用户反馈"点 EMA20 没反应、点 EMA480 却开关了 EMA20" | 症状就是行错位（下标偏一格）。本地 16 种"尺寸 × 条数"组合都复现不出来 —— 极可能是**页面仍在跑旧的客户端半**（宿主按原样转发文件字节，但浏览器缓存/未刷新就会这样） | 不满足于"本地复现不了"：把命中判定从"落进格子"改成**取最近一行**（不再依赖高度/内边距/字号三者严格对齐），加了**悬停高亮 + 手型光标**（点之前能看出会开关谁），再补上"每一行 × 每种条数 × 每种画布尺寸：只开关自己那一条"的扫测（44 次点击 / 16 种组合） |
+| 用户反馈"3m 建的预警规则切到 15m 就变成绑 15m" | `normalizeAlerts(input, bar)` 里写着"没有 `bar` 就用传进来的当前周期" —— 只要规则的 `bar` 缺失/为空，每次载入规则都会把它重绑到**当时的**周期上 | 改成 `bar: typeof item.bar === 'string' ? item.bar : ''`（**绝不**用当前周期补）；拿不到周期时拒绝创建规则而不是建一条死规则；规则行明确显示「本周期 3m」/「3m」；测试覆盖"3m 建 → 切 15m → 仍是 3m → 切回 3m 又标本周期" |
+| 用户反馈"规则只能绑 EMA20，绑不了 EMA480" | 创建时取的是 `emas[0].period`，而且**没有任何入口能改绑** | 规则行加了 `EMAn` 按钮：点一下在"当前所有均线"里轮换（`alertSetPeriod` + `alertNextPeriod`）；均线被删掉时按 `alert-elsewhere` 变红提示 |
+| 用户反馈"记录里**497584h44m前**"（≈57 年） | **两处调用点把"时间戳"当成了"时长"传进 `fmtAgo`**：`fmtAgo(rec.at)` 而不是 `fmtAgo(tick - rec.at)`。`fmtAgo` 的入参是**时长（毫秒）**，直接喂一个 `Date.now()` 量级的时间戳（~1.79e12）换算出来正好是 49 万小时 —— 数字对得上，所以能一眼认出是单位/语义错配。同文件里正确用法（`fmtAgo(tick - data.at)`）一直都在，只是这两处漏了 | **按用户要求把"间隔多久"整列删掉**：记录行只留触发时间（`alertLogTime`），价格行的最新命中条也只留文案。同时把 `fmtAgo` 加固：入参是时长、加"超过 10 年一律当刚刚"的兜底、补上 `0`/负数/`null`/`NaN` 处理（它现在只服务于"更新 x 前"）。回归测试直接查渲染出来的那一行：必须有触发时间、**不许**出现 `h…m前` 或 `^\d{4,}h` |
+| 用户反馈"3m 的 EMA20 下穿在 0:00 没有告警" | **宿主只发了 6 位 K 线**（`[t,o,h,l,c,v]`），而客户端读第 7 位 `candles[i][6]` 判"这根收线了没"。于是 `closedAlertCursor` 一根"已收盘"的都找不到 → **预警从来没跑过**，而且全程零报错（未收盘 K 线的描边、"当前这一列"底带也一样静默失效） | 宿主 `candles` 补上第 7 位 `done`（0/1）；客户端在"一根已收盘都找不到"时打**只此一次**的 `console.warn`（不然每 5 秒刷屏）；`host-test` 加断言：每根 ≥7 位、第 7 位是 0/1、至少一根已收盘、且不能全标已收盘。修完在真实 OKX 上验到 `已收盘 1799/1800，最后一根 done=0`（六周期 × demo/prod） |
+| 用户反馈"过了几分钟没有任何刷新"（连自检块的"最近检查"时间戳都停住） | 预警判定的 effect 依赖是 `[board, alerts, bar, notify, showAlertPanel]` —— **只靠载荷变化驱动**。一旦轮询因为任何原因停下（网络卡住 / 宿主挂了 / 缓存层出问题），effect 就永远不再运行，**判据、记录、自检块一起冻住**。另外 `useTick` 里有个 `visibilityState === 'hidden' → return` 的守卫：只要环境的 visibilityState 不是 `'visible'`（jsdom 报 `'prerender'`，某些 WebView 也报别的值）就**每次都命中**，面板从此不再重渲染 | ①判定 effect 加 1 秒节拍依赖（`beat = useTick(1000)`）兜底，最多每秒检查一次"有没有新收线"，判断本身幂等；②`useTick` 去掉 visibilityState 守卫 —— 空转一个 `setInterval` 的代价远小于"看板静默冻结"。回归测试：**不给任何输入，自检块的时间读数必须自己走**（连采 6 次要变化） |
+| 用户反馈"判据日志要收起面板再打开才刷新，自检块却在实时跳" | **`setEvalLog` 写在 `try` 之后，而 `catch` 里直接 `return`** —— 一旦 `emaFor` / `evalAlerts` 抛异常，判据日志**一条都不会写**；而 `setDiag` 在另外的分支里照常更新 → 看起来就是"日志不刷新"。错误只进了 `console.error`，界面上完全看不见 | 判据收集移到 `try/catch` **之后**，catch 只记下 `failed` 而不 return；判定抛错本身也写成一条判据（`verdict: 'failed'` + 错误信息），自检块结论变成"⚠️ 判定过程抛错了：…"。回归测试钉住 `failed` 必须有判据文案 |
+| 用户反馈"判据日志看起来只有点开才更新" | 判据**只在"新收一根"时产生一条**（不是每 5 秒一条）—— 这是刻意的：40 条上限下若按轮询写，只够存 3 分钟，真正的判据反而被刷掉 | 自检块里加了**每次轮询都在跳的"最近检查"时间戳**，与"判定次数"分开显示，这样"没有新收线"和"它卡住了"一眼能分辨 |
 | 鼠标在空白处也弹数据框 | 中途试过"价格区内按列命中"，鼠标一进价格区就弹框，实际用起来很吵 | 判定回到 `hitCandle`（压在实体/影线上才算命中），测试里两种位置都断言 |
 | 浏览器被转死（占满一个核） | `timeTicks` 的起点在某些时区/浮点组合下落到窗口右端之外，`for (; t <= hi; t += step)` 空转 | 硬上限 64 条 + 明确游标；测试看门狗 |
 | 文件里同名函数定义了两遍 | 用脚本按行号替换整块函数时旧块没被完全覆盖；`function` 声明提升后**后一个定义生效**，症状看起来像"改了没生效" | 测试断言 `bodyOf` / `roundBox` 各只定义一次 |
+| 用户反馈"切到 ETH 后 K 线变了，但左上角价格/24h 还是 BTC；回测里选了 ETH 却跑 BTC" | **宿主还在跑旧 `index.js`**：旧 Host 的 `/board` 本来就支持 `instId`（所以 K 线会切），但 `/price` 与 `POST /backtest/run` 不认识 `instId`（静默用默认 BTC）；另外回测面板的标的默认值原先以"上次表单"优先，看板切 ETH 后打开回测仍是上次表单里的 BTC | ① 价格行的数据源改成**优先用看板载荷里的 ticker**（与 K 线同源；`/price` 只兜底且要校验 `instId` 匹配当前标的）；② 看板切换标的时同步回测表单记住的标的；③ 旧 Host（`/backtest/strategies` 没有 `insts`）时标的下拉锁定 BTC 并明确提示「重启 DSH 宿主」，回测结果标的与面板选择不一致时红字警告，绝不静默给 BTC 结果；④ 多合约改动属于 Host 半，**升级后必须重启 DSH 宿主**（客户端半刷新页面即可） |
+| 用户反馈"回测面板里数字删空后再按数字键打不进去" | Dashboard 的全局 `keydown` 处理挂在 `document` 上、**没看事件目标**：输入框里按 `1`–`6` 被当成「切周期」快捷键并 `preventDefault()`（Delete 也可能被当成删画线），于是删空后敲数字全被吞 | `onKey` 开头加 `isEditableTarget(event.target)` 守卫：焦点在 `input/textarea/select/contentEditable` 时除 `Escape` 外一律不处理（Tab/Delete/数字/Alt+H 放行给表单）；Esc 仍可收面板。回归测试：输入框里按 `1` 不切周期、删空后可继续输入并提交、输入框里按 Delete 不删画线 |
 
 ## 自检
 

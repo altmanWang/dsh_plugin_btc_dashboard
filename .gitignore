@@ -6,6 +6,10 @@
 # 运行期状态（每次切环境/周期都会重写）
 .dashboard/
 
+# 回测：历史 K 线缓存（可能几十 MB）与报告产物，不进仓库
+backtest/data/
+backtest/reports/
+
 # 依赖与杂项
 node_modules/
 *.log

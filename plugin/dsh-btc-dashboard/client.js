@@ -148,6 +148,69 @@ window.__ModuleLoader__.load({
       '.btcd-danger:hover{color:var(--dsw-alias-state-error-primary,#ff6b6b)!important}',
       '.btcd-mini-primary{color:var(--dsw-alias-brand-primary,#4a8cff);font-weight:600}',
       '.btcd-mini:disabled{opacity:.45;cursor:not-allowed}',
+      // 邮件开关：用颜色说话 —— 开启=绿色，关闭=红色（一眼看出当前状态）
+      '.btcd-email-btn{font-weight:600}',
+      '.btcd-email-btn-on{background:rgba(22,199,132,.16);border-color:rgba(22,199,132,.55);color:#0f9c67}',
+      '.btcd-email-btn-off{background:rgba(234,57,67,.14);border-color:rgba(234,57,67,.5);color:#cf2f39}',
+      // 收线预警
+      '.btcd-alertpanel{top:132px}',
+      // 规则 + 12 条记录能把浮层撑得很高，得让它自己滚（不然底部的记录被切在屏幕外）
+      '.btcd-emapanel.btcd-alertpanel{max-height:calc(100vh - 210px);overflow:auto}',
+      // 记录那块单独限制高度并滚动，规则区始终看得见
+      '.btcd-alert-logwrap{display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow:auto}',
+      '.btcd-alert-up{color:var(--btcd-up,#16c784)!important}',
+      '.btcd-alert-down{color:var(--btcd-down,#ea3943)!important}',
+      '.btcd-alert-btn.armed{color:var(--dsw-alias-brand-primary,#4a8cff)}',
+      '.btcd-alert-chip{background:rgba(74,140,255,.14);color:#4a8cff;border-radius:6px;padding:2px 7px;white-space:nowrap}',
+      // 规则绑的不是当前周期时，那格提示要弱化（免得误以为"本周期生效"）
+      '.btcd-alert-elsewhere{opacity:.65}',
+      // 预警记录
+      '.btcd-alert-loghead{border-top:none;display:flex;align-items:center;gap:8px}',
+      '.btcd-alert-logrow{align-items:baseline}',
+      '.btcd-alert-logtime{color:var(--dsw-alias-label-secondary,#98a2ad);font-size:11px;white-space:nowrap}',
+      '.btcd-alert-logtext{font-size:11px}',
+      // 工具条按钮上的未读数
+      '.btcd-alert-dot{position:absolute;top:-4px;right:-4px;min-width:15px;height:15px;padding:0 4px;border-radius:8px;background:#ea3943;color:#fff;font-size:10px;line-height:15px;text-align:center}',
+      '.btcd-alert-btn{position:relative}',
+      // 自检块：条件不满足时染红，一眼能看见
+      '.btcd-alert-diag{background:rgba(74,140,255,.08);border-radius:6px;padding:5px 7px;line-height:1.5}',
+      '.btcd-alert-diag-bad{background:rgba(234,57,67,.12)}',
+      // 判据日志：一根一行（命中打 ✔，没中打 ·）
+      '.btcd-alert-evalrow{align-items:baseline;gap:6px;flex-wrap:wrap}',
+      '.btcd-alert-evalrow .btcd-alert-logtext{flex:1 1 auto}',
+      '.btcd-alert-gap{color:var(--dsw-alias-state-warning-primary,#d29922);font-size:11px;white-space:nowrap}',
+      // 邮件通道
+      '.btcd-email-block{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--dsw-alias-border-l1,#e6e9ee);padding-top:8px}',
+      '.btcd-email-to{flex:1 1 auto;min-width:140px}',
+      // ---- 回测面板：复用 .btcd-emapanel 的定位 / 底色 / 边框，只覆盖宽度与最大高度 ——
+      //      回测要放下表单 + 8 格 KPI + 资金曲线 + 交易表，290px 的默认宽度根本不够。
+      '.btcd-emapanel.btcd-btpanel{top:96px;width:460px;max-width:calc(100vw - 40px);max-height:calc(100vh - 210px);overflow:auto}',
+      '.btcd-bt-sub{color:var(--dsw-alias-label-secondary,#98a2ad);font-size:11px;font-weight:400}',
+      '.btcd-bt-hint{color:var(--dsw-alias-label-secondary,#98a2ad);font-size:11px}',
+      '.btcd-bt-warn{color:var(--dsw-alias-state-warn-primary,#e0a800);font-size:11px}',
+      '.btcd-bt-select{background:var(--dsw-alias-bg-base,#1a1f24);color:var(--dsw-alias-label-primary,#e8e8e8);border:1px solid var(--dsw-alias-border-l2,#4a535c);border-radius:6px;padding:3px 6px;font-size:11.5px;outline:none}',
+      '.btcd-bt-select:focus{border-color:var(--dsw-alias-brand-primary,#4a8cff)}',
+      '.btcd-bt-input{width:78px;background:var(--dsw-alias-bg-base,#1a1f24);color:var(--dsw-alias-label-primary,#e8e8e8);border:1px solid var(--dsw-alias-border-l2,#4a535c);border-radius:6px;padding:3px 7px;font-size:11.5px;font-variant-numeric:tabular-nums;outline:none}',
+      '.btcd-bt-input:focus{border-color:var(--dsw-alias-brand-primary,#4a8cff)}',
+      '.btcd-bt-input.btcd-bt-date{width:122px}',
+      '.btcd-bt-check{accent-color:var(--dsw-alias-brand-primary,#4a8cff)}',
+      '.btcd-bt-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}',
+      '.btcd-bt-progress{background:rgba(74,140,255,.10);border-radius:6px;padding:4px 7px;font-size:11.5px;line-height:1.5;color:var(--dsw-alias-label-primary,#e8e8e8)}',
+      '.btcd-bt-done{font-size:11.5px;font-weight:600;line-height:1.5}',
+      '.btcd-bt-error{color:var(--dsw-alias-state-error-primary,#ff6b6b);font-size:11.5px;line-height:1.5}',
+      // 旧 Host（没加载多标的版本）时的提示：用警示色，别让它看起来像普通说明
+      '.btcd-bt-warn{color:var(--dsw-alias-state-warning-primary,#d97706);font-size:11px;line-height:1.5}',
+      '.btcd-bt-kpis{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px}',
+      '.btcd-bt-kpi{background:var(--dsw-alias-bg-layer-2,#2b333b);border-radius:6px;padding:4px 6px;min-width:0;display:flex;flex-direction:column;gap:1px}',
+      '.btcd-bt-kpi-label{font-size:10.5px;color:var(--dsw-alias-label-secondary,#98a2ad);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+      '.btcd-bt-kpi b{font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}',
+      '.btcd-bt-chartwrap{background:var(--dsw-alias-bg-layer-2,#2b333b);border-radius:6px;padding:4px}',
+      '.btcd-btchart{display:block;width:100%;height:200px}',
+      '.btcd-bt-trades{max-height:220px;overflow:auto;border-radius:6px}',
+      '.btcd-bt-table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}',
+      '.btcd-bt-table th{position:sticky;top:0;z-index:1;background:var(--dsw-alias-bg-overlay,#2b333b);color:var(--dsw-alias-label-secondary,#98a2ad);text-align:left;font-weight:600;padding:3px 4px;white-space:nowrap}',
+      '.btcd-bt-table td{border-top:1px solid var(--dsw-alias-border-l1,#3a4149);padding:3px 4px;white-space:nowrap;vertical-align:top}',
+      '.btcd-bt-table .btcd-bt-hint{font-size:10px}',
       '.btcd-toast{position:absolute;left:50%;bottom:56px;transform:translateX(-50%);background:var(--dsw-alias-bg-overlay,#2b333b);color:var(--dsw-alias-label-primary,#e8e8e8);border:1px solid var(--dsw-alias-border-l2,#4a535c);border-radius:8px;padding:6px 14px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:3}',
       // 窄屏：工具条不换行，改成横向滚动 —— 省下的每一行都是图表的高度
       '.btcd-bar{overflow-x:auto;scrollbar-width:thin}',
@@ -196,10 +259,14 @@ window.__ModuleLoader__.load({
     function useTick(ms) {
       var state = React.useState(function () { return Date.now(); });
       React.useEffect(function () {
-        var timer = setInterval(function () {
-          if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
-          state[1](Date.now());
-        }, ms);
+        // ⚠️ 这里**不要**再加 `visibilityState === 'hidden'` 之类的守卫。
+        // 曾经有一版：`if (document.visibilityState === 'hidden') return;` ——
+        // 意图是"标签页在后台就别刷了"，但只要环境的 visibilityState 不是 'visible'
+        // （jsdom 报的是 'prerender'，某些内嵌视图/WebView 也会报别的值），
+        // 这条守卫就**每次都命中**，整个面板从此不再重渲染 ——
+        // 症状是"面板挂上去了，但时间读数停住、预警再也不刷新"，且没有任何报错。
+        // 代价权衡：空转一个 setInterval 的开销，远小于"看板静默冻结"的代价。
+        var timer = setInterval(function () { state[1](Date.now()); }, ms);
         return function () { clearInterval(timer); };
       }, [ms]);
       return state[0];
@@ -475,6 +542,1140 @@ window.__ModuleLoader__.load({
       return made;
     }
 
+    // ------------------------------------------------------------------ 收线预警
+    //
+    // 「当 K 线收线后收盘价穿过指定均线时提示我」。
+    // 判定只在**收线**那一刻做（新出现一根 done 的 K 线），不是每 5 秒刷新都做 ——
+    // 否则盘中价格来回穿，会反复弹提示，一点用都没有。
+
+    var ALERT_STORE_KEY = 'dsh-btc-dashboard:alerts';
+    var ALERT_LOG_KEY = 'dsh-btc-dashboard:alert-log';
+    var ALERT_EVAL_KEY = 'dsh-btc-dashboard:alert-eval';
+    var NOTIFY_STORE_KEY = 'dsh-btc-dashboard:notify';
+    /** 邮件提醒的目标地址。**真身在宿主**（它才是发信方），这里只缓存一份供界面显示。 */
+    var EMAIL_STORE_KEY = 'dsh-btc-dashboard:email';
+    var ALERT_MAX = 6;
+    // 预警记录：存最近这么多条（够回看，又不会把 localStorage 撑大）
+    var ALERT_MAX_HISTORY = 60;
+    // 判据日志：每次判定留一条，供排障（为什么没中）。比命中记录多，但都是小对象
+    var ALERT_MAX_EVALS = 40;
+    // 判定要用到"上一根"，所以至少要有这么多根 K 线才算得出来
+    var ALERT_MIN_BARS = 3;
+    /** "载荷没带 done"这件事只提醒一次，别每 5 秒刷一遍控制台 */
+    var noDoneWarned = false;
+
+    /**
+     * 载荷健康度：预警能不能判，全看这几项。做成自检是为了"看得见" ——
+     * 症状是"什么都不发生"时，没有自检就只能靠猜（真踩过：宿主少发一位 `done`，
+     * 预警静默失效，查了很久都以为是判定逻辑的问题）。
+     */
+    function candleHealth(candles) {
+      var list = Array.isArray(candles) ? candles : [];
+      var withDone = 0;
+      var doneCount = 0;
+      var lastDoneIdx = -1;
+      var lastDoneTs = null;
+      for (var i = 0; i < list.length; i += 1) {
+        var row = list[i];
+        var flag = row === undefined || row === null ? undefined : row[6];
+        var isFlag = flag === 0 || flag === 1 || flag === true || flag === false;
+        if (isFlag) withDone += 1;
+        if (isFlag && (flag === 1 || flag === true)) {
+          doneCount += 1;
+          lastDoneIdx = i;
+          lastDoneTs = Number(row[0]);
+        }
+      }
+      return {
+        count: list.length,
+        withDone: withDone,
+        doneCount: doneCount,
+        lastDoneIdx: lastDoneIdx,
+        lastDoneTs: lastDoneTs,
+        // 能不能判收线：每根都要带 done 标记，而且得存在一根"已收盘且有上一根"的
+        // （下标 0 那根没有"上一根"，判不了穿越）
+        ready: withDone === list.length && list.length >= ALERT_MIN_BARS && lastDoneIdx >= 1,
+      };
+    }
+
+    // ------------------------------------------------------------------ 预警记录
+    //
+    // 每条命中都留一条记录，**存在 localStorage 里**（不是只活在内存里）：
+    // 刷新页面、关掉看板再打开，记录都还在，用户可以随时清空。
+    // 记的是"事实"（哪条规则、哪个周期、什么时候收的线、收盘价与均线值），
+    // 不是文案 —— 文案是渲染时按当前格式拼的，这样以后改措辞不会让老记录变成一坨旧字符串。
+
+    /** 一条记录的唯一键：规则 + 那根收线时刻。同一条规则同一根只记一次。 */
+    function alertRecordKey(record) {
+      return String(record === null || record === undefined ? '' : record.ruleId)
+        + '@' + String(record === null || record === undefined ? '' : record.ts);
+    }
+
+    /** 把存下来的东西规范成记录列表（脏数据丢掉，不炸）。 */
+    function normalizeAlertLog(input) {
+      var src = Array.isArray(input) ? input : [];
+      var out = [];
+      for (var i = 0; i < src.length && out.length < ALERT_MAX_HISTORY; i += 1) {
+        var item = src[i];
+        if (item === null || item === undefined) continue;
+        if (typeof item.text !== 'string' || item.text === '') continue;
+        var ts = Number(item.ts);
+        var at = Number(item.at);
+        out.push({
+          id: typeof item.id === 'string' && item.id !== '' ? item.id : alertRecordKey(item),
+          ruleId: typeof item.ruleId === 'string' ? item.ruleId : '',
+          text: item.text,
+          dir: item.dir === 'down' ? 'down' : 'up',
+          bar: typeof item.bar === 'string' ? item.bar : '',
+          emaPeriod: typeof item.emaPeriod === 'number' && isFinite(item.emaPeriod) ? item.emaPeriod : null,
+          close: typeof item.close === 'number' && isFinite(item.close) ? item.close : null,
+          ema: typeof item.ema === 'number' && isFinite(item.ema) ? item.ema : null,
+          ts: isFinite(ts) ? ts : 0,
+          at: isFinite(at) ? at : 0,
+        });
+      }
+      // 新的在前
+      out.sort(function (a, b) { return b.at - a.at; });
+      return out;
+    }
+
+    /**
+     * 追加记录（纯函数）：新的在前、同一条规则同一根不重复记、超出上限丢最老的。
+     * 返回新数组；没有可加的（全是重复）时**返回原数组**，调用方可以据此跳过写入。
+     */
+    function alertLogAdd(log, hits, at, bar) {
+      var current = Array.isArray(log) ? log : [];
+      var seen = {};
+      for (var i = 0; i < current.length; i += 1) seen[current[i].id] = true;
+      var fresh = [];
+      var hitList = Array.isArray(hits) ? hits : [];
+      for (var h = 0; h < hitList.length; h += 1) {
+        var hit = hitList[h];
+        if (hit === null || hit === undefined) continue;
+        var id = alertRecordKey(hit);
+        if (seen[id] === true) continue;
+        seen[id] = true;
+        fresh.push({
+          id: id,
+          ruleId: typeof hit.ruleId === 'string' ? hit.ruleId : '',
+          text: String(hit.text),
+          dir: hit.dir === 'down' ? 'down' : 'up',
+          bar: typeof bar === 'string' ? bar : '',
+          emaPeriod: typeof hit.emaPeriod === 'number' ? hit.emaPeriod : null,
+          close: typeof hit.close === 'number' ? hit.close : null,
+          ema: typeof hit.ema === 'number' ? hit.ema : null,
+          ts: Number(hit.ts) || 0,
+          at: at,
+        });
+      }
+      if (fresh.length === 0) return current;
+      return fresh.concat(current).slice(0, ALERT_MAX_HISTORY);
+    }
+
+    /** 记录里那根的收线时间（按周期粒度显示，日线不带时分）。 */
+    function alertLogTime(record, barMs) {
+      var ms = barMs === undefined || barMs === null ? 0 : barMs;
+      return fmtTime(record.ts, ms, true);
+    }
+
+    // ------------------------------------------------------------------ 判据日志（dfx 用）
+    //
+    // 「为什么没中」是这类功能最难查的事：症状是"什么都没发生"。
+    // 所以每次判定都留一条判据：那根的时间、收盘价、均线值、以及**为什么中/不中**。
+    // 只读不改判定逻辑，纯观测。
+
+    function normalizeEvalLog(input) {
+      var src = Array.isArray(input) ? input : [];
+      var out = [];
+      for (var i = 0; i < src.length && out.length < ALERT_MAX_EVALS; i += 1) {
+        var item = src[i];
+        if (item === null || item === undefined) continue;
+        if (typeof item.verdict !== 'string' || item.verdict === '') continue;
+        out.push({
+          at: isFinite(Number(item.at)) ? Number(item.at) : 0,
+          bar: typeof item.bar === 'string' ? item.bar : '',
+          idx: isFinite(Number(item.idx)) ? Number(item.idx) : null,
+          ts: isFinite(Number(item.ts)) ? Number(item.ts) : null,
+          verdict: item.verdict,
+          ruleId: typeof item.ruleId === 'string' ? item.ruleId : '',
+          emaPeriod: isFinite(Number(item.emaPeriod)) ? Number(item.emaPeriod) : null,
+          dir: item.dir === 'down' ? 'down' : 'up',
+          prevClose: isFinite(Number(item.prevClose)) ? Number(item.prevClose) : null,
+          nowClose: isFinite(Number(item.nowClose)) ? Number(item.nowClose) : null,
+          prevEma: isFinite(Number(item.prevEma)) ? Number(item.prevEma) : null,
+          nowEma: isFinite(Number(item.nowEma)) ? Number(item.nowEma) : null,
+        });
+      }
+      return out;
+    }
+
+    /** 一次判定的所有理由 → 若干条日志（新的在前），并裁剪到上限。 */
+    function evalLogAdd(log, entry) {
+      var current = Array.isArray(log) ? log : [];
+      if (entry === null || entry === undefined) return current;
+      return [entry].concat(current).slice(0, ALERT_MAX_EVALS);
+    }
+
+    /**
+     * 把一次判定整理成"能贴给别人看"的多行文本（dfx 就是靠这段）。
+     * 包含：载荷健康度、游标、规则、每条规则的判据与数字。
+     */
+    function formatEvalDiag(info) {
+      var lines = [];
+      var h = info === null || info === undefined ? null : info.health;
+      lines.push('[BTC 看板 · 收线预警自检]');
+      lines.push('时间: ' + new Date(info !== null && info.at !== undefined ? info.at : Date.now()).toLocaleString());
+      lines.push('周期: ' + String(info === null || info.bar === null || info.bar === undefined ? '?' : info.bar)
+        + ' | 规则数: ' + String(info === null || info.rules === undefined ? 0 : info.rules));
+      if (h !== null && h !== undefined) {
+        lines.push('载荷: K 线 ' + String(h.count) + ' 根，带 done ' + String(h.withDone)
+          + '，已收盘 ' + String(h.doneCount) + '，就绪=' + String(h.ready === true));
+        lines.push('最近一根已收盘: ' + (h.lastDoneTs === null || h.lastDoneTs === undefined
+          ? '（没有）' : new Date(Number(h.lastDoneTs)).toLocaleString()));
+      }
+      lines.push('游标(lastClosedTs): ' + (info === null || info.cursor === null || info.cursor === undefined
+        ? '（未登记）' : new Date(Number(info.cursor)).toLocaleString()));
+      lines.push('确认新收线的次数(应判): ' + String(info === null || info.expect === undefined ? 0 : info.expect));
+      lines.push('实际跑完判定的次数(判定): ' + String(info === null || info.fires === undefined ? 0 : info.fires));
+      lines.push('（应判 > 判定 说明判定的那几根里有的失败了；应判不涨说明根本没看见新收线）');
+      if (info !== null && info !== undefined && info.error !== undefined && info.error !== null) {
+        lines.push('判定异常: ' + String(info.error));
+      }
+      var evals = info === null || !Array.isArray(info.evals) ? [] : info.evals;
+      lines.push('判据（最近 ' + String(evals.length) + ' 条）:');
+      if (evals.length === 0) lines.push('  （还没有判定过）');
+      for (var i = 0; i < evals.length; i += 1) {
+        var e = evals[i];
+        lines.push('  ' + new Date(e.at).toLocaleString()
+          + ' [' + String(e.bar) + '] EMA' + String(e.emaPeriod)
+          + ' ' + (e.dir === 'down' ? '↓' : '↑')
+          + ' → ' + e.verdict + '（' + verdictText(e.verdict) + '）'
+          + (e.idx === null ? '' : ' #' + String(e.idx))
+          + (e.ts === null ? '' : ' 收线 ' + new Date(e.ts).toLocaleString())
+          + (e.prevClose === null ? '' : ' 前收 ' + String(e.prevClose) + '/前均 ' + String(e.prevEma))
+          + (e.nowClose === null ? '' : ' 今收 ' + String(e.nowClose) + '/今均 ' + String(e.nowEma)));
+      }
+      return lines.join('\n');
+    }
+
+    // ------------------------------------------------------------------ 通知渠道
+    //
+    // 面板内的 toast / 常驻条是"看着屏幕才有用"。这里补两条能让人察觉的通道：
+    //   * 桌面通知：标签页在后台也能弹系统通知（要用户授权，所以做成开关、按需申请）
+    //   * 提示音：WebAudio 合成，不带音频文件（用一声 + 一记延长音，够醒目又不吵）
+    // 两个都不改变"只在收线那一刻判一次"的语义，只是把同一件事讲给更多地方。
+
+    /** 默认值：都开，但真正生效要用户授权 / 与页面交互过（浏览器策略） */
+    function normalizeNotify(input) {
+      var src = input !== null && typeof input === 'object' ? input : {};
+      return {
+        desktop: src.desktop !== false,
+        sound: src.sound !== false,
+      };
+    }
+
+    function notifyAvailable() {
+      return typeof window !== 'undefined' && typeof window.Notification === 'function';
+    }
+
+    /** 当前授权状态：'granted' / 'denied' / 'default'（不支持时给 'unsupported'）。 */
+    function notifyPermission() {
+      if (notifyAvailable() !== true) return 'unsupported';
+      return String(window.Notification.permission || 'default');
+    }
+
+    /** 弹一条桌面通知。没授权 / 不支持 → 返回 false（调用方不必当错误处理）。 */
+    function sendDesktopNotice(title, body) {
+      if (notifyAvailable() !== true) return false;
+      if (notifyPermission() !== 'granted') return false;
+      try {
+        var n = new window.Notification(String(title), { body: String(body), tag: 'dsh-btc-alert' });
+        if (n === null || n === undefined) return false;
+        // 点通知就把用户带回这个标签页
+        n.onclick = function () {
+          try {
+            if (typeof window.focus === 'function') window.focus();
+            n.close();
+          } catch (error) { /* 关不掉就算了 */ }
+        };
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    var audioCtx = null;
+
+    /**
+     * 一声提示音（WebAudio 合成，两声：短促 + 略低）。
+     * 浏览器的自动播放策略要求页面被交互过，否则 AudioContext 会是 suspended ——
+     * 所以这里返回 false 表示"没响"，由调用方决定要不要说明。
+     */
+    function playAlertSound() {
+      if (typeof window === 'undefined') return false;
+      var Ctor = window.AudioContext || window.webkitAudioContext;
+      if (typeof Ctor !== 'function') return false;
+      try {
+        if (audioCtx === null) audioCtx = new Ctor();
+        if (audioCtx.state === 'suspended' && typeof audioCtx.resume === 'function') audioCtx.resume();
+        var now = audioCtx.currentTime;
+        var beep = function (at, freq, dur) {
+          var osc = audioCtx.createOscillator();
+          var gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, at);
+          // 淡入淡出，避免"咔"的爆音
+          gain.gain.setValueAtTime(0, at);
+          gain.gain.linearRampToValueAtTime(0.18, at + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(at);
+          osc.stop(at + dur + 0.02);
+        };
+        beep(now, 880, 0.12);
+        beep(now + 0.16, 660, 0.18);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    /**
+     * 复制文本到剪贴板。`navigator.clipboard` 在非安全上下文里没有，退回 `execCommand`
+     * （已废弃但到处都还支持），两条都不行就返回 false，由调用方提示用户自己抄。
+     */
+    function copyToClipboard(text) {
+      var value = String(text);
+      try {
+        if (typeof navigator !== 'undefined' && navigator.clipboard !== undefined
+          && typeof navigator.clipboard.writeText === 'function') {
+          return navigator.clipboard.writeText(value).then(function () { return true; })
+            .catch(function () { return false; });
+        }
+      } catch (error) { /* 落到下面的兜底 */ }
+      try {
+        if (typeof document === 'undefined') return Promise.resolve(false);
+        var area = document.createElement('textarea');
+        area.value = value;
+        area.setAttribute('readonly', 'readonly');
+        area.style.position = 'fixed';
+        area.style.left = '-9999px';
+        document.body.appendChild(area);
+        area.select();
+        var ok = typeof document.execCommand === 'function' ? document.execCommand('copy') : false;
+        document.body.removeChild(area);
+        return Promise.resolve(ok === true);
+      } catch (error) {
+        return Promise.resolve(false);
+      }
+    }
+
+    // ------------------------------------------------------------------ 预警的共享存储
+    //
+    // 预警要**常驻执行**：不管看板开不开，只要插件挂着就得盯着收线。
+    // 所以判定引擎的输入不能放在 Dashboard 的 state 里 —— 看板一关，那些 state 就没了。
+    // 这里做一个模块级的单例存储：侧边栏按钮（常驻）与看板（按需）订阅同一份数据。
+    // 用的是"订阅 + 快照"模式，两个组件看到的永远是同一份，不会各存一份互相同步。
+    var ALERT_STORE = {
+      alerts: [],
+      notify: null,
+      log: [],
+      evals: [],
+      unread: 0,
+      // 邮件配置：真身在宿主，这里缓存一份（面板要显示、引擎要判"开没开"）。
+      // `available` 表示宿主的 qqEmail 服务在不在 —— 不在时界面要给可执行的提示。
+      email: { enabled: false, to: '', confirmed: '', authorized: false, available: false, confirmedAt: null, lastSentAt: null, lastError: null, sentCount: 0 },
+      meta: { expect: 0, fires: 0, at: null, reason: '', health: null, error: null, lastBar: null, hits: 0 },
+    };
+    var alertStoreListeners = new Set();
+    var alertStoreSnapshot = 0;
+    var alertStoreLoaded = false;
+
+    function alertStoreGet(key) {
+      if (key === undefined) return ALERT_STORE;
+      return ALERT_STORE[key];
+    }
+
+    /** 改一处或几处（传对象就是批量），然后通知所有订阅者。 */
+    function alertStoreSet(patch) {
+      if (patch === null || patch === undefined) return;
+      var changed = false;
+      for (var key in patch) {
+        if (!Object.prototype.hasOwnProperty.call(patch, key)) continue;
+        if (Object.is(ALERT_STORE[key], patch[key])) continue;
+        ALERT_STORE[key] = patch[key];
+        changed = true;
+      }
+      if (changed !== true) return;
+      alertStoreSnapshot += 1;
+      alertStoreListeners.forEach(function (fn) { fn(); });
+    }
+
+    function alertStoreSubscribe(fn) {
+      alertStoreListeners.add(fn);
+      return function () { alertStoreListeners.delete(fn); };
+    }
+
+    /**
+     * 从 localStorage 读一次，把规则 / 记录 / 判据 / 通知开关装进存储。
+     * 两个视图（侧边栏按钮、看板）挂载时都会调它 —— 谁先挂载谁把它填上；
+     * 之后的重叠调用只是重读一遍同样的数据（幂等），不会覆盖内存里的新内容，
+     * 因为任何改动都会立刻写回 localStorage。
+     */
+    function alertStoreLoad() {
+      var rawAlerts = loadStored(ALERT_STORE_KEY, null);
+      var rawLog = loadStored(ALERT_LOG_KEY, null);
+      var rawEvals = loadStored(ALERT_EVAL_KEY, null);
+      var rawNotify = loadStored(NOTIFY_STORE_KEY, null);
+      var patch = { notify: normalizeNotify(rawNotify) };
+      patch.alerts = rawAlerts === null || rawAlerts === undefined ? [] : normalizeAlerts(rawAlerts, '');
+      patch.log = rawLog === null || rawLog === undefined ? [] : normalizeAlertLog(rawLog);
+      patch.evals = rawEvals === null || rawEvals === undefined ? [] : normalizeEvalLog(rawEvals);
+      // 邮件：本地只缓存了界面用的那几个字段，权威值靠 `pullEmailConfig()` 从宿主对齐
+      var cachedEmail = loadStored(EMAIL_STORE_KEY, null);
+      if (cachedEmail !== null && cachedEmail !== undefined) patch.email = normalizeEmail(cachedEmail);
+      alertStoreSet(patch);
+    }
+
+    /**
+     * 订阅预警存储。`useSyncExternalStore` 拿不到时退回 useState（老 React 也能跑）。
+     * 第三个参数（服务端快照）**必须给**：SSR 渲染时缺它会直接抛
+     * "Missing getServerSnapshot"。服务端和首次客户端渲染都返回同一份初始快照，
+     * 所以不会出现水合不一致。
+     */
+    function useAlertStore(key) {
+      var sub = React.useSyncExternalStore;
+      if (typeof sub === 'function') {
+        var read = function () { return alertStoreGet(key); };
+        return sub(alertStoreSubscribe, read, read);
+      }
+      var state = React.useState(function () { return alertStoreGet(key); });
+      React.useEffect(function () {
+        return alertStoreSubscribe(function () { state[1](alertStoreGet(key)); });
+      }, [key]);
+      return state[0];
+    }
+
+    /**
+     * 把预警存储写回 localStorage。任何一处改动都走这里 ——
+     * 侧边栏按钮持有引擎，它卸载基本意味着插件卸载，所以不存在"谁来收尾"的问题。
+     */
+    var alertStoreSaved = {};
+    function alertStorePersist() {
+      var pairs = [
+        [ALERT_STORE_KEY, ALERT_STORE.alerts],
+        [ALERT_LOG_KEY, ALERT_STORE.log],
+        [ALERT_EVAL_KEY, ALERT_STORE.evals],
+        [NOTIFY_STORE_KEY, ALERT_STORE.notify],
+      ];
+      for (var i = 0; i < pairs.length; i += 1) {
+        var text = JSON.stringify(pairs[i][1]);
+        if (alertStoreSaved[pairs[i][0]] === text) continue;
+        alertStoreSaved[pairs[i][0]] = text;
+        saveStored(pairs[i][0], pairs[i][1]);
+      }
+    }
+
+    // ------------------------------------------------------------------ 预警邮件
+    //
+    // 发信在**宿主半**（它才有 `ctx.qqEmail`），这里负责：填地址 / 授权确认 / 命中时通知宿主。
+    // 授权时机在"用户填地址"那一步；之后每封自动预警只发往已确认的那个地址。
+    // 宿主那边为什么不用 DSH 的 approval：见 index.js 里"确认模型"那段说明
+    // （approval.request() 要求打开的 turn，而预警是自动触发的，没有 turn 可依附）。
+
+    /** 邮件配置的规范化（本地缓存这份；宿主的权威值通过 /email 接口对齐）。 */
+    function normalizeEmail(input) {
+      var source = input !== null && typeof input === 'object' ? input : {};
+      return {
+        enabled: source.enabled === true,
+        to: typeof source.to === 'string' ? source.to : '',
+        confirmed: typeof source.confirmed === 'string' ? source.confirmed : '',
+        authorized: source.authorized === true,
+        available: source.available === true,
+        confirmedAt: isFinite(Number(source.confirmedAt)) && source.confirmedAt !== null
+          ? Number(source.confirmedAt) : null,
+        lastSentAt: isFinite(Number(source.lastSentAt)) && source.lastSentAt !== null
+          ? Number(source.lastSentAt) : null,
+        lastError: typeof source.lastError === 'string' ? source.lastError : null,
+        sentCount: isFinite(Number(source.sentCount)) ? Number(source.sentCount) : 0,
+      };
+    }
+
+    /** 从宿主读回邮件配置，写进共享存储（权威值以宿主为准）。 */
+    function pullEmailConfig() {
+      return fetchJson('/email').then(function (res) {
+        if (res !== null && res.ok === true && res.email !== undefined) {
+          alertStoreSet({ email: normalizeEmail(res.email) });
+          saveStored(EMAIL_STORE_KEY, alertStoreGet('email'));
+        }
+        return alertStoreGet('email');
+      }).catch(function () {
+        return alertStoreGet('email');
+      });
+    }
+
+    /**
+     * 保存邮件配置到宿主。
+     * `confirm: true` 表示用户已在界面上确认过这个地址 —— 只有带上它，
+     * 宿主才会把地址记成"已确认"并允许后续自动发信。
+     */
+    function saveEmailConfig(patch, confirm) {
+      var body = { enabled: patch.enabled === true, confirm: confirm === true };
+      // **只有真的填了地址才传 to** —— 关掉开关时不要把地址带成空串，
+      // 那会让后端把已存的地址当成"这次没提交地址"（虽然前端也有兜底，但别在两头都挖坑）。
+      if (typeof patch.to === 'string' && patch.to.trim() !== '') body.to = patch.to.trim();
+      var fail = function (error) {
+        var text = String((error && error.message) || error);
+        alertStoreSet({ email: Object.assign({}, alertStoreGet('email'), { lastError: text }) });
+        return { ok: false, email: alertStoreGet('email'), needsConfirm: false, error: text };
+      };
+      // ⚠️ **必须有 catch**：没有它的话，fetch 失败或 .then 里抛异常会让调用方的
+      // `setEmailBusy(false)` 永远执行不到 —— 按钮卡在 disabled，表现为"点一下变灰、
+      // 再也点不动"（真踩过）。同时未处理的 rejection 会打到 window，测试抓得到。
+      return fetchJson('/email', { method: 'POST', body: JSON.stringify(body) })
+        .then(function (res) {
+          if (res !== null && res.ok === true && res.email !== undefined) {
+            var view = normalizeEmail(res.email);
+            var current = alertStoreGet('email');
+            // 后端这次没带地址时不要把地址抹成空 —— `normalizeEmail` 缺字段就给空串，
+            // 直接覆盖会让"地址丢失"，这跟用户报过的"再次打开邮箱丢了"是同一类问题。
+            if (view.to === '' && current.to !== '') view.to = current.to;
+            alertStoreSet({ email: view });
+            saveStored(EMAIL_STORE_KEY, view);
+            return { ok: true, email: view, needsConfirm: false, error: null };
+          }
+          var error = res === null || res.error === undefined ? '保存失败' : String(res.error);
+          var needsConfirm = res !== null && res.needsConfirm === true;
+          // 保存失败也要让界面看到原因（比如"没找到 qqEmail 服务"）
+          alertStoreSet({ email: Object.assign({}, alertStoreGet('email'), { lastError: error }) });
+          return { ok: false, email: alertStoreGet('email'), needsConfirm: needsConfirm, error: error };
+        })
+        .catch(fail);
+    }
+
+    /**
+     * 发一封**测试**邮件（面板「试一下」用）。
+     * 走同一个后端路由，只是带 `test: true` 让宿主用一份示例行情组正文 ——
+     * 这样测试邮件长什么样，跟真实预警邮件一模一样，不会"测通了但真预警是另一封"。
+     * 测试邮件同样只发往**已确认地址**，不额外开口子。
+     */
+    function sendTestEmail() {
+      return fetchJson('/notify-email', {
+        method: 'POST',
+        body: JSON.stringify({ test: true, at: Date.now() }),
+      }).then(function (res) {
+        if (res !== null && res.ok === true) {
+          return { ok: true, error: null, to: res.to };
+        }
+        var error = res === null || res.error === undefined ? '发送失败' : String(res.error);
+        var skipped = res === null || res.skipped === undefined ? null : String(res.skipped);
+        return { ok: false, error: error, skipped: skipped };
+      }).catch(function (error) {
+        return { ok: false, error: String((error && error.message) || error), skipped: null };
+      });
+    }
+
+    /** 命中时把预警信息交给宿主发信。宿主会自己再校验"开关 + 已确认地址"。 */
+    function sendAlertEmailOnce(payload) {
+      return fetchJson('/notify-email', { method: 'POST', body: JSON.stringify(payload) })
+        .then(function (res) {
+          if (res !== null && res.ok === true) {
+            alertStoreSet({
+              email: Object.assign({}, alertStoreGet('email'), {
+                lastSentAt: Date.now(),
+                lastError: null,
+                sentCount: alertStoreGet('email').sentCount + 1,
+              }),
+            });
+            saveStored(EMAIL_STORE_KEY, alertStoreGet('email'));
+            return { ok: true, error: null };
+          }
+          var error = res === null || res.error === undefined ? '发送失败' : String(res.error);
+          var skipped = res === null || res.skipped === undefined ? null : String(res.skipped);
+          var email = alertStoreGet('email');
+          // "没开"/"没授权"不是错误，是正常的跳过；只有真失败才记 lastError
+          alertStoreSet({
+            email: Object.assign({}, email, {
+              lastError: skipped === null ? error : email.lastError,
+              available: skipped === 'no-service' ? false : email.available,
+            }),
+          });
+          return { ok: false, error: error, skipped: skipped };
+        })
+        .catch(function (error) {
+          var text = String((error && error.message) || error);
+          alertStoreSet({
+            email: Object.assign({}, alertStoreGet('email'), { lastError: text }),
+          });
+          return { ok: false, error: text, skipped: null };
+        });
+    }
+
+    /**
+     * 把一次命中整理成发信用的载荷：**规则 / 周期 / 那根 K 线的数据**。
+     * 只做数据搬运，文案与排版都在宿主那边（宿主才知道邮件长什么样）。
+     */
+    function alertEmailPayload(hit, bar, candles, idx, instId, rules) {
+      var candle = Array.isArray(candles) && idx >= 0 && idx < candles.length ? candles[idx] : null;
+      return {
+        rule: (hit.dir === 'down' ? '收盘下穿' : '收盘上穿') + ' EMA' + String(hit.emaPeriod),
+        bar: bar === null || bar === undefined ? '' : String(bar),
+        text: typeof hit.text === 'string' ? hit.text : '',
+        ts: isFinite(Number(hit.ts)) ? Number(hit.ts) : null,
+        instId: typeof instId === 'string' ? instId : '',
+        price: { close: hit.close === undefined ? null : hit.close, ema: hit.ema === undefined ? null : hit.ema },
+        candle: candle === null ? null : {
+          t: Number(candle[0]), o: Number(candle[1]), h: Number(candle[2]),
+          l: Number(candle[3]), c: Number(candle[4]), v: Number(candle[5]),
+        },
+        rules: Array.isArray(rules) ? rules.map(function (one) {
+          return { dir: one.dir, emaPeriod: one.emaPeriod, bar: one.bar, on: one.on !== false };
+        }) : [],
+      };
+    }
+
+    /**
+     * 常驻的收线判定引擎（一个**只渲染 null 的组件**）。
+     *
+     * 关键点：它挂在**始终挂载的侧边栏按钮**上，看板开不开都在跑 ——
+     * 所以关掉看板、切到别的标签页，规则照样在盯，桌面通知和提示音照样响。
+     * 判定所需的数据由它自己取（每个"有规则的周期"各拉一次），不依赖看板是否打开。
+     * 看板只是它产出的数据（`ALERT_STORE`）的一个视图。
+     *
+     * 为什么做成组件而不是 hook：它要在 `shell.overlay`（按需挂载）之外也活着；
+     * 而且这样"引擎在不在跑"可以直接在界面上验证，不靠推断。
+     */
+    function AlertEngine() {
+      var alerts = useAlertStore('alerts');
+      // 挂载后再读一次盘：`apply()` 那一刻 window/localStorage 未必就绪
+      // （模块是在一个受控环境里求值的），所以真正的"首次装载"放在这里更稳。
+      React.useEffect(function () {
+        alertStoreLoad();
+        // 邮件配置以宿主为准（它才是发信方），拉一次对齐本地缓存
+        pullEmailConfig();
+      }, []);
+      var bars = {};
+      var barList = [];
+      for (var i = 0; i < alerts.length; i += 1) {
+        var b = alerts[i].bar;
+        if (b === '' || bars[b] === true) continue;
+        bars[b] = true;
+        barList.push(b);
+      }
+      var barKey = barList.join(',');
+      // 各周期的载荷与游标都放在 ref 里：它们是引擎的工作数据，不需要触发重渲染
+      var dataRef = React.useRef({ boards: {}, cursors: {}, expect: 0, fires: 0 });
+      React.useEffect(function () {
+        if (barKey === '') return undefined;
+        var alive = true;
+        var list = barKey.split(',');
+        function pull() {
+          for (var k = 0; k < list.length; k += 1) {
+            (function (oneBar) {
+              fetchJson('/board?bar=' + encodeURIComponent(oneBar) + '&limit=' + String(FETCH_LIMIT))
+                .then(function (res) {
+                  if (!alive || res === null || res.ok !== true) return;
+                  dataRef.current.boards[oneBar] = res;
+                  var patch = runAlertEngine(dataRef.current, oneBar, res, alertStoreGet('alerts'), alertStoreGet('notify'));
+                  if (patch !== null) {
+                    alertStoreSet(patch);
+                    alertStorePersist();
+                  }
+                })
+                .catch(function () { /* 单次失败忽略，下一轮再来 */ });
+            })(list[k]);
+          }
+        }
+        pull();
+        var timer = setInterval(pull, REFRESH_MS);
+        return function () {
+          alive = false;
+          clearInterval(timer);
+        };
+      }, [barKey]);
+      return null;
+    }
+
+    /**
+     * 跑一次收线判定（纯逻辑 + 副作用分开：返回值是要写进存储的 patch，通知/声音在这里直接发）。
+     *
+     * `engine` 是引擎的工作数据 `{ boards, cursors, expect, fires }`（存在 ref 里）。
+     * 返回 `null` 表示这次没有新收线、什么都不用改。
+     *
+     * **这里刻意不依赖任何组件 state**：它由常驻的侧边栏按钮驱动，
+     * 所以看板开不开都不影响它。
+     */
+    function runAlertEngine(engine, oneBar, board, alerts, notify) {
+      if (board === null || board === undefined) return null;
+      var candles = Array.isArray(board.candles) ? board.candles : [];
+      var health = candleHealth(candles);
+      var prevReason = engine.reason === undefined ? '' : engine.reason;
+      var lastCursor = engine.cursors[oneBar] === undefined ? null : engine.cursors[oneBar];
+      function metaOf(reason, cursor, extra) {
+        return {
+          expect: engine.expect, fires: engine.fires, at: Date.now(), reason: reason,
+          health: health, cursor: cursor, error: null, lastBar: null, hits: 0, bar: oneBar,
+          previousReason: prevReason,
+        };
+      }
+      // 顺序很重要：**缺 done 是硬阻塞**，不管有没有规则都该先说它
+      if (health.ready !== true) {
+        engine.reason = 'no-done';
+        return { meta: metaOf('no-done', lastCursor, null) };
+      }
+      var mine = [];
+      for (var i = 0; i < alerts.length; i += 1) if (alerts[i].bar === oneBar) mine.push(alerts[i]);
+      if (mine.length === 0) {
+        engine.reason = 'no-rules';
+        return { meta: metaOf('no-rules', lastCursor, null) };
+      }
+      var cursor = closedAlertCursor(candles, lastCursor);
+      if (cursor === null) {
+        engine.reason = 'waiting';
+        return { meta: metaOf('waiting', lastCursor, null) };
+      }
+      // 第一次只登记游标：刚装上插件不该把历史上最后一次穿越报成"刚刚发生"
+      if (cursor.fresh !== true) {
+        engine.cursors[oneBar] = cursor.ts;
+        engine.reason = 'armed';
+        return { meta: metaOf('armed', cursor.ts, null) };
+      }
+      engine.cursors[oneBar] = cursor.ts;
+      engine.expect += 1;
+      var lines;
+      var verdicts = [];
+      var skipped = [];
+      var hits = [];
+      var failed = null;
+      try {
+        lines = emaFor(candles, mine.map(function (a) {
+          return { id: 'a' + a.id, period: a.emaPeriod, color: '#000000', show: true };
+        }), board.fetchedAt);
+        var outcome = evalAlerts(mine, candles, lines, cursor.idx, oneBar, digitsOf(candles[cursor.idx][4]));
+        hits = outcome.hits;
+        verdicts = outcome.verdicts;
+        skipped = outcome.skipped;
+        engine.fires += 1;
+      } catch (error) {
+        failed = String((error && error.message) || error);
+        if (typeof console !== 'undefined' && console.error !== undefined) {
+          console.error('[btcd] 收线预警判定失败', error);
+        }
+      }
+      // 判据：参与判定的每条规则一条；被跳过的也记原因；抛错本身也记一条
+      var at0 = Date.now();
+      var entries = [];
+      for (var vi = 0; vi < verdicts.length; vi += 1) {
+        var v = verdicts[vi];
+        entries.push({
+          at: at0, bar: oneBar, idx: v.idx, ts: v.ts, verdict: v.verdict,
+          ruleId: v.ruleId, emaPeriod: v.emaPeriod, dir: v.dir,
+          prevClose: v.prevClose, nowClose: v.nowClose, prevEma: v.prevEma, nowEma: v.nowEma,
+        });
+      }
+      for (var si = 0; si < skipped.length; si += 1) {
+        entries.push({
+          at: at0, bar: oneBar, idx: cursor.idx, ts: cursor.ts,
+          verdict: skipped[si].verdict === 'not-this-bar' ? 'other-bar' : skipped[si].verdict,
+          ruleId: skipped[si].ruleId, emaPeriod: null, dir: 'up',
+          prevClose: null, nowClose: null, prevEma: null, nowEma: null,
+        });
+      }
+      if (entries.length === 0) {
+        entries.push({
+          at: at0, bar: oneBar, idx: cursor.idx, ts: cursor.ts,
+          verdict: failed === null ? 'no-current-bar-rule' : 'failed',
+          ruleId: '', emaPeriod: null, dir: 'up', note: failed,
+          prevClose: null, nowClose: null, prevEma: null, nowEma: null,
+        });
+      }
+      var nextEvals = alertStoreGet('evals');
+      for (var ei = 0; ei < entries.length; ei += 1) nextEvals = evalLogAdd(nextEvals, entries[ei]);
+      if (failed !== null) {
+        engine.reason = 'failed';
+        var patchFail = { evals: nextEvals, meta: metaOf('failed', cursor.ts, null) };
+        patchFail.meta.error = failed;
+        return patchFail;
+      }
+      // 命中：写记录 + 三条通道（面板 toast 由看板自己看 unread，这里只管常驻的两条）
+      var patch = { evals: nextEvals };
+      if (hits.length === 0) {
+        engine.reason = 'checked';
+        patch.meta = metaOf('checked', cursor.ts, null);
+        return patch;
+      }
+      engine.reason = 'hit';
+      var at = Date.now();
+      patch.log = alertLogAdd(alertStoreGet('log'), hits, at, oneBar);
+      var unread = alertStoreGet('unread') + hits.length;
+      patch.unread = unread;
+      patch.meta = metaOf('hit', cursor.ts, null);
+      patch.meta.hits = hits.length;
+      patch.meta.lastBar = cursor.ts;
+      // 常驻提醒的两条通道。看板开着时也会弹 toast（它自己订阅 unread/log）。
+      if (notify !== null && notify.desktop === true) {
+        for (var hi = 0; hi < hits.length; hi += 1) {
+          sendDesktopNotice(
+            instShort(board.instId) + ' ' + oneBar + ' 收线预警 · ' + alertDirInfo(hits[hi].dir).label,
+            hits[hi].text + '（OKX ' + (board.instId || 'BTC-USDT-SWAP') + '）',
+          );
+        }
+      }
+      if (notify !== null && notify.sound === true) playAlertSound();
+      // 邮件：交给宿主发（它才有 ctx.qqEmail）。宿主自己再校验"开着 + 地址已确认"，
+      // 这里只负责把载荷递过去；失败会写进 email.lastError，面板上看得见。
+      var email = alertStoreGet('email');
+      if (email !== null && email.enabled === true) {
+        for (var mi = 0; mi < hits.length; mi += 1) {
+          sendAlertEmailOnce(alertEmailPayload(hits[mi], oneBar, candles, cursor.idx, board.instId, alerts));
+        }
+      }
+      return patch;
+    }
+
+    /** 预警的方向：收盘价上穿 / 下穿均线。 */
+    var ALERT_DIRS = [
+      { id: 'up', label: '收盘上穿', arrow: '↑', text: '收线上穿' },
+      { id: 'down', label: '收盘下穿', arrow: '↓', text: '收线下穿' },
+    ];
+
+    function alertDirInfo(id) {
+      for (var i = 0; i < ALERT_DIRS.length; i += 1) if (ALERT_DIRS[i].id === id) return ALERT_DIRS[i];
+      return ALERT_DIRS[0];
+    }
+
+    function alertNewId() {
+      alertSeq += 1;
+      return 'a' + String(Date.now().toString(36)) + String(alertSeq);
+    }
+    var alertSeq = 0;
+
+    /**
+     * 把存下来的东西规范成预警规则列表。
+     *
+     * **周期字段 `bar` 只保留原值，绝不用"当前周期"去补**：
+     * 早先这里写的是"没有 bar 就填传进来的当前周期"，结果规则会被重绑到当时的周期上 ——
+     * 在 3m 建的规则切到 15m 就变成绑 15m，看起来像"跟着周期跑"。现在的语义是：
+     * 每条规则**固定绑在它被创建时的周期**上；真拿不到周期（面板还没取到数）就记空串，
+     * 那条规则哪个周期都不判、在面板里显示"周期未知"，由用户删掉重加。
+     */
+    function normalizeAlerts(input, bar, nextId) {
+      var src = Array.isArray(input) ? input : [];
+      var idGen = typeof nextId === 'function' ? nextId : alertNewId;
+      var out = [];
+      for (var i = 0; i < src.length && out.length < ALERT_MAX; i += 1) {
+        var item = src[i];
+        if (item === null || item === undefined) continue;
+        var period = item.emaPeriod;
+        if (typeof period === 'string') period = parsePeriod(period, null);
+        if (typeof period !== 'number' || !isFinite(period) || period < EMA_PERIOD_MIN) continue;
+        out.push({
+          id: typeof item.id === 'string' && item.id !== '' ? item.id : idGen(),
+          emaPeriod: Math.min(EMA_PERIOD_MAX, Math.round(period)),
+          dir: item.dir === 'down' ? 'down' : 'up',
+          bar: typeof item.bar === 'string' ? item.bar : '',
+          on: item.on !== false,
+        });
+      }
+      return out;
+    }
+
+    /**
+     * 收线穿越判定，**并把判据一起返回**（这是排障要的）。
+     *
+     * `idx` 是刚收线那根的下标，`series` 是那条均线的整条序列。判定条件：
+     *   上一根收盘在均线**另一侧**（或刚好相等），这一根收盘到了这一侧 →
+     *   也就是"穿过去了"。只在同一侧来回晃不算穿越。
+     *
+     * 返回值：`{ verdict, ... }`。`verdict === 'hit'` 时额外带 `hit`（给用户看的那句话）。
+     * 其它 verdict 说明**为什么没中**，看板把每一条都列出来，省得靠猜：
+     *   off / no-rule / bad-index / bad-candle / no-ema / bad-close / side-same / side-crossed-wrong-way
+     */
+    function evalAlertVerdict(rule, candles, series, idx, digits) {
+      if (rule === null || rule === undefined) return { verdict: 'no-rule' };
+      if (rule.on === false) return { verdict: 'off' };
+      if (!Array.isArray(candles) || !Array.isArray(series)) return { verdict: 'bad-candle' };
+      if (idx === null || idx === undefined || idx < 1 || idx >= candles.length) {
+        return { verdict: 'bad-index', idx: idx === undefined ? null : idx };
+      }
+      var now = candles[idx];
+      var prev = candles[idx - 1];
+      if (now === undefined || prev === undefined) return { verdict: 'bad-candle' };
+      var nowEma = series[idx];
+      var prevEma = series[idx - 1];
+      var base = {
+        idx: idx,
+        ts: Number(now[0]),
+        emaPeriod: rule.emaPeriod,
+        dir: rule.dir === 'down' ? 'down' : 'up',
+        nowClose: Number(now[4]),
+        prevClose: Number(prev[4]),
+        nowEma: nowEma === undefined ? null : nowEma,
+        prevEma: prevEma === undefined ? null : prevEma,
+      };
+      if (nowEma === null || nowEma === undefined || prevEma === null || prevEma === undefined) {
+        // 均线还没预热出来：这条均线的周期比序列还长（比如刚加了一条 EMA480 而序列不够）
+        return Object.assign(base, { verdict: 'no-ema' });
+      }
+      if (!isFinite(base.nowClose) || !isFinite(base.prevClose)) {
+        return Object.assign(base, { verdict: 'bad-close' });
+      }
+      var up = rule.dir !== 'down';
+      var wasOtherSide = up ? base.prevClose <= prevEma : base.prevClose >= prevEma;
+      var isThisSide = up ? base.nowClose > nowEma : base.nowClose < nowEma;
+      if (wasOtherSide !== true) {
+        // 上一根就已经在这边了：没有"穿"的动作
+        return Object.assign(base, { verdict: 'side-same' });
+      }
+      if (isThisSide !== true) {
+        // 这一根又回到另一边（或者没过去）—— 方向不对
+        return Object.assign(base, { verdict: 'side-crossed-wrong-way' });
+      }
+      var d = digits === undefined || digits === null ? digitsOf(base.nowClose) : digits;
+      var hit = {
+        ruleId: rule.id,
+        ts: base.ts,
+        dir: up ? 'up' : 'down',
+        emaPeriod: rule.emaPeriod,
+        close: base.nowClose,
+        ema: base.nowEma,
+        text: ALERT_DIRS[up ? 0 : 1].text + ' EMA' + String(rule.emaPeriod)
+          + ' · 收盘 ' + fmtPrice(base.nowClose, d) + ' / 均线 ' + fmtPrice(base.nowEma, d),
+      };
+      return Object.assign(base, { verdict: 'hit', hit: hit });
+    }
+
+    /** 兼容旧签名：只关心"中没中"。 */
+    function evalAlert(rule, candles, series, idx, digits) {
+      var out = evalAlertVerdict(rule, candles, series, idx, digits);
+      return out.verdict === 'hit' ? out.hit : null;
+    }
+
+    /** 判据文字：给看板/导出用的人话。 */
+    var VERDICT_TEXT = {
+      hit: '命中：穿过去了',
+      off: '规则已暂停',
+      'no-rule': '没有规则',
+      'bad-index': '收线那根的下标不合法',
+      'bad-candle': 'K 线数据不完整',
+      'no-ema': '均线还没预热出值（这条均线的周期比已有序列还长）',
+      'bad-close': '收盘价不是数字',
+      'side-same': '上一根就已经在均线这一侧了 —— 没有"穿"的动作',
+      'side-crossed-wrong-way': '这一根没穿过去（同一侧或又折回去了）',
+      'no-current-bar-rule': '没有启用中的、绑在当前周期的规则',
+      'other-bar': '规则绑的是别的周期，本次不判',
+      'not-advanced': '还没有新的收线（同一根之内不算）',
+      'first-seen': '第一次见到这根：只登记游标，不判定',
+      failed: '判定过程抛错了（详情见控制台 / 自检块）',
+    };
+
+    function verdictText(code) {
+      var text = VERDICT_TEXT[code];
+      return text === undefined ? String(code) : text;
+    }
+
+    /**
+     * 把判据按"收线时刻"分组。
+     *
+     * 一次收线会给每条规则各写一条判据（两条规则就是两条），逐条平铺看起来像重复。
+     * 按根分组之后：这一根收在什么价、均线在哪、每条规则各自的结论一目了然；
+     * 而且**这一根到上一根隔了多久**也直接看得出来 —— "中间少了几分钟"就是靠这个查的。
+     * 返回新的在前，每项 `{ key, ts, at, bar, idx, prevClose, nowClose, prevEma, nowEma, items }`。
+     */
+    function groupVerdicts(log) {
+      var list = Array.isArray(log) ? log : [];
+      var order = [];
+      var byKey = {};
+      for (var i = 0; i < list.length; i += 1) {
+        var e = list[i];
+        if (e === null || e === undefined) continue;
+        var key = String(e.ts === null || e.ts === undefined ? 'no-ts' : e.ts) + '|' + String(e.bar);
+        if (byKey[key] === undefined) {
+          byKey[key] = {
+            key: key, ts: e.ts, at: e.at, bar: e.bar, idx: e.idx,
+            prevClose: e.prevClose, nowClose: e.nowClose,
+            prevEma: e.prevEma, nowEma: e.nowEma, items: [],
+          };
+          order.push(key);
+        }
+        var group = byKey[key];
+        group.items.push(e);
+        // 同一次判定里每条规则的数字都一样，取第一个有值的补全
+        if (group.nowClose === null && e.nowClose !== null) group.nowClose = e.nowClose;
+        if (group.prevClose === null && e.prevClose !== null) group.prevClose = e.prevClose;
+        if (group.nowEma === null && e.nowEma !== null) group.nowEma = e.nowEma;
+        if (group.prevEma === null && e.prevEma !== null) group.prevEma = e.prevEma;
+      }
+      var out = [];
+      for (var k = 0; k < order.length; k += 1) out.push(byKey[order[k]]);
+      return out;
+    }
+
+    /**
+     * 相邻两次收线之间隔了多久（毫秒），拿不到返回 null。
+     * 断档通常意味着**看板当时没开着**（判定只在看板打开时跑），标出来就不会被误当成故障。
+     */
+    function verdictGapMs(groups, index) {
+      var list = Array.isArray(groups) ? groups : [];
+      var cur = list[index];
+      var prev = list[index + 1];
+      if (cur === undefined || prev === undefined) return null;
+      if (cur.ts === null || cur.ts === undefined || prev.ts === null || prev.ts === undefined) return null;
+      var gap = Number(cur.ts) - Number(prev.ts);
+      return isFinite(gap) && gap > 0 ? gap : null;
+    }
+
+    /**
+     * 一次刷新要判的所有预警：只判**当前周期的、开着的**规则。
+     * `idx` 传刚收线那一根的下标。
+     * 返回 `{ hits, verdicts, skipped }`：命中的、每条规则一条判据、以及被跳过的规则及原因。
+     */
+    function evalAlerts(rules, candles, lines, idx, bar, digits) {
+      var hits = [];
+      var verdicts = [];
+      var skipped = [];
+      var list = Array.isArray(rules) ? rules : [];
+      if (list.length === 0) return { hits: hits, verdicts: verdicts, skipped: skipped };
+      var byPeriod = {};
+      var seriesList = Array.isArray(lines) ? lines : [];
+      for (var i = 0; i < seriesList.length; i += 1) {
+        if (seriesList[i] === null || seriesList[i] === undefined) continue;
+        if (seriesList[i].item === null || seriesList[i].item === undefined) continue;
+        byPeriod[String(seriesList[i].item.period)] = seriesList[i].series;
+      }
+      for (var r = 0; r < list.length; r += 1) {
+        var rule = list[r];
+        if (rule === null || rule === undefined) continue;
+        // 被跳过的也要记原因：不然"为什么没判"就查不出来
+        if (rule.on === false) { skipped.push({ ruleId: rule.id, verdict: 'off' }); continue }
+        if (rule.bar !== bar) {
+          skipped.push({ ruleId: rule.id, verdict: 'not-this-bar', bar: rule.bar });
+          continue;
+        }
+        var out = evalAlertVerdict(rule, candles, byPeriod[String(rule.emaPeriod)], idx, digits);
+        verdicts.push({
+          ruleId: rule.id,
+          emaPeriod: rule.emaPeriod,
+          dir: out.dir === 'down' ? 'down' : (rule.dir === 'down' ? 'down' : 'up'),
+          verdict: out.verdict,
+          idx: out.idx === undefined ? null : out.idx,
+          ts: out.ts === undefined ? null : out.ts,
+          prevClose: out.prevClose === undefined ? null : out.prevClose,
+          nowClose: out.nowClose === undefined ? null : out.nowClose,
+          prevEma: out.prevEma === undefined ? null : out.prevEma,
+          nowEma: out.nowEma === undefined ? null : out.nowEma,
+        });
+        if (out.verdict === 'hit') hits.push(out.hit);
+      }
+      return { hits: hits, verdicts: verdicts, skipped: skipped };
+    }
+
+    /**
+     * 找"刚收线的那一根"：返回 `{ idx, ts }`，或 null（还没有新的收线）。
+     * `lastClosedTs` 是上次判过的收线时刻 —— **第一次调用传 null，表示"只登记不判定"**：
+     * 刚打开面板时不能把历史上最后一次穿越当成刚发生的事来提示。
+     * 为什么记时刻而不是下标：刷新时历史会从左边滑走，下标会整体漂移。
+     */
+    function closedAlertCursor(candles, lastClosedTs) {
+      if (!Array.isArray(candles) || candles.length < ALERT_MIN_BARS) return null;
+      var idx = -1;
+      for (var i = candles.length - 1; i >= 0; i -= 1) {
+        var done = candles[i][6] === 1 || candles[i][6] === true;
+        if (done === true) { idx = i; break }
+      }
+      // 一根"已收盘"的都找不到 → 载荷里没带 done（宿主老版本，或字段退化了）。
+      // 这种时候要**吭声**：静默返回 null 的表现是"预警永远不响"，却没有任何线索
+      // （真踩过：宿主 `candles` 只发了 6 位，客户端读第 7 位，于是全线静默失效）。
+      // 但每 5 秒轮询都刷一遍会把控制台淹掉，所以**一个会话只提醒一次**。
+      if (idx < 0) {
+        if (noDoneWarned !== true) {
+          noDoneWarned = true;
+          if (typeof console !== 'undefined' && console.warn !== undefined) {
+            console.warn('[btcd] K 线载荷没有 done 标记（第 7 位缺失），收线预警无法判定；'
+              + '需要宿主半升级并重启（只此一次提醒）');
+          }
+        }
+        return null;
+      }
+      if (idx < 1) return null;
+      var ts = Number(candles[idx][0]);
+      if (lastClosedTs === null || lastClosedTs === undefined || !isFinite(Number(lastClosedTs))) {
+        // 第一次：只把游标停在"当前已收线的那一根"，不判定
+        return { idx: idx, ts: ts, fresh: false };
+      }
+      if (ts <= Number(lastClosedTs)) return null;
+      return { idx: idx, ts: ts, fresh: true };
+    }
+
+    /** 预警列表操作：纯函数，不改入参。 */
+    function alertAdd(list, period, dir, bar) {
+      var current = Array.isArray(list) ? list : [];
+      if (current.length >= ALERT_MAX) return current;
+      return current.concat([{
+        id: alertNewId(),
+        emaPeriod: Math.min(EMA_PERIOD_MAX, Math.max(EMA_PERIOD_MIN, Math.round(Number(period) || 20))),
+        dir: dir === 'down' ? 'down' : 'up',
+        bar: bar === undefined || bar === null ? '' : String(bar),
+        on: true,
+      }]);
+    }
+
+    function alertRemove(list, id) {
+      var out = [];
+      for (var i = 0; i < (Array.isArray(list) ? list : []).length; i += 1) {
+        if (list[i].id !== id) out.push(list[i]);
+      }
+      return out;
+    }
+
+    function alertToggle(list, id) {
+      var out = [];
+      for (var i = 0; i < (Array.isArray(list) ? list : []).length; i += 1) {
+        out.push(list[i].id === id ? Object.assign({}, list[i], { on: list[i].on === false }) : list[i]);
+      }
+      return out;
+    }
+
+    function alertSetDir(list, id, dir) {
+      var out = [];
+      for (var i = 0; i < (Array.isArray(list) ? list : []).length; i += 1) {
+        out.push(list[i].id === id ? Object.assign({}, list[i], { dir: dir === 'down' ? 'down' : 'up' }) : list[i]);
+      }
+      return out;
+    }
+
+    /** 把规则改绑到另一条均线上（周期不合法就原样返回）。 */
+    function alertSetPeriod(list, id, period) {
+      var next = typeof period === 'string' ? parsePeriod(period, null) : Math.round(Number(period));
+      if (typeof next !== 'number' || !isFinite(next) || next < EMA_PERIOD_MIN) return list;
+      var clamped = Math.min(EMA_PERIOD_MAX, next);
+      var out = [];
+      for (var i = 0; i < (Array.isArray(list) ? list : []).length; i += 1) {
+        out.push(list[i].id === id ? Object.assign({}, list[i], { emaPeriod: clamped }) : list[i]);
+      }
+      return out;
+    }
+
+    /**
+     * 在候选均线里取下一条（点按钮轮换用）。
+     * 当前值不在候选里（比如那条均线被删了）→ 回到第一条。
+     */
+    function alertNextPeriod(current, candidates) {
+      var list = Array.isArray(candidates) ? candidates : [];
+      if (list.length === 0) return current;
+      for (var i = 0; i < list.length; i += 1) {
+        if (list[i] === current) return list[(i + 1) % list.length];
+      }
+      return list[0];
+    }
+
+    /** 给用户看的规则描述：`收盘上穿 EMA20`。 */
+    function alertLabel(rule) {
+      var d = alertDirInfo(rule === null || rule === undefined ? 'up' : rule.dir);
+      return d.label + ' EMA' + String(rule === null || rule === undefined ? '' : rule.emaPeriod);
+    }
+
     // ------------------------------------------------------------------ 画图
 
     function cssVar(name, fallback) {
@@ -695,6 +1896,29 @@ window.__ModuleLoader__.load({
     }
 
     /**
+     * 把**可见窗口里**的指针位置吸到最近的 OHLC（画线/尺子端点用）。
+     *
+     * 为什么全量序列和窗口下标必须一起传：Chart 里 `board.candles` 是 `candles.slice(win.start, win.end)`，
+     * 而 `pointerToData` 给出的 `index` 是**窗口内**的小数下标。早先这里直接拿窗口下标去全量数组里取，
+     * 整体偏了 `win.start` 根 —— 吸到的是几百根之前那个价位，距离超容差就永远是 null。
+     * 表现就是"吸附按钮按了跟没按一样"（实测：窗口内每根 OHLC 正对着鼠标，命中率 0%）。
+     *
+     * 返回 `null` 表示附近没有可吸的价位；否则返回 `{ index, price, label }`，
+     * `label` 是吸到了开/高/低/收的哪一个（用**整数下标**取行，之前传小数下标取到 undefined，
+     * 提示永远只显示"吸附"）。
+     */
+    function snapToViewOhlc(candles, win, index, price, yOf, limitPx) {
+      if (!Array.isArray(candles) || candles.length === 0 || typeof yOf !== 'function') return null;
+      if (!isFinite(Number(price)) || !isFinite(Number(index))) return null;
+      var start = win === null || win === undefined ? 0 : Number(win.start);
+      if (!isFinite(start) || start < 0) start = 0;
+      var at = clampInt(start + Number(index), 0, candles.length - 1);
+      var hit = snapPriceToOhlc(candles, at, price, yOf, limitPx);
+      if (hit === null) return null;
+      return { index: at, price: hit, label: ohlcLabelOf(candles[at], hit) };
+    }
+
+    /**
      * 指针是不是落在第 index 根 K 线上（实体矩形，或上下影线那一条）。
      * 用来区分两档悬浮：
      *   * 命中 K 线 → 弹完整的 OHLC / 量 / 均线数据框
@@ -816,10 +2040,19 @@ window.__ModuleLoader__.load({
       return pad2(m) + ':' + pad2(s);
     }
 
-    /** 「x 前」：刚刷过的显示"刚刚" —— 一直挂着"00:00前"反而像坏了。 */
+    /**
+     * 「x 前」：刚刷过的显示"刚刚" —— 一直挂着"00:00前"反而像坏了。
+     *
+     * ⚠️ 参数是**时长（毫秒）**，不是时间戳。传时间戳进去会显示成
+     * "497584h前"（≈57 年）这种一看就离谱的值 —— 真踩过：两处调用点把
+     * `rec.at` 直接传了进来。所以这里加一道兜底：超过 10 年一律当成"数不对"，
+     * 宁可显示"刚刚"，也不显示一个荒谬的时长。
+     */
+    var FMT_AGO_MAX_MS = 10 * 365 * 24 * 3600 * 1000;
     function fmtAgo(ms) {
-      var d = Math.max(0, Number(ms) || 0);
-      if (d < 1500) return '刚刚';
+      var d = Number(ms);
+      if (!isFinite(d) || d <= 0) return '刚刚';
+      if (d > FMT_AGO_MAX_MS || d < 1500) return '刚刚';
       return fmtDur(d) + '前';
     }
 
@@ -1775,15 +3008,17 @@ window.__ModuleLoader__.load({
       });
     }
 
-    function useBoard(bar, auto, epoch) {
+    function useBoard(bar, auto, epoch, instId) {
       var state = React.useState({ status: 'loading', board: null, error: null, at: 0 });
       var setState = state[1];
+      var wantedInst = normalizeInstId(instId) === null ? 'BTC-USDT-SWAP' : normalizeInstId(instId);
+      var instQuery = '&instId=' + encodeURIComponent(wantedInst);
       React.useEffect(function () {
         var alive = true;
         var timer = null;
 
         function load(force) {
-          fetchJson('/board?bar=' + encodeURIComponent(bar) + '&limit=' + String(FETCH_LIMIT) + (force ? '&force=1' : ''))
+          fetchJson('/board?bar=' + encodeURIComponent(bar) + '&limit=' + String(FETCH_LIMIT) + instQuery + (force ? '&force=1' : ''))
             .then(function (res) {
               if (!alive) return;
               if (res !== null && res.ok === true) {
@@ -1813,10 +3048,10 @@ window.__ModuleLoader__.load({
           alive = false;
           if (timer !== null) clearInterval(timer);
         };
-      }, [bar, auto, epoch]);
+      }, [bar, auto, epoch, instQuery]);
       return [state[0], function (force) {
         // 手动刷新：直接打一次带 force 的请求（绕过 Host 的 15 秒热缓存）
-        fetchJson('/board?bar=' + encodeURIComponent(bar) + '&limit=' + String(FETCH_LIMIT) + '&force=1').then(function (res) {
+        fetchJson('/board?bar=' + encodeURIComponent(bar) + '&limit=' + String(FETCH_LIMIT) + instQuery + '&force=1').then(function (res) {
           if (res !== null && res.ok === true) setState({ status: 'done', board: res, error: null, at: Date.now() });
           else setState(function (prev) { return { status: 'error', board: prev.board, error: (res && res.error) || '取数失败', at: prev.at }; });
         }).catch(function (err) {
@@ -1825,13 +3060,14 @@ window.__ModuleLoader__.load({
       }];
     }
 
-    function usePrice(open) {
+    function usePrice(open, instId) {
       var state = React.useState(null);
       var setState = state[1];
+      var wantedInst = normalizeInstId(instId) === null ? 'BTC-USDT-SWAP' : normalizeInstId(instId);
       React.useEffect(function () {
         var alive = true;
         function pull() {
-          fetchJson('/price').then(function (res) {
+          fetchJson('/price?instId=' + encodeURIComponent(wantedInst)).then(function (res) {
             if (alive && res !== null) setState(res);
           }).catch(function () { /* 单次失败忽略，下一轮再来 */ });
         }
@@ -1843,7 +3079,7 @@ window.__ModuleLoader__.load({
           alive = false;
           clearInterval(timer);
         };
-      }, [open]);
+      }, [open, wantedInst]);
       return state[0];
     }
 
@@ -2038,10 +3274,12 @@ window.__ModuleLoader__.load({
           var yOfPrice = function (value) {
             return box.priceTop + box.priceH - ((value - range.lo) / span) * box.priceH;
           };
-          var hitPrice = snapPriceToOhlc(candlesRef.current, at.index, price, yOfPrice, SNAP_PX);
-          if (hitPrice !== null) {
-            price = hitPrice;
-            snapped = { price: hitPrice, label: ohlcLabelOf(candlesRef.current[at.index], hitPrice) };
+          // dataAt 的下标是**可见窗口内**的，必须配上窗口起点才能在全量序列里找到那根。
+          var hit = snapToViewOhlc(candlesRef.current, latest.current === null ? null : latest.current.win,
+            at.index, price, yOfPrice, SNAP_PX);
+          if (hit !== null) {
+            price = hit.price;
+            snapped = { price: hit.price, label: hit.label };
           }
         }
         return { ts: at.ts, price: price, snapped: snapped };
@@ -2362,7 +3600,7 @@ window.__ModuleLoader__.load({
       }
 
       /** 无障碍：canvas 对读屏是空白，至少给一段「现在看到什么」的文字。 */
-      var ariaText = 'BTC 合约 K 线图，共 ' + String(candles.length) + ' 根，'
+      var ariaText = instShort(props.instId) + ' 合约 K 线图，共 ' + String(candles.length) + ' 根，'
         + (view.rightTs === null ? '当前显示最新一段' : '正在回看历史')
         + (props.lastPrice === undefined || props.lastPrice === null ? '' : '，最新价 ' + fmtPrice(props.lastPrice))
         + '；方向键平移，Ctrl 加方向键缩放，Alt+R 回到最新';
@@ -2405,6 +3643,7 @@ window.__ModuleLoader__.load({
       // 尺子：一把斜放的直尺 + 两端刻度
       ruler: ['M1 8.6 8.6 1', 'M1.9 9.6 9.6 1.9', 'M2.6 6.6l1.3 1.3', 'M4.6 4.6l1.3 1.3', 'M6.6 2.6l1.3 1.3'],
       magnet: ['M3 9.8V5.2a3 3 0 0 1 6 0v4.6', 'M3 7.6h6', 'M2 9.8h2', 'M8 9.8h2'],
+      bell: ['M6 1.8a3 3 0 0 0-3 3v2.4L2.2 9h7.6L9 7.2V4.8a3 3 0 0 0-3-3Z', 'M4.8 9.8a1.2 1.2 0 0 0 2.4 0'],
       plus: ['M6 2v8', 'M2 6h8'],
       sliders: ['M2 3.4h8', 'M2 8.6h8', 'M4.6 3.4v2.4', 'M7.4 6.2v2.4'],
       pin: ['M6 1.2v9.6', 'M2.2 4.4h7.6'],
@@ -2416,6 +3655,1445 @@ window.__ModuleLoader__.load({
       pause: ['M4.2 3v6', 'M7.8 3v6'],
       play: ['M4.4 2.8 9 6l-4.6 3.2Z'],
     };
+
+    // ================================================================== 回测面板
+    //
+    // 回测是「异步 job」：POST 启动 → 立刻拿 jobId → 浏览器每 800ms 轮询状态。
+    // 所以整个面板自己管一整套状态（表单 / 策略列表 / job / 结果），Dashboard 只留一个开关 ——
+    // 塞进 Dashboard 会让本来就很大的组件再涨一截，回测状态的生命周期也只在面板打开期间有意义。
+    // 接口与文案以 backtest/INTEGRATION-SPEC.md 为准（§2 API、§4 UI，§4.2 的文案是测试断言依据）。
+
+    var BT_STORE_KEY = 'dsh-btc-dashboard:backtest';
+
+    /**
+     * 看板切换标的时，把回测表单里记住的标的也切过去。
+     * 否则「先打开过回测面板（表单记住了 BTC）→ 在看板切到 ETH → 再打开回测」时，
+     * 表单里上次的 BTC 会压过看板的 ETH，用户以为在跑 ETH、实际跑 BTC（真踩过）。
+     */
+    function syncBacktestStoreInst(next) {
+      var stored = loadStored(BT_STORE_KEY, null);
+      if (stored === null || stored === undefined || typeof stored !== 'object' || Array.isArray(stored)) return;
+      var id = normalizeInstId(next);
+      if (id === null || stored.instId === id) return;
+      stored.instId = id;
+      saveStored(BT_STORE_KEY, stored);
+    }
+    // 轮询间隔：契约 §2.3 建议约 800ms；再快只是给宿主添无意义的请求
+    var BT_POLL_MS = 800;
+    // 交易明细最多显示多少行（summary.trades 最多 500 条，全渲染会把浮层撑爆）
+    var BT_TRADE_LIMIT = 100;
+    // 各周期的毫秒数：只用来估算「预计 N 根 K 线」与交易表里的时间粒度
+    var BT_BAR_MS = {
+      '1m': 60000, '3m': 180000, '5m': 300000, '15m': 900000,
+      '1h': 3600000, '4h': 14400000, '1D': 86400000,
+    };
+    // 时间范围快捷档位（文案是契约 §4.2 的固定文案，别改字）
+    var BT_QUICK_RANGES = [['近7天', 7], ['近30天', 30], ['近90天', 90], ['近1年', 365]];
+    // 策略参数的中文名（认不出的参数名就显示原始名，不瞎猜）
+    var BT_PARAM_LABELS = {
+      fast: '快线', slow: '慢线', allowShort: '允许做空',
+      entryWindow: '突破窗口', exitWindow: '出场窗口', trendWindow: '趋势均线',
+      atrPeriod: 'ATR 周期', atrStop: 'ATR 止损倍数', slopeFilter: '均线斜率过滤', weight: '仓位比例',
+    };
+    // 平仓原因的中文口径（引擎可能给出策略自定义字符串，认不出就原样显示）
+    var BT_REASON_TEXT = { strategy: '策略', end: '到期', liquidation: '爆仓', stop: '止损', target: '目标' };
+
+    // ---- 合约标的（看板 + 预警 + 回测面板共用）----
+    // 白名单与 Host 的 `SUPPORTED_INSTS` 保持同一份口径；真正拦截非法 instId 的是 Host，
+    // 前端这份只用于渲染切换按钮 / 下拉，以及标题与单位文案。
+    var INST_OPTIONS = [
+      { instId: 'BTC-USDT-SWAP', label: 'BTCUSDT 永续', short: 'BTC' },
+      { instId: 'ETH-USDT-SWAP', label: 'ETHUSDT 永续', short: 'ETH' },
+    ];
+    // 当前标的的共享存储：侧边栏按钮与看板要看到同一个选择（和 ALERT_STORE 一个套路）
+    var INST_STORE_KEY = 'dsh-btc-dashboard:inst';
+    var INST_STORE = { instId: 'BTC-USDT-SWAP', listeners: new Set() };
+
+    function instOption(instId) {
+      for (var ii = 0; ii < INST_OPTIONS.length; ii += 1) {
+        if (INST_OPTIONS[ii].instId === instId) return INST_OPTIONS[ii];
+      }
+      return INST_OPTIONS[0];
+    }
+
+    /** 标的短名（BTC/ETH）：用在标题、「24h量」单位、侧边栏按钮上。 */
+    function instShort(instId) { return instOption(instId).short; }
+
+    /** 标的完整展示名（BTCUSDT 永续 / ETHUSDT 永续）：用在回测面板副标题。 */
+    function instLabel(instId) { return instOption(instId).label; }
+
+    /** 只认白名单里的 instId；不合法返回 null（与 Host 的 normalizeInstId 同口径）。 */
+    function normalizeInstId(raw) {
+      var text = typeof raw === 'string' ? raw.trim() : '';
+      for (var ii = 0; ii < INST_OPTIONS.length; ii += 1) {
+        if (INST_OPTIONS[ii].instId === text) return text;
+      }
+      return null;
+    }
+
+    function instStoreNotify() {
+      INST_STORE.listeners.forEach(function (fn) { fn(); });
+    }
+
+    function instStoreSubscribe(fn) {
+      INST_STORE.listeners.add(fn);
+      return function () { INST_STORE.listeners.delete(fn); };
+    }
+
+    /** 从 localStorage 读一次当前标的（apply() 时调用；脏数据静默回落 BTC）。 */
+    function instStoreLoad() {
+      var id = normalizeInstId(loadStored(INST_STORE_KEY, null));
+      if (id === null || id === INST_STORE.instId) return;
+      INST_STORE.instId = id;
+      instStoreNotify();
+    }
+
+    /** 切换当前标的：写回 localStorage 并通知所有订阅者（看板/侧边栏一起换）。 */
+    function instStoreSet(next) {
+      var id = normalizeInstId(next);
+      if (id === null || id === INST_STORE.instId) return;
+      INST_STORE.instId = id;
+      saveStored(INST_STORE_KEY, id);
+      instStoreNotify();
+    }
+
+    function useInstStore() {
+      var sub = React.useSyncExternalStore;
+      if (typeof sub === 'function') {
+        var read = function () { return INST_STORE.instId; };
+        return sub(instStoreSubscribe, read, read);
+      }
+      var state = React.useState(function () { return INST_STORE.instId; });
+      React.useEffect(function () {
+        return instStoreSubscribe(function () { state[1](INST_STORE.instId); });
+      }, []);
+      return state[0];
+    }
+
+    function btBarMs(bar) {
+      var ms = BT_BAR_MS[bar];
+      return typeof ms === 'number' ? ms : 0;
+    }
+
+    /** 毫秒时间戳 → UTC+8 的 YYYY-MM-DD。回测的日期口径固定是北京时间，跟浏览器时区无关。 */
+    function btDateText(ms) {
+      var t = Number(ms);
+      if (!isFinite(t)) return '';
+      var d = new Date(t + 8 * 3600000);
+      return String(d.getUTCFullYear()) + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate());
+    }
+
+    /** UTC+8 的「今天」（默认结束日期）。 */
+    function btTodayUtc8() {
+      return btDateText(Date.now());
+    }
+
+    /**
+     * YYYY-MM-DD → 毫秒（按 UTC+8 的零点）。
+     * 契约 §4.2：`Date.parse(date + 'T00:00:00+08:00')`；解析不出来给 NaN，交给调用方报错。
+     * 「结束日期含当日」由调用方再 +1 天（右开区间），这里不偷偷加。
+     */
+    function btDateMs(text) {
+      if (typeof text !== 'string' || /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(text) !== true) return NaN;
+      var ms = Date.parse(text + 'T00:00:00+08:00');
+      // 像 2026-02-31 这种「格式对、日期不存在」的输入，某些引擎会滚到下个月 —— 回读校验一次
+      return btDateText(ms) === text ? ms : NaN;
+    }
+
+    /** 毫秒 → MM-DD HH:MM（UTC+8）：交易表里够用且不占宽度。 */
+    function btStampText(ms) {
+      var t = Number(ms);
+      if (!isFinite(t)) return '—';
+      var d = new Date(t + 8 * 3600000);
+      return pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate())
+        + ' ' + pad2(d.getUTCHours()) + ':' + pad2(d.getUTCMinutes());
+    }
+
+    /**
+     * 表单里的费率按百分比显示（默认 0.0200 / 0.0500），提交时再 /100 成小数。
+     * 先 toFixed 再转回数字：0.02/100 的浮点结果和字面量 0.0002 不一定是同一个 double，
+     * 而契约要求提交的就是 0.0002 / 0.0005。
+     */
+    function btRateFromPercent(text) {
+      return Number((Number(text) / 100).toFixed(8));
+    }
+
+    function btErrText(error) {
+      if (error === null || error === undefined) return '未知错误';
+      if (typeof error === 'string') return error;
+      return String(error.message === undefined || error.message === null ? error : error.message);
+    }
+
+    /**
+     * 回测接口专用取数：比 fetchJson 多一层「不是 JSON 就别抛英文解析错」。
+     *
+     * 为什么需要：Host 半是新增路由，**没重启宿主时 /backtest/* 会返回 404 + 空 body**。
+     * 直接 `response.json()` 抛的是 `Unexpected end of JSON input` —— 用户看到只会计较英文，
+     * 完全猜不到"宿主还没重启"这个真正原因。这里统一折成中文提示，并保留原始状态码。
+     */
+    function btFetchJson(path, options) {
+      return fetch(API + path, Object.assign({ cache: 'no-store' }, options || {})).then(function (response) {
+        if (response === null || response === undefined) {
+          throw new Error('回测框架不可用（宿主没有响应，请确认 DSH 还在运行）');
+        }
+        var status = Number(response.status);
+        if (status === 404 || status === 405) {
+          throw new Error('回测框架不可用（宿主可能还没重启：/dsh-btc/backtest/* 路由未注册）');
+        }
+        return response.text().then(function (text) {
+          if (text === null || text === undefined || text === '') {
+            throw new Error('回测框架不可用（宿主返回了空响应，可能还没重启）');
+          }
+          try {
+            return JSON.parse(text);
+          } catch (parseError) {
+            throw new Error('回测框架不可用（宿主返回的不是 JSON，可能还没重启）');
+          }
+        });
+      });
+    }
+
+    /** 数字格式化：null / 非数字给「—」，绝不让 NaN 出现在界面上。 */
+    function btNum(value, digits) {
+      if (value === null || value === undefined || !isFinite(Number(value))) return '—';
+      return Number(value).toFixed(digits === undefined ? 2 : digits);
+    }
+
+    /** 百分比（带正负号）—— fmtPct 已经把 null / NaN 处理成「—」了。 */
+    function btPct(value) {
+      return fmtPct(value);
+    }
+
+    /** 百分比（取绝对值显示）：最大回撤 / 胜率这种「本身无方向」的比率用。 */
+    function btPctAbs(value) {
+      if (value === null || value === undefined || !isFinite(Number(value))) return '—';
+      return Math.abs(Number(value)).toFixed(2) + '%';
+    }
+
+    function btIsDateText(text) {
+      return typeof text === 'string' && isFinite(btDateMs(text));
+    }
+
+    function btCoerceParam(def, candidate) {
+      if (typeof def === 'boolean') return candidate === true || candidate === 1 || candidate === 'true';
+      if (typeof def === 'number') {
+        var n = Number(candidate);
+        return isFinite(n) ? n : def;
+      }
+      if (typeof def === 'string') return typeof candidate === 'string' ? candidate : def;
+      return candidate === undefined ? def : candidate;
+    }
+
+    /**
+     * 把 localStorage 里存的值规范成合法表单。
+     * 原则：脏数据静默回落默认值（契约 §4.2 明确要求），绝不让一份坏数据把面板卡死。
+     */
+    function btPositiveText(saved, fallback, hard) {
+      var n = Number(saved);
+      if (!isFinite(n) || n <= 0) n = Number(fallback);
+      if (!isFinite(n) || n <= 0) n = hard;
+      return String(n);
+    }
+
+    function btRateText(saved, fallbackRate, hardRate) {
+      var pct = Number(saved);
+      if (!isFinite(pct) || pct < 0) {
+        var rate = Number(fallbackRate);
+        if (!isFinite(rate) || rate < 0) rate = hardRate;
+        pct = rate * 100;
+      }
+      return pct.toFixed(4);
+    }
+
+    /** 找到策略条目（Host 只会给 listStrategies 白名单里的名字；找不到给 null）。 */
+    function btFindStrategy(payload, name) {
+      var list = payload !== null && payload !== undefined && Array.isArray(payload.strategies) ? payload.strategies : [];
+      for (var i = 0; i < list.length; i += 1) {
+        if (list[i] !== null && list[i] !== undefined && list[i].name === name) return list[i];
+      }
+      return null;
+    }
+
+    function btStrategyParams(payload, name) {
+      var entry = btFindStrategy(payload, name);
+      var src = entry !== null && entry.params !== null && typeof entry.params === 'object' && Array.isArray(entry.params) !== true
+        ? entry.params : {};
+      var out = {};
+      for (var key in src) {
+        if (Object.prototype.hasOwnProperty.call(src, key)) out[key] = src[key];
+      }
+      return out;
+    }
+
+    /**
+     * 「策略列表载荷 + localStorage 里的旧表单」→ 一份可直接渲染的表单。
+     * 默认值以 Host 的 defaults 为准（前端不重复维护一份）；默认策略 sma-cross 是契约 §4.2 的前端约定。
+     * 这是纯函数，脏数据（类型不对 / 日期不存在 / 负数）全部静默回落默认值。
+     */
+    /**
+     * 持久化前的参数归一：编辑期 numeric 参数是原始字符串（text 输入框），
+     * 存 localStorage 时按策略默认值的类型转回数字；空/非法值保留原样（回填时 btCoerceParam 会回落默认值）。
+     */
+    function btParamsForStorage(payload, strategyName, params) {
+      var defaults = btStrategyParams(payload, strategyName);
+      var out = {};
+      for (var key in params) {
+        if (Object.prototype.hasOwnProperty.call(params, key) !== true) continue;
+        var value = params[key];
+        if (typeof defaults[key] === 'number') {
+          var n = Number(value);
+          out[key] = value !== '' && value !== null && value !== undefined && isFinite(n) ? n : defaults[key];
+        } else {
+          out[key] = value;
+        }
+      }
+      return out;
+    }
+
+    function btBuildForm(payload, stored, currentInst) {
+      var defaults = payload !== null && payload !== undefined && payload.defaults !== null && typeof payload.defaults === 'object'
+        ? payload.defaults : {};
+      var list = payload !== null && payload !== undefined && Array.isArray(payload.strategies) ? payload.strategies : [];
+      var names = [];
+      var i;
+      for (i = 0; i < list.length; i += 1) {
+        if (list[i] !== null && list[i] !== undefined && typeof list[i].name === 'string') names.push(list[i].name);
+      }
+      var saved = stored !== null && stored !== undefined && typeof stored === 'object' && Array.isArray(stored) !== true ? stored : {};
+      var wantStrategy = typeof saved.strategy === 'string' && saved.strategy !== '' ? saved.strategy : 'sma-cross';
+      var strategy = names.indexOf(wantStrategy) >= 0 ? wantStrategy
+        : (names.indexOf('sma-cross') >= 0 ? 'sma-cross' : (names.length > 0 ? names[0] : wantStrategy));
+      var paramDefaults = btStrategyParams(payload, strategy);
+      var savedParams = saved.params !== null && saved.params !== undefined
+        && typeof saved.params === 'object' && Array.isArray(saved.params) !== true ? saved.params : null;
+      var params = {};
+      for (var key in paramDefaults) {
+        if (Object.prototype.hasOwnProperty.call(paramDefaults, key) !== true) continue;
+        params[key] = savedParams !== null && Object.prototype.hasOwnProperty.call(savedParams, key) === true
+          ? btCoerceParam(paramDefaults[key], savedParams[key]) : paramDefaults[key];
+      }
+      var barList = payload !== null && payload !== undefined && Array.isArray(payload.bars) && payload.bars.length > 0
+        ? payload.bars : BAR_IDS;
+      // 标的：Host 没返回 insts（旧版 Host 不认 body.instId）时只能 BTC —— 否则 UI 会显示 ETH、
+      // Host 却静默跑 BTC。
+      var hostSupportsInsts = payload !== null && payload !== undefined
+        && Array.isArray(payload.insts) && payload.insts.length > 0;
+      // 新 Host：上次表单 > 当前看板标的 > Host 默认 > BTC（用户刚切到 ETH 时回测默认也应是 ETH；
+      // Host 的 defaults.instId 只是最后一层兜底，不该压过用户当前的看板选择）
+      var wantInst = null;
+      if (hostSupportsInsts) {
+        wantInst = normalizeInstId(saved.instId);
+        if (wantInst === null) wantInst = normalizeInstId(currentInst);
+        if (wantInst === null) wantInst = normalizeInstId(defaults.instId);
+      }
+      if (wantInst === null) wantInst = 'BTC-USDT-SWAP';
+      var wantBar = typeof saved.bar === 'string' && barList.indexOf(saved.bar) >= 0 ? saved.bar
+        : (typeof defaults.bar === 'string' && barList.indexOf(defaults.bar) >= 0 ? defaults.bar : barList[0]);
+      var endText = btIsDateText(saved.end) ? saved.end : btTodayUtc8();
+      var rangeDays = Number(defaults.rangeDays);
+      if (!isFinite(rangeDays) || rangeDays <= 0) rangeDays = 30;
+      var endMs = btDateMs(endText);
+      var startText = btIsDateText(saved.start) ? saved.start : btDateText(endMs - rangeDays * 86400000);
+      // 开始 >= 结束是坏数据：静默回默认区间（不弹错误，契约要求「脏数据静默回默认」）
+      if (!isFinite(btDateMs(startText)) || btDateMs(startText) >= endMs) {
+        startText = btDateText(endMs - rangeDays * 86400000);
+      }
+      return {
+        instId: wantInst,
+        strategy: strategy,
+        params: params,
+        bar: wantBar,
+        start: startText,
+        end: endText,
+        capital: btPositiveText(saved.capital, defaults.initialCapital, 10000),
+        leverage: btPositiveText(saved.leverage, defaults.leverage, 1),
+        maker: btRateText(saved.maker, defaults.makerFeeRate, 0.0002),
+        taker: btRateText(saved.taker, defaults.takerFeeRate, 0.0005),
+      };
+    }
+
+    /**
+     * 建一个 blob URL；任何一环缺失都返回 null（调用方负责兜底提示，不把面板带崩）。
+     * 为什么先试 window.URL 再试全局 URL：浏览器里两者是同一份，但 jsdom 测试环境会把
+     * createObjectURL 作为替身挂在 window.URL 上；多试几组（构造器 × URL 实现）才稳。
+     */
+    function btBlobUrl(text, mime) {
+      var blobs = [];
+      var urls = [];
+      var i;
+      try {
+        if (typeof window !== 'undefined' && typeof window.Blob === 'function') blobs.push(window.Blob);
+      } catch (e1) { /* 没有 window.Blob 就用全局的 */ }
+      try {
+        if (typeof Blob === 'function') blobs.push(Blob);
+      } catch (e2) { /* 环境没有 Blob */ }
+      try {
+        if (typeof window !== 'undefined' && window.URL !== null && window.URL !== undefined) urls.push(window.URL);
+      } catch (e3) { /* 跳过 */ }
+      try {
+        if (typeof URL !== 'undefined' && URL !== null) urls.push(URL);
+      } catch (e4) { /* 跳过 */ }
+      for (i = 0; i < urls.length; i += 1) {
+        if (typeof urls[i].createObjectURL !== 'function') continue;
+        for (var b = 0; b < blobs.length; b += 1) {
+          try {
+            return urls[i].createObjectURL(new blobs[b]([text], { type: mime }));
+          } catch (e5) {
+            // 这一组不兼容（比如 Node 的 URL 不认 jsdom 的 Blob），换一组再试
+          }
+        }
+      }
+      return null;
+    }
+
+    function btRevokeUrl(url) {
+      var urls = [];
+      var i;
+      try {
+        if (typeof window !== 'undefined' && window.URL !== null && window.URL !== undefined) urls.push(window.URL);
+      } catch (e1) { /* 跳过 */ }
+      try {
+        if (typeof URL !== 'undefined' && URL !== null) urls.push(URL);
+      } catch (e2) { /* 跳过 */ }
+      for (i = 0; i < urls.length; i += 1) {
+        if (typeof urls[i].revokeObjectURL !== 'function') continue;
+        try {
+          urls[i].revokeObjectURL(url);
+          return;
+        } catch (e3) { /* 换下一个实现 */ }
+      }
+    }
+
+    /**
+     * 资金曲线：权益线（实线）+ Buy&Hold（虚线）+ 回撤面积（下方独立一条带子）。
+     * 数据点由 Host 降采样到 ≤600，画起来很便宜，所以不搞缓存，每次直接重画。
+     * 画布尺寸按 devicePixelRatio 放大，文字才不糊。
+     */
+    function btDrawEquityChart(canvas, summary) {
+      if (canvas === null || canvas === undefined || summary === null || summary === undefined) return;
+      var points = Array.isArray(summary.equity) ? summary.equity : [];
+      var dpr = typeof window !== 'undefined' && isFinite(Number(window.devicePixelRatio)) && Number(window.devicePixelRatio) > 0
+        ? Number(window.devicePixelRatio) : 1;
+      var cssW = Number(canvas.clientWidth);
+      if (!isFinite(cssW) || cssW < 40) cssW = 420;
+      var cssH = Number(canvas.clientHeight);
+      if (!isFinite(cssH) || cssH < 60) cssH = 200;
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+      var g = null;
+      try {
+        g = canvas.getContext('2d');
+      } catch (e1) {
+        g = null;
+      }
+      if (g === null || g === undefined || typeof g.beginPath !== 'function') return;
+      if (typeof g.setTransform === 'function') g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (typeof g.clearRect === 'function') g.clearRect(0, 0, cssW, cssH);
+      var brand = cssVar('--dsw-alias-brand-primary', '#4a8cff');
+      var labelColor = cssVar('--dsw-alias-label-secondary', '#98a2ad');
+      var down = cssVar('--btcd-down', C_DOWN);
+      var i;
+      g.font = '10px system-ui, -apple-system, "Segoe UI", sans-serif';
+      g.textBaseline = 'middle';
+      if (points.length < 2) {
+        g.fillStyle = labelColor;
+        g.textAlign = 'left';
+        g.fillText('资金曲线数据不足', 10, cssH / 2);
+        return;
+      }
+      var lo = null;
+      var hi = null;
+      for (i = 0; i < points.length; i += 1) {
+        var point = points[i];
+        if (point === null || point === undefined) continue;
+        var eq = Number(point.equity);
+        if (isFinite(eq)) {
+          if (lo === null || eq < lo) lo = eq;
+          if (hi === null || eq > hi) hi = eq;
+        }
+        var bh = Number(point.bh);
+        if (isFinite(bh)) {
+          if (lo === null || bh < lo) lo = bh;
+          if (hi === null || bh > hi) hi = bh;
+        }
+      }
+      if (lo === null || hi === null || hi - lo <= 0) {
+        lo = 0;
+        hi = 1;
+      }
+      var pad = (hi - lo) * 0.08;
+      lo -= pad;
+      hi += pad;
+      var span = hi - lo;
+      var padL = 44;
+      var padR = 8;
+      var padT = 8;
+      var padB = 14;
+      // 下面留 24% 高度画回撤：回撤是「越深越差」的负向面积，单独一条带子才不会被权益线压住
+      var ddH = Math.max(22, Math.round((cssH - padT - padB) * 0.24));
+      var priceH = Math.max(30, cssH - padT - padB - ddH - 6);
+      var plotW = cssW - padL - padR;
+      var n = points.length;
+
+      function xOf(index) {
+        return padL + (plotW * index) / Math.max(1, n - 1);
+      }
+
+      function yOf(value) {
+        return padT + priceH - ((value - lo) / span) * priceH;
+      }
+
+      // 横向网格 + 左轴价格标签（只标 3 条：浮层只有 460px 宽，标多了糊成一片）
+      g.textAlign = 'right';
+      for (i = 0; i <= 2; i += 1) {
+        var gridValue = lo + (span * i) / 2;
+        var gridY = yOf(gridValue);
+        g.strokeStyle = C_GRID;
+        g.lineWidth = 1;
+        g.beginPath();
+        g.moveTo(padL, gridY);
+        g.lineTo(padL + plotW, gridY);
+        g.stroke();
+        g.fillStyle = labelColor;
+        g.fillText(fmtPrice(gridValue, 0), padL - 4, gridY);
+      }
+      // Buy&Hold 虚线先画（压在权益线下面），走势一样时也不会互相盖住
+      g.strokeStyle = labelColor;
+      g.lineWidth = 1;
+      if (typeof g.setLineDash === 'function') g.setLineDash([4, 3]);
+      g.beginPath();
+      var started = false;
+      for (i = 0; i < n; i += 1) {
+        var pbh = points[i] === null || points[i] === undefined ? NaN : Number(points[i].bh);
+        if (!isFinite(pbh)) continue;
+        if (started !== true) {
+          g.moveTo(xOf(i), yOf(pbh));
+          started = true;
+        } else {
+          g.lineTo(xOf(i), yOf(pbh));
+        }
+      }
+      g.stroke();
+      if (typeof g.setLineDash === 'function') g.setLineDash([]);
+      // 权益线（实线、品牌色）
+      g.strokeStyle = brand;
+      g.lineWidth = 1.6;
+      g.beginPath();
+      started = false;
+      for (i = 0; i < n; i += 1) {
+        var peq = points[i] === null || points[i] === undefined ? NaN : Number(points[i].equity);
+        if (!isFinite(peq)) continue;
+        if (started !== true) {
+          g.moveTo(xOf(i), yOf(peq));
+          started = true;
+        } else {
+          g.lineTo(xOf(i), yOf(peq));
+        }
+      }
+      g.stroke();
+      // 回撤面积：dd = equity / 历史峰值 - 1（≤0），把「离峰值跌了多少」画成向下的面积
+      var ddTop = padT + priceH + 6;
+      var peak = null;
+      var maxDd = 0;
+      var dds = [];
+      for (i = 0; i < n; i += 1) {
+        var q = points[i] === null || points[i] === undefined ? NaN : Number(points[i].equity);
+        if (!isFinite(q)) {
+          dds.push(null);
+          continue;
+        }
+        if (peak === null || q > peak) peak = q;
+        var dd = peak === null || peak === 0 ? 0 : (q / peak - 1) * 100;
+        if (dd < 0) {
+          if (-dd > maxDd) maxDd = -dd;
+        } else {
+          dd = 0;
+        }
+        dds.push(dd);
+      }
+      if (maxDd > 0) {
+        var ddScale = Math.max(1, maxDd);
+        g.fillStyle = 'rgba(234,57,67,0.18)';
+        g.beginPath();
+        g.moveTo(xOf(0), ddTop);
+        for (i = 0; i < n; i += 1) {
+          if (dds[i] === null) continue;
+          g.lineTo(xOf(i), ddTop + (-dds[i] / ddScale) * ddH);
+        }
+        g.lineTo(xOf(n - 1), ddTop);
+        g.closePath();
+        g.fill();
+        g.strokeStyle = down;
+        g.lineWidth = 1;
+        g.beginPath();
+        started = false;
+        for (i = 0; i < n; i += 1) {
+          if (dds[i] === null) continue;
+          if (started !== true) {
+            g.moveTo(xOf(i), ddTop + (-dds[i] / ddScale) * ddH);
+            started = true;
+          } else {
+            g.lineTo(xOf(i), ddTop + (-dds[i] / ddScale) * ddH);
+          }
+        }
+        g.stroke();
+        g.fillStyle = labelColor;
+        g.textAlign = 'left';
+        g.fillText('回撤 ' + maxDd.toFixed(2) + '%', padL, ddTop + 7);
+      }
+      // 底部时间刻度：只标首尾（460px 宽放不下更多日期）
+      var firstTs = null;
+      var lastTs = null;
+      for (i = 0; i < n; i += 1) {
+        var tt = points[i] === null || points[i] === undefined ? NaN : Number(points[i].t);
+        if (!isFinite(tt)) continue;
+        if (firstTs === null) firstTs = tt;
+        lastTs = tt;
+      }
+      g.fillStyle = labelColor;
+      if (firstTs !== null) {
+        g.textAlign = 'left';
+        g.fillText(btDateText(firstTs), padL, cssH - 6);
+        g.textAlign = 'right';
+        g.fillText(btDateText(lastTs), padL + plotW, cssH - 6);
+      }
+      // 左上角图例（极简：颜色 + 两个字）
+      g.textAlign = 'left';
+      g.fillStyle = brand;
+      g.fillText('权益', padL + 2, padT + 6);
+      g.fillStyle = labelColor;
+      g.fillText('Buy&Hold', padL + 34, padT + 6);
+    }
+
+    /** KPI 八格（契约 §4.2 的顺序）：总收益 / 年化收益 / 最大回撤 / 夏普 / 胜率 / 交易次数 / 手续费 / Buy&Hold。 */
+    function btKpiItems(summary) {
+      var metrics = summary !== null && summary !== undefined && summary.metrics !== null && summary.metrics !== undefined
+        ? summary.metrics : {};
+      var fees = summary !== null && summary !== undefined && summary.fees !== null && summary.fees !== undefined
+        ? summary.fees : {};
+      var tradeCount = summary !== null && summary !== undefined && summary.tradeCount !== null && summary.tradeCount !== undefined
+        ? summary.tradeCount : metrics.tradeCount;
+
+      function clsOf(value) {
+        if (value === null || value === undefined || !isFinite(Number(value))) return '';
+        var n = Number(value);
+        return n > 0 ? 'btcd-up' : (n < 0 ? 'btcd-down' : '');
+      }
+
+      return [
+        { label: '总收益', text: btPct(metrics.totalReturnPct), cls: clsOf(metrics.totalReturnPct) },
+        { label: '年化收益', text: btPct(metrics.annualizedReturnPct), cls: clsOf(metrics.annualizedReturnPct) },
+        { label: '最大回撤', text: btPctAbs(metrics.maxDrawdownPct), cls: 'btcd-down' },
+        { label: '夏普', text: btNum(metrics.sharpe, 2), cls: '' },
+        { label: '胜率', text: btPctAbs(metrics.winRatePct), cls: '' },
+        {
+          label: '交易次数',
+          text: tradeCount === null || tradeCount === undefined || !isFinite(Number(tradeCount)) ? '—' : String(tradeCount),
+          cls: '',
+        },
+        { label: '手续费', text: btNum(fees.total, 2), cls: '' },
+        { label: 'Buy&Hold', text: btPct(metrics.buyHoldReturnPct), cls: clsOf(metrics.buyHoldReturnPct) },
+      ];
+    }
+
+    /** 平仓原因：常见值翻成中文，策略自定义的字符串原样显示（别把用户填的原因吞掉）。 */
+    function btReasonText(reason) {
+      if (typeof reason !== 'string' || reason === '') return '—';
+      return Object.prototype.hasOwnProperty.call(BT_REASON_TEXT, reason) ? BT_REASON_TEXT[reason] : reason;
+    }
+
+    /**
+     * 回测面板（自包含）：表单 / 策略列表 / job 轮询 / 结果全在这里。
+     * Dashboard 只负责「开不开」；关闭时整棵组件卸载，下次打开靠 GET /backtest/status 恢复上次结果
+     * （契约 §4.2：「打开面板时若 job 还在跑，继续轮询」——恢复出来是 running 就重新起轮询）。
+     */
+    function BacktestBoard(props) {
+      var onClose = typeof props.onClose === 'function' ? props.onClose : null;
+      // 当前看板标的（打开面板时的默认值；面板里还有自己的「标的」下拉，可单独选）
+      var currentInst = normalizeInstId(props.instId) === null ? 'BTC-USDT-SWAP' : normalizeInstId(props.instId);
+      var metaState = React.useState(null);
+      var meta = metaState[0];
+      var setMeta = metaState[1];
+      var formState = React.useState(null);
+      var form = formState[0];
+      var setForm = formState[1];
+      var jobState = React.useState(null);
+      var job = jobState[0];
+      var setJob = jobState[1];
+      var errorState = React.useState(null);
+      var error = errorState[0];
+      var setError = errorState[1];
+      // null | 'run' | 'cancel' | 'report' | 'json'：动作进行中禁用按钮，避免连点
+      var busyState = React.useState(null);
+      var busy = busyState[0];
+      var setBusy = busyState[1];
+      var chartRef = React.useRef(null);
+      // 当前表单的最新值：applyJob 是异步回调，闭包里可能拿到旧 form，
+      // 判「实际标的 vs 面板所选标的」必须读 ref。
+      var formRef = React.useRef(null);
+      formRef.current = form;
+
+      /** 统一消化一份 job 状态：done 清错误、error 把中文原因摆到面板上。 */
+      function applyJob(next) {
+        if (next === null || next === undefined) return;
+        setJob(next);
+        if (next.state === 'error') {
+          setError('回测失败：' + (typeof next.error === 'string' && next.error !== '' ? next.error : '回测出错'));
+        } else if (next.state === 'done') {
+          setError(null);
+          // 防御：宿主可能还在跑旧代码（忽略 body.instId），结果标的与面板选择不一致时明确提示，
+          // 不能让人把 BTC 的结果当成 ETH 的。
+          var selected = formRef.current !== null && formRef.current !== undefined ? formRef.current.instId : null;
+          var actual = next.summary !== null && next.summary !== undefined && typeof next.summary.instId === 'string'
+            ? next.summary.instId : null;
+          if (selected !== null && actual !== null && actual !== selected) {
+            setError('注意：本次回测实际标的 ' + actual + '，与面板选择 ' + selected
+              + ' 不一致（宿主可能还在跑旧代码，请重启 DSH 宿主后重试）');
+          }
+        }
+      }
+
+      // ---- 打开面板：GET strategies + GET status（不带 jobId，恢复上次结果）+ 回填 localStorage
+      React.useEffect(function () {
+        var alive = true;
+        var stored = loadStored(BT_STORE_KEY, null);
+        btFetchJson('/backtest/strategies').then(function (res) {
+          if (alive !== true) return;
+          var payload = res !== null && res !== undefined && res.ok === true ? res : null;
+          setMeta(payload);
+          setForm(btBuildForm(payload, stored, currentInst));
+          if (payload === null) {
+            setError('回测失败：' + ((res !== null && res !== undefined && res.error) || '策略列表加载失败'));
+          }
+        }).catch(function (loadError) {
+          if (alive !== true) return;
+          setMeta(null);
+          setForm(btBuildForm(null, stored, currentInst));
+          // 旧 Host（没有 /backtest/* 路由）会 404 或者返回非 JSON，fetchJson 在 response.json() 那步就拒了。
+          // 这时候报「Unexpected token <」对用户没有意义 —— 直接说人话：宿主需要重启。
+          setError('回测失败：回测框架不可用（宿主可能还没重启）');
+        });
+        btFetchJson('/backtest/status').then(function (res) {
+          if (alive !== true) return;
+          if (res !== null && res !== undefined && res.ok === true && res.job !== null && res.job !== undefined) {
+            applyJob(res.job);
+          }
+        }).catch(function () {
+          // 恢复上次结果失败不影响「重新跑一次」，不打扰用户
+        });
+        return function () { alive = false; };
+      }, []);
+
+      // 表单持久化：只存表单字段（契约 §4.2），结果不存 —— 结果以 Host 的 job 为准。
+      // params 先归一：编辑期 numeric 参数存的是原始字符串（text 输入框），落盘要转回数字，
+      // 否则下次打开 localStorage 里是 "13" 这种字符串（虽然回填时也能 coerce，但存储形状不该脏）。
+      React.useEffect(function () {
+        if (form === null) return;
+        saveStored(BT_STORE_KEY, {
+          instId: form.instId,
+          strategy: form.strategy,
+          params: btParamsForStorage(meta, form.strategy, form.params),
+          bar: form.bar,
+          start: form.start,
+          end: form.end,
+          capital: form.capital,
+          leverage: form.leverage,
+          maker: form.maker,
+          taker: form.taker,
+        });
+      }, [form, meta]);
+
+      var jobId = job !== null && job !== undefined && typeof job.id === 'string' ? job.id : '';
+      var jobActive = job !== null && job !== undefined && (job.state === 'running' || job.state === 'queued');
+      // ---- job 轮询：只有 running/queued 才轮询；state 一变（done/error/cancelled）effect 自己收掉
+      React.useEffect(function () {
+        if (jobActive !== true || jobId === '') return undefined;
+        var alive = true;
+        var timer = setInterval(function () {
+          btFetchJson('/backtest/status?jobId=' + encodeURIComponent(jobId)).then(function (res) {
+            if (alive !== true) return;
+            if (res !== null && res !== undefined && res.ok === true && res.job !== null && res.job !== undefined) {
+              applyJob(res.job);
+            }
+          }).catch(function () {
+            // 单次轮询失败忽略，下一轮再来（宿主重启的间隙不该把面板打成错误态）
+          });
+        }, BT_POLL_MS);
+        return function () {
+          alive = false;
+          clearInterval(timer);
+        };
+      }, [jobActive, jobId]);
+
+      // ---- 资金曲线：summary 有变化就重画；容器尺寸变化用 ResizeObserver 跟着重画
+      React.useEffect(function () {
+        var canvas = chartRef.current;
+        if (canvas === null || job === null || job === undefined || job.summary === null || job.summary === undefined) {
+          return undefined;
+        }
+        var summary = job.summary;
+        btDrawEquityChart(canvas, summary);
+        if (typeof ResizeObserver === 'undefined') return undefined;
+        var observer = new ResizeObserver(function () { btDrawEquityChart(canvas, summary); });
+        observer.observe(canvas);
+        return function () { observer.disconnect(); };
+      }, [job]);
+
+      function changeField(key, value) {
+        setForm(function (prev) {
+          if (prev === null) return prev;
+          var next = Object.assign({}, prev);
+          next[key] = value;
+          return next;
+        });
+      }
+
+      function changeParam(key, value) {
+        setForm(function (prev) {
+          if (prev === null) return prev;
+          var params = Object.assign({}, prev.params);
+          params[key] = value;
+          var next = Object.assign({}, prev);
+          next.params = params;
+          return next;
+        });
+      }
+
+      function changeStrategy(name) {
+        setForm(function (prev) {
+          if (prev === null) return prev;
+          var next = Object.assign({}, prev);
+          next.strategy = name;
+          // 换策略就把参数换回该策略的默认值（两套参数结构不同，留着旧的没有意义）
+          next.params = btStrategyParams(meta, name);
+          return next;
+        });
+      }
+
+      /** 快捷时间范围：结束=今天（UTC+8），开始=结束 - N 天。 */
+      function quickRange(days) {
+        var endText = btTodayUtc8();
+        var startText = btDateText(btDateMs(endText) - days * 86400000);
+        setForm(function (prev) {
+          if (prev === null) return prev;
+          var next = Object.assign({}, prev);
+          next.end = endText;
+          next.start = startText;
+          return next;
+        });
+      }
+
+      /** 参数按策略默认值的类型转：number → 数字，boolean → 布尔，string → 字符串。 */
+      function submitParams() {
+        var merged = {};
+        var defaults = btStrategyParams(meta, form === null ? '' : form.strategy);
+        for (var key in defaults) {
+          if (Object.prototype.hasOwnProperty.call(defaults, key) !== true) continue;
+          var def = defaults[key];
+          var raw = form !== null && form.params !== null && form.params !== undefined
+            && Object.prototype.hasOwnProperty.call(form.params, key) ? form.params[key] : def;
+          if (typeof def === 'boolean') {
+            merged[key] = raw === true;
+            continue;
+          }
+          if (typeof def === 'number') {
+            // 编辑期间 params 里存的是**原始字符串**（text 输入框），这里统一转成数字；
+            // 空串必须判非法 —— Number('') === 0，不拦的话清空输入会被悄悄当成 0 提交
+            if (raw === '' || raw === null || raw === undefined) return null;
+            var n = Number(raw);
+            if (!isFinite(n)) return null;
+            merged[key] = n;
+            continue;
+          }
+          merged[key] = raw === null || raw === undefined ? '' : String(raw);
+        }
+        return merged;
+      }
+
+      function startRun() {
+        if (form === null || busy !== null) return;
+        var startMs = btDateMs(form.start);
+        var endDayMs = btDateMs(form.end);
+        if (!isFinite(startMs) || !isFinite(endDayMs)) {
+          setError('回测失败：日期格式不对（要 YYYY-MM-DD）');
+          return;
+        }
+        // 结束日期是「含当日」的：契约 §4.2 要求提交右开区间，所以 +1 天
+        var endMs = endDayMs + 86400000;
+        if (endMs <= startMs) {
+          setError('回测失败：结束日期必须晚于开始日期');
+          return;
+        }
+        var capital = Number(form.capital);
+        var leverage = Number(form.leverage);
+        var maker = Number(form.maker);
+        var taker = Number(form.taker);
+        if (!isFinite(capital) || capital <= 0) {
+          setError('回测失败：初始资金要大于 0');
+          return;
+        }
+        if (!isFinite(leverage) || leverage <= 0) {
+          setError('回测失败：杠杆要大于 0');
+          return;
+        }
+        if (!isFinite(maker) || maker < 0 || !isFinite(taker) || taker < 0) {
+          setError('回测失败：费率不能是负数');
+          return;
+        }
+        var params = submitParams();
+        if (params === null) {
+          setError('回测失败：策略参数要是数字');
+          return;
+        }
+        // 旧 Host 不认 instId：ETH 会被静默当成 BTC 跑。宁可拒绝并提示，也不给错结果。
+        if (normalizeInstId(form.instId) !== 'BTC-USDT-SWAP'
+          && (meta === null || meta === undefined || !Array.isArray(meta.insts) || meta.insts.length === 0)) {
+          setError('回测失败：当前宿主还没加载多标的版本，不能回测 ETH（请重启 DSH 宿主后重试）');
+          return;
+        }
+        var body = {
+          instId: form.instId,
+          strategy: form.strategy,
+          params: params,
+          bar: form.bar,
+          start: startMs,
+          end: endMs,
+          initialCapital: capital,
+          leverage: leverage,
+          makerFeeRate: btRateFromPercent(form.maker),
+          takerFeeRate: btRateFromPercent(form.taker),
+        };
+        setBusy('run');
+        setError(null);
+        btFetchJson('/backtest/run', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        }).then(function (res) {
+          setBusy(null);
+          if (res === null || res === undefined || res.ok !== true) {
+            setError('回测失败：' + ((res !== null && res !== undefined && res.error) || '启动失败'));
+            return;
+          }
+          if (res.job !== null && res.job !== undefined) applyJob(res.job);
+        }).catch(function (runError) {
+          setBusy(null);
+          setError('回测失败：' + btErrText(runError));
+        });
+      }
+
+      function cancelRun() {
+        if (job === null || busy !== null) return;
+        var runningId = typeof job.id === 'string' ? job.id : '';
+        if (runningId === '') return;
+        setBusy('cancel');
+        setError(null);
+        btFetchJson('/backtest/cancel', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ jobId: runningId }),
+        }).then(function (res) {
+          setBusy(null);
+          if (res === null || res === undefined || res.ok !== true) {
+            setError('回测失败：' + ((res !== null && res !== undefined && res.error) || '取消失败'));
+            return;
+          }
+          if (res.job !== null && res.job !== undefined) applyJob(res.job);
+        }).catch(function (cancelError) {
+          setBusy(null);
+          setError('回测失败：' + btErrText(cancelError));
+        });
+      }
+
+      /** 当前完成结果的 summary（没有就是 null）。 */
+      function currentSummary() {
+        if (job === null || job === undefined || job.summary === null || job.summary === undefined) return null;
+        return job.summary;
+      }
+
+      function reportUrl(format) {
+        var summary = currentSummary();
+        if (summary === null || summary.reports === null || summary.reports === undefined) return '';
+        var url = format === 'json' ? summary.reports.json : summary.reports.html;
+        return typeof url === 'string' ? url : '';
+      }
+
+      function fetchReportText(path) {
+        // summary.reports.* 是**相对 API 前缀**的路径（契约 §2.5，形如 /backtest/report?jobId=…），
+        // 所以和 fetchJson 一样要拼上 API 前缀；已经带 /dsh-btc 的写法也容忍，免得两种口径混用打错路由。
+        var url = path.indexOf(API + '/') === 0 ? path : API + path;
+        return fetch(url, { cache: 'no-store' }).then(function (res) {
+          if (res === null || res === undefined || res.ok !== true) throw new Error('报告读取失败');
+          return res.text();
+        });
+      }
+
+      /**
+       * 打开完整 HTML 报告：fetch → text → Blob → objectURL → window.open。
+       * 走 blob 是为了「报告 HTML 不在同源里执行」——Host 那边的 CSP 是第二道防线，
+       * 但把报告放进 blob 源里，报告的脚本/外链从一开始就没有本站的权限。
+       */
+      function openReport() {
+        if (busy !== null) return;
+        var url = reportUrl('html');
+        if (url === '') {
+          setError('回测失败：没有可打开的报告');
+          return;
+        }
+        setBusy('report');
+        setError(null);
+        fetchReportText(url).then(function (html) {
+          setBusy(null);
+          var blobUrl = btBlobUrl(String(html), 'text/html');
+          if (blobUrl === null) {
+            setError('回测失败：当前环境不支持以 blob 方式打开报告');
+            return;
+          }
+          var opened = null;
+          try {
+            opened = typeof window === 'undefined' ? null : window.open(blobUrl, '_blank');
+          } catch (openError) {
+            opened = null;
+          }
+          // 浏览器拦截弹窗时 window.open 明确返回 null；只在 null 时提示。
+          // （测试替身可能返回 undefined —— 那不代表被拦，别误报成失败）
+          if (opened === null) {
+            setError('回测失败：报告已生成，但新窗口被浏览器拦截了（请允许弹出窗口后重试）');
+          }
+        }).catch(function (reportError) {
+          setBusy(null);
+          setError('回测失败：' + btErrText(reportError));
+        });
+      }
+
+      function downloadJson() {
+        if (busy !== null) return;
+        var url = reportUrl('json');
+        if (url === '') {
+          setError('回测失败：没有可下载的 JSON');
+          return;
+        }
+        setBusy('json');
+        setError(null);
+        fetchReportText(url).then(function (text) {
+          setBusy(null);
+          var summary = currentSummary();
+          var barLabel = summary !== null && typeof summary.bar === 'string' && summary.bar !== ''
+            ? summary.bar : (form === null ? 'bt' : form.bar);
+          var strategyLabel = summary !== null && summary.strategy !== null && summary.strategy !== undefined
+            && typeof summary.strategy.name === 'string' && summary.strategy.name !== ''
+            ? summary.strategy.name : (form === null ? 'strategy' : form.strategy);
+          var jobLabel = job !== null && job !== undefined && typeof job.id === 'string' && job.id !== ''
+            ? job.id : 'job';
+          var filename = 'backtest-' + barLabel + '-' + strategyLabel + '-' + jobLabel + '.json';
+          var blobUrl = btBlobUrl(text, 'application/json');
+          if (blobUrl === null) {
+            setError('回测失败：当前环境不支持下载 blob');
+            return;
+          }
+          try {
+            if (typeof document === 'undefined' || document === null || typeof document.createElement !== 'function') {
+              throw new Error('没有 DOM，无法触发下载');
+            }
+            var a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            a.style.display = 'none';
+            if (document.body !== null && document.body !== undefined && typeof document.body.appendChild === 'function') {
+              document.body.appendChild(a);
+            }
+            if (typeof a.click === 'function') a.click();
+            if (a.parentNode !== null && a.parentNode !== undefined && typeof a.parentNode.removeChild === 'function') {
+              a.parentNode.removeChild(a);
+            }
+            // 立刻 revoke 有些浏览器会把还没开始的下载掐掉，留 4 秒
+            setTimeout(function () { btRevokeUrl(blobUrl); }, 4000);
+          } catch (downloadError) {
+            setError('回测失败：' + btErrText(downloadError));
+          }
+        }).catch(function (downloadError) {
+          setBusy(null);
+          setError('回测失败：' + btErrText(downloadError));
+        });
+      }
+
+      // ---- 渲染：先出标题行（加载态也要能关掉面板）
+      var headKids = [
+        React.createElement('span', { key: 'title' }, '回测'),
+        React.createElement('span', { key: 'sub', className: 'btcd-bt-sub' }, instLabel(form === null ? currentInst : form.instId)),
+        React.createElement('span', { key: 'sp', className: 'btcd-spacer' }),
+        React.createElement('button', {
+          key: 'close',
+          className: 'btcd-mini',
+          title: '收起回测面板（Esc 也可以）',
+          onClick: function () { if (onClose !== null) onClose(); },
+        }, '关闭'),
+      ];
+
+      if (form === null) {
+        return React.createElement('div', { className: 'btcd-emapanel btcd-btpanel' },
+          React.createElement('div', { className: 'btcd-emapanel-head' }, headKids),
+          React.createElement('div', { className: 'btcd-bt-hint' }, '正在加载策略…'),
+          error === null ? null : React.createElement('div', { className: 'btcd-bt-error' }, error));
+      }
+
+      var kids = [];
+      kids.push(React.createElement('div', { className: 'btcd-emapanel-head', key: 'head' }, headKids));
+
+      // 标的：BTC / ETH 永续（列表来自 Host 的 insts；Host 端仍会做白名单校验）。
+      // 旧版 Host 不返回 insts、也不认 body.instId —— 这种情况下只给 BTC，并明确提示需重启宿主，
+      // 不能让人选了 ETH 而 Host 静默跑 BTC。
+      var hostSupportsInsts = meta !== null && meta !== undefined && Array.isArray(meta.insts) && meta.insts.length > 0;
+      var instMeta = hostSupportsInsts ? meta.insts : [{ instId: 'BTC-USDT-SWAP', label: 'BTCUSDT 永续' }];
+      var instOptionKids = [];
+      for (var ii = 0; ii < instMeta.length; ii += 1) {
+        var iEntry = instMeta[ii];
+        if (iEntry === null || iEntry === undefined || typeof iEntry.instId !== 'string') continue;
+        if (normalizeInstId(iEntry.instId) === null) continue;
+        instOptionKids.push(React.createElement('option', {
+          key: 'i' + iEntry.instId,
+          value: iEntry.instId,
+        }, typeof iEntry.label === 'string' && iEntry.label !== '' ? iEntry.label : iEntry.instId));
+      }
+      if (instOptionKids.length === 0) {
+        instOptionKids.push(React.createElement('option', { key: 'iBTC', value: 'BTC-USDT-SWAP' }, 'BTCUSDT 永续'));
+      }
+      kids.push(React.createElement('div', { className: 'btcd-emapanel-row', key: 'instpick' },
+        React.createElement('span', { className: 'btcd-bt-hint' }, '标的'),
+        React.createElement('select', {
+          className: 'btcd-bt-select btcd-bt-inst',
+          'aria-label': '标的',
+          title: hostSupportsInsts === true
+            ? '回测标的：BTC / ETH 永续合约（Host 白名单校验）'
+            : '当前宿主还没加载多标的版本（重启宿主后才能回测 ETH）',
+          disabled: hostSupportsInsts !== true,
+          value: form.instId,
+          onChange: function (event) { changeField('instId', event.target.value); },
+        }, instOptionKids)));
+      if (hostSupportsInsts !== true) {
+        kids.push(React.createElement('div', { className: 'btcd-bt-hint btcd-bt-warn', key: 'instwarn' },
+          '当前宿主还没加载多标的版本：回测只支持 BTC-USDT-SWAP。要回测 ETH 请重启 DSH 宿主进程'
+          + '（不是刷新浏览器页面），再重开面板。'));
+      }
+
+      // 策略 / 周期
+      var strategies = meta !== null && meta !== undefined && Array.isArray(meta.strategies) ? meta.strategies : [];
+      var strategyOptions = [];
+      for (var si = 0; si < strategies.length; si += 1) {
+        var sname = strategies[si] !== null && strategies[si] !== undefined && typeof strategies[si].name === 'string'
+          ? strategies[si].name : '';
+        if (sname === '') continue;
+        strategyOptions.push(React.createElement('option', { key: 's' + sname, value: sname }, sname));
+      }
+      if (strategyOptions.length === 0) {
+        strategyOptions.push(React.createElement('option', { key: 's' + form.strategy, value: form.strategy }, form.strategy));
+      }
+      var bars = meta !== null && meta !== undefined && Array.isArray(meta.bars) && meta.bars.length > 0
+        ? meta.bars : BAR_IDS;
+      var barOptions = [];
+      for (var bi = 0; bi < bars.length; bi += 1) {
+        var bname = String(bars[bi]);
+        barOptions.push(React.createElement('option', { key: 'b' + bname, value: bname }, bname));
+      }
+      kids.push(React.createElement('div', { className: 'btcd-emapanel-row', key: 'pick' },
+        React.createElement('span', { className: 'btcd-bt-hint' }, '策略'),
+        React.createElement('select', {
+          className: 'btcd-bt-select btcd-bt-strategy',
+          'aria-label': '策略',
+          title: '选一个内置策略（Host 按 listStrategies 白名单校验策略名）',
+          value: form.strategy,
+          onChange: function (event) { changeStrategy(event.target.value); },
+        }, strategyOptions),
+        React.createElement('span', { className: 'btcd-bt-hint' }, '周期'),
+        React.createElement('select', {
+          className: 'btcd-bt-select btcd-bt-bar',
+          'aria-label': '周期',
+          title: '回测用的 K 线周期',
+          value: form.bar,
+          onChange: function (event) { changeField('bar', event.target.value); },
+        }, barOptions)));
+
+      // 策略参数：按 Host 给的默认值类型动态渲染（number → number、boolean → checkbox、string → text）
+      var paramDefaults = btStrategyParams(meta, form.strategy);
+      var paramKeys = [];
+      for (var pk in paramDefaults) {
+        if (Object.prototype.hasOwnProperty.call(paramDefaults, pk) === true) paramKeys.push(pk);
+      }
+      if (paramKeys.length > 0) {
+        var paramKids = [React.createElement('span', { className: 'btcd-bt-hint', key: 'lbl' }, '参数')];
+        for (var pi = 0; pi < paramKeys.length; pi += 1) {
+          var pkey = paramKeys[pi];
+          var pdef = paramDefaults[pkey];
+          var plabel = Object.prototype.hasOwnProperty.call(BT_PARAM_LABELS, pkey) ? BT_PARAM_LABELS[pkey] : pkey;
+          var pval = form.params !== null && form.params !== undefined
+            && Object.prototype.hasOwnProperty.call(form.params, pkey) ? form.params[pkey] : pdef;
+          if (typeof pdef === 'boolean') {
+            paramKids.push(React.createElement('label', {
+              className: 'btcd-bt-hint', key: 'p' + pkey, title: '策略参数 ' + pkey,
+            },
+            React.createElement('input', {
+              type: 'checkbox',
+              className: 'btcd-bt-check',
+              'data-param': pkey,
+              'aria-label': plabel,
+              checked: pval === true,
+              onChange: function (key) {
+                return function (event) { changeParam(key, event.target.checked === true); };
+              }(pkey),
+            }),
+            ' ' + plabel));
+          } else {
+            paramKids.push(React.createElement('label', {
+              className: 'btcd-bt-hint', key: 'p' + pkey, title: '策略参数 ' + pkey,
+            },
+            plabel + ' ',
+            React.createElement('input', {
+              // 数字参数也用 text + inputMode：type="number" 会带上下调节箭头，
+              // 面板里没有"点箭头加减"的语义，而且 number 输入框在小数/空值上有浏览器差异
+              type: 'text',
+              inputMode: 'decimal',
+              autoComplete: 'off',
+              spellCheck: false,
+              className: 'btcd-bt-input',
+              'data-param': pkey,
+              'aria-label': plabel,
+              value: String(pval === null || pval === undefined ? '' : pval),
+              onChange: function (key) {
+                return function (event) {
+                  // 编辑期间保留**原始字符串**：否则 "0." 会被 Number 成 0，小数点被吞掉，
+                  // weight 这种 0–1 的小数参数根本敲不进去。提交时由 submitParams 统一转数字。
+                  changeParam(key, event.target.value);
+                };
+              }(pkey),
+            })));
+          }
+        }
+        kids.push(React.createElement('div', { className: 'btcd-emapanel-row btcd-bt-params', key: 'params' }, paramKids));
+      }
+
+      // 时间范围（北京时间；结束日期含当日）
+      kids.push(React.createElement('div', { className: 'btcd-emapanel-row', key: 'dates' },
+        React.createElement('span', { className: 'btcd-bt-hint' }, '时间范围'),
+        React.createElement('input', {
+          type: 'date',
+          className: 'btcd-bt-input btcd-bt-date',
+          'aria-label': '开始日期',
+          title: '开始日期（北京时间零点）',
+          value: form.start,
+          onChange: function (event) { changeField('start', event.target.value); },
+        }),
+        React.createElement('span', { className: 'btcd-bt-hint' }, '~'),
+        React.createElement('input', {
+          type: 'date',
+          className: 'btcd-bt-input btcd-bt-date',
+          'aria-label': '结束日期',
+          title: '结束日期（含当日，按北京时间）',
+          value: form.end,
+          onChange: function (event) { changeField('end', event.target.value); },
+        })));
+
+      var quickKids = [React.createElement('span', { className: 'btcd-bt-hint', key: 'lbl' }, '快捷')];
+      for (var qi = 0; qi < BT_QUICK_RANGES.length; qi += 1) {
+        quickKids.push(React.createElement('button', {
+          key: 'q' + qi,
+          className: 'btcd-mini',
+          title: '结束日期设为今天（UTC+8），开始日期设为 ' + String(BT_QUICK_RANGES[qi][1]) + ' 天前',
+          onClick: function (days) {
+            return function () { quickRange(days); };
+          }(BT_QUICK_RANGES[qi][1]),
+        }, BT_QUICK_RANGES[qi][0]));
+      }
+      kids.push(React.createElement('div', { className: 'btcd-emapanel-row', key: 'quick' }, quickKids));
+
+      // 资金 / 杠杆 / 费率（费率输入框显示百分比，提交时 /100）
+      // 全部用 text + inputMode="decimal"：不要 type="number" 的上下调节箭头（和需求一致，
+      // 也避免不同浏览器对小数点的接受方式不一致）；数值校验统一在 startRun 里做。
+      function amountField(label, key, aria, value) {
+        return React.createElement('label', { className: 'btcd-bt-hint', key: 'f' + key },
+          label + ' ',
+          React.createElement('input', {
+            type: 'text',
+            inputMode: 'decimal',
+            autoComplete: 'off',
+            spellCheck: false,
+            className: 'btcd-bt-input',
+            'aria-label': aria,
+            title: aria + '（' + (key === 'capital' || key === 'leverage' ? '正数' : '百分比，如 0.0200 = 0.02%') + '）',
+            value: value,
+            onChange: function (k) {
+              return function (event) { changeField(k, event.target.value); };
+            }(key),
+          }));
+      }
+
+      kids.push(React.createElement('div', { className: 'btcd-emapanel-row', key: 'amounts1' },
+        amountField('初始资金', 'capital', '初始资金', form.capital),
+        amountField('杠杆', 'leverage', '杠杆', form.leverage)));
+      kids.push(React.createElement('div', { className: 'btcd-emapanel-row', key: 'amounts2' },
+        amountField('挂单费率(%)', 'maker', '挂单费率', form.maker),
+        amountField('吃单费率(%)', 'taker', '吃单费率', form.taker)));
+
+      // 预计根数（超过 Host 的 maxBarsHint 时提示首次会慢）
+      var expectBars = null;
+      var hintStart = btDateMs(form.start);
+      var hintEnd = btDateMs(form.end);
+      if (isFinite(hintStart) && isFinite(hintEnd) && hintEnd + 86400000 > hintStart) {
+        var hintBarMs = btBarMs(form.bar);
+        if (hintBarMs > 0) expectBars = Math.max(0, Math.round((hintEnd + 86400000 - hintStart) / hintBarMs));
+      }
+      var maxBarsHint = 20000;
+      if (meta !== null && meta !== undefined && meta.limits !== null && meta.limits !== undefined) {
+        var hinted = Number(meta.limits.maxBarsHint);
+        if (isFinite(hinted) && hinted > 0) maxBarsHint = hinted;
+      }
+      var hintKids = [React.createElement('span', { key: 'bars', className: 'btcd-bt-hint' },
+        expectBars === null ? '预计根数 —' : '预计 ' + expectBars.toLocaleString('en-US') + ' 根 K 线')];
+      if (expectBars !== null && expectBars > maxBarsHint) {
+        hintKids.push(React.createElement('span', { key: 'warn', className: 'btcd-bt-warn' }, '⚠ 首次抓取可能较慢'));
+      }
+      kids.push(React.createElement('div', { className: 'btcd-emapanel-row', key: 'hint' }, hintKids));
+
+      // 操作按钮：运行中只留「取消」；完成后多出「打开完整报告 / 下载 JSON」
+      var actionKids = [];
+      if (jobActive === true) {
+        actionKids.push(React.createElement('button', {
+          key: 'cancel',
+          className: 'btcd-mini btcd-danger',
+          disabled: busy !== null,
+          title: '取消这次回测（数据抓取阶段会在阶段边界生效）',
+          onClick: cancelRun,
+        }, '取消'));
+      } else {
+        actionKids.push(React.createElement('button', {
+          key: 'run',
+          className: 'btcd-mini btcd-mini-primary',
+          disabled: busy !== null,
+          title: '按当前表单启动一次回测（同一时间只允许一个）',
+          onClick: startRun,
+        }, '开始回测'));
+      }
+      var summary = currentSummary();
+      if (summary !== null) {
+        actionKids.push(React.createElement('button', {
+          key: 'report',
+          className: 'btcd-mini',
+          disabled: busy !== null,
+          title: '在新标签页打开完整 HTML 报告（用 blob 源隔离，报告里的脚本不会在本站执行）',
+          onClick: openReport,
+        }, '打开完整报告'));
+        actionKids.push(React.createElement('button', {
+          key: 'json',
+          className: 'btcd-mini',
+          disabled: busy !== null,
+          title: '把完整 JSON 报告下载到本地',
+          onClick: downloadJson,
+        }, '下载 JSON'));
+      }
+      if (busy === 'report' || busy === 'json') {
+        actionKids.push(React.createElement('span', { key: 'busy', className: 'btcd-bt-hint' }, '处理中…'));
+      }
+      kids.push(React.createElement('div', { className: 'btcd-emapanel-row btcd-bt-actions', key: 'actions' }, actionKids));
+
+      if (error !== null) {
+        kids.push(React.createElement('div', { className: 'btcd-bt-error', key: 'error' }, error));
+      }
+
+      if (jobActive === true && job !== null && job !== undefined) {
+        var message = typeof job.message === 'string' && job.message !== '' ? job.message : '正在准备…';
+        var progress = job.progress !== null && job.progress !== undefined ? job.progress : null;
+        var pages = progress === null ? 0 : Number(progress.pages);
+        var extra = '';
+        // message 里已经带「已抓取 N 页」时不再重复追加；只有没带页数时才补一句
+        if (isFinite(pages) && pages > 0 && message.indexOf('页') < 0 && message.indexOf('抓取') < 0) {
+          extra = ' · 已抓取 ' + String(pages) + ' 页';
+        }
+        kids.push(React.createElement('div', { className: 'btcd-bt-progress', key: 'progress' },
+          '回测进行中 · ' + message + extra));
+      }
+      if (job !== null && job !== undefined && job.state === 'cancelled') {
+        kids.push(React.createElement('div', { className: 'btcd-bt-hint btcd-bt-cancelled', key: 'cancelled' }, '回测已取消'));
+      }
+
+      if (summary !== null) {
+        // 完成行：日期按北京时间显示；end 是右开区间，减一天才是用户选的「结束日期（含当日）」
+        var doneStart = Number(summary.start);
+        var doneEnd = Number(summary.end);
+        var doneBars = summary.range !== null && summary.range !== undefined && isFinite(Number(summary.range.bars))
+          ? Number(summary.range.bars) : null;
+        kids.push(React.createElement('div', { className: 'btcd-bt-done', key: 'done' },
+          '回测完成 · ' + (isFinite(doneStart) ? btDateText(doneStart) : '—')
+          + ' ~ ' + (isFinite(doneEnd) ? btDateText(doneEnd - 86400000) : '—')
+          + ' · ' + (doneBars === null ? '—' : doneBars.toLocaleString('en-US')) + ' 根'));
+
+        // KPI 八格
+        var kpis = btKpiItems(summary);
+        var kpiKids = [];
+        for (var ki = 0; ki < kpis.length; ki += 1) {
+          kpiKids.push(React.createElement('div', { className: 'btcd-bt-kpi', key: 'k' + ki },
+            React.createElement('span', { className: 'btcd-bt-kpi-label' }, kpis[ki].label),
+            React.createElement('b', { className: kpis[ki].cls }, kpis[ki].text)));
+        }
+        kids.push(React.createElement('div', { className: 'btcd-bt-kpis', key: 'kpis' }, kpiKids));
+
+        // 资金曲线（独立 canvas；尺寸随容器，见 btDrawEquityChart）
+        kids.push(React.createElement('div', { className: 'btcd-bt-chartwrap', key: 'chart' },
+          React.createElement('canvas', {
+            ref: chartRef,
+            className: 'btcd-btchart',
+            role: 'img',
+            'aria-label': '回测资金曲线：权益线 + Buy&Hold 虚线 + 回撤面积',
+          })));
+
+        // 交易明细表（最多 100 行，多出来的给一行提示）
+        var trades = Array.isArray(summary.trades) ? summary.trades : [];
+        var tradeHeadCells = ['#', '方向', '开仓', '平仓', '盈亏', '手续费', '原因'];
+        var tradeHeadKids = [];
+        for (var hi = 0; hi < tradeHeadCells.length; hi += 1) {
+          tradeHeadKids.push(React.createElement('th', { key: 'h' + hi }, tradeHeadCells[hi]));
+        }
+        var tradeRows = [];
+        for (var ti = 0; ti < trades.length && tradeRows.length < BT_TRADE_LIMIT; ti += 1) {
+          var trade = trades[ti];
+          if (trade === null || trade === undefined) continue;
+          var pnl = Number(trade.pnl);
+          var pnlCls = isFinite(pnl) ? (pnl > 0 ? 'btcd-up' : (pnl < 0 ? 'btcd-down' : '')) : '';
+          tradeRows.push(React.createElement('tr', { key: 'tr' + ti },
+            React.createElement('td', null,
+              String(trade.seq === null || trade.seq === undefined ? tradeRows.length + 1 : trade.seq)),
+            React.createElement('td', { className: trade.side === 'short' ? 'btcd-down' : 'btcd-up' },
+              trade.side === 'short' ? '空' : '多'),
+            React.createElement('td', null,
+              btStampText(trade.entryT),
+              React.createElement('div', { className: 'btcd-bt-hint' }, fmtPrice(trade.entryPrice))),
+            React.createElement('td', null,
+              btStampText(trade.exitT),
+              React.createElement('div', { className: 'btcd-bt-hint' }, fmtPrice(trade.exitPrice))),
+            React.createElement('td', { className: pnlCls },
+              isFinite(pnl) ? (pnl > 0 ? '+' : '') + pnl.toFixed(2) : '—'),
+            React.createElement('td', null, btNum(trade.fees, 2)),
+            React.createElement('td', null, btReasonText(trade.exitReason))));
+        }
+        var tradesKids = [];
+        if (tradeRows.length === 0) {
+          tradesKids.push(React.createElement('div', { className: 'btcd-bt-hint', key: 'empty' }, '没有成交记录'));
+        } else {
+          tradesKids.push(React.createElement('table', { className: 'btcd-bt-table', key: 'table' },
+            React.createElement('thead', null, React.createElement('tr', null, tradeHeadKids)),
+            React.createElement('tbody', null, tradeRows)));
+          var totalTrades = Number(summary.tradeCount);
+          if (isFinite(totalTrades) && totalTrades > tradeRows.length) {
+            tradesKids.push(React.createElement('div', { className: 'btcd-bt-hint', key: 'more' },
+              '共 ' + String(totalTrades) + ' 笔，只显示最近 ' + String(tradeRows.length) + ' 笔'));
+          }
+        }
+        kids.push(React.createElement('div', { className: 'btcd-bt-trades', key: 'trades' },
+          React.createElement('div', { className: 'btcd-bt-hint', key: 'thead' },
+            '交易明细（' + String(trades.length) + ' 笔）'),
+          tradesKids));
+      }
+
+      return React.createElement('div', { className: 'btcd-emapanel btcd-btpanel' }, kids);
+    }
 
     function Dashboard(props) {
       var close = props.close;
@@ -2434,6 +5112,74 @@ window.__ModuleLoader__.load({
       var emaPanelState = React.useState(false);
       var showEmaPanel = emaPanelState[0];
       var setShowEmaPanel = emaPanelState[1];
+      // 收线预警：规则 / 记录 / 判据 / 通知开关全部放在**模块级存储**里（`ALERT_STORE`），
+      // 因为判定引擎要常驻执行（由侧边栏按钮驱动），看板只是它的一个视图。
+      // 组件自己不再持有这些状态，两侧永远看同一份。
+      var alerts = useAlertStore('alerts');
+      var setAlerts = function (updater) {
+        alertStoreSet({ alerts: typeof updater === 'function' ? updater(alertStoreGet('alerts')) : updater });
+        alertStorePersist();
+      };
+      var notify = useAlertStore('notify') || normalizeNotify(null);
+      var setNotify = function (updater) {
+        alertStoreSet({ notify: typeof updater === 'function' ? updater(alertStoreGet('notify')) : updater });
+        alertStorePersist();
+      };
+      var alertPanelState = React.useState(false);
+      var showAlertPanel = alertPanelState[0];
+      var setShowAlertPanel = alertPanelState[1];
+      // 回测面板：和均线/预警一样，Dashboard 只留一个开关；
+      // 表单 / 策略列表 / job 轮询 / 结果全在自包含的 BacktestBoard 里。
+      var backtestPanelState = React.useState(false);
+      var showBacktestPanel = backtestPanelState[0];
+      var setShowBacktestPanel = backtestPanelState[1];
+      /**
+       * 打开预警看板时把邮件配置拉一次。
+       * 不这么做的话，面板可能是"配置还没回来"时挂载的，输入框会停在空值上
+       * （缓存里若刚好没有地址就更是空白，看起来像"关闭后地址丢了"）。
+       * 同时**清掉编辑标记**：面板重开是一次全新的交互，输入框该跟服务端的值走，
+       * 否则上一轮"编辑过"的标记会把输入框钉在旧草稿上 → 地址看起来丢了。
+       */
+      React.useEffect(function () {
+        if (showAlertPanel !== true) return;
+        emailEditedRef.current = false;
+        setEmailDraft(null);
+        pullEmailConfig();
+      }, [showAlertPanel]);
+      var alertLog = useAlertStore('log');
+      var setAlertLog = function (updater) {
+        alertStoreSet({ log: typeof updater === 'function' ? updater(alertStoreGet('log')) : updater });
+        alertStorePersist();
+      };
+      var evalLog = useAlertStore('evals');
+      var setEvalLog = function (updater) {
+        alertStoreSet({ evals: typeof updater === 'function' ? updater(alertStoreGet('evals')) : updater });
+        alertStorePersist();
+      };
+      /** 自上次打开记录面板以来新增了几条（按钮上出个小圆点）—— 也在共享存储里 */
+      var unread = useAlertStore('unread');
+      var setUnread = function (updater) {
+        alertStoreSet({ unread: typeof updater === 'function' ? updater(alertStoreGet('unread')) : updater });
+      };
+      /** 预警自检：读引擎写进共享存储的 meta。判定不在这里跑，这里只显示。 */
+      var diag = useAlertStore('meta');
+      /** 邮件地址输入框的草稿（null 表示"跟着服务端的值走"） */
+      var emailDraftState = React.useState(null);
+      var emailDraft = emailDraftState[0];
+      var setEmailDraft = emailDraftState[1];
+      /**
+       * 用户是不是正在手改地址。
+       * 服务端配置会异步回来（也可能被轮询刷新），如果无条件用它覆盖输入框，
+       * 用户敲到一半就会被改写；反过来，一律不覆盖就会出现
+       * "重开面板地址是空的、要手打一遍"（真踩过）。所以按这个标记二选一。
+       */
+      var emailEditedRef = React.useRef(false);
+      /** 正在保存邮件设置（保存期间禁用控件，避免连点） */
+      var emailBusyState = React.useState(false);
+      var emailBusy = emailBusyState[0];
+      var setEmailBusy = emailBusyState[1];
+      // 看板也可能先于引擎挂载（引擎在 overlay 槽里，顺序不保证），这里也读一次盘
+      React.useEffect(function () { alertStoreLoad(); }, []);
       var epochState = React.useState(0);
       var setEpoch = epochState[1];
       var viewState = React.useState({ size: DEFAULT_WINDOW, rightTs: null });
@@ -2469,13 +5215,28 @@ window.__ModuleLoader__.load({
       var errState = React.useState(null);
       var actionError = errState[0];
       var setActionError = errState[1];
-      var boardCall = useBoard(bar === null ? '15m' : bar, auto, epochState[0]);
+      var inst = useInstStore();
+      function switchInst(next) {
+        instStoreSet(next);
+        // 回测表单记住的标的也跟着切（否则下次打开回测面板还是上一次的标的）
+        syncBacktestStoreInst(next);
+      }
+      var boardCall = useBoard(bar === null ? '15m' : bar, auto, epochState[0], inst);
       var data = boardCall[0];
       var refresh = boardCall[1];
-      var price = usePrice(true);
+      var price = usePrice(true, inst);
       // 「x 秒前」与「本轮刷新有没有在跑」都要自己走，不能等 5 秒的轮询来推动
       var tick = useTick(1000);
       var submitTick = useTick(120);
+      /**
+       * 判定节拍：预警判定**不能只靠载荷变化来驱动**。
+       * 早先依赖是 `[board, alerts, bar, notify, showAlertPanel]` ——
+       * 一旦轮询因为任何原因停下（网络卡住、宿主挂了、缓存层出问题），
+       * effect 就永远不再运行，面板上的判据 / 记录 / 自检**一起冻住**，
+       * 看起来就是"几分钟没有任何刷新"。现在用 1 秒的节拍兜底：
+       * 最多每秒检查一次"有没有新收线"，判断本身仍是幂等的（同一根只判一次）。
+       */
+      var beat = useTick(1000);
 
       // Host 记住的周期：第一次拿到载荷时对齐一次，之后以用户点击为准。
       React.useEffect(function () {
@@ -2509,6 +5270,15 @@ window.__ModuleLoader__.load({
       showEmaPanelRef.current = showEmaPanel;
       var setShowEmaPanelRef = React.useRef(null);
       setShowEmaPanelRef.current = setShowEmaPanel;
+      var showAlertPanelRef = React.useRef(false);
+      showAlertPanelRef.current = showAlertPanel;
+      var setShowAlertPanelRef = React.useRef(null);
+      setShowAlertPanelRef.current = setShowAlertPanel;
+      // 回测面板同理：键盘处理只注册一次，读状态要走 ref
+      var showBacktestPanelRef = React.useRef(false);
+      showBacktestPanelRef.current = showBacktestPanel;
+      var setShowBacktestPanelRef = React.useRef(null);
+      setShowBacktestPanelRef.current = setShowBacktestPanel;
       // Alt+H：一键开关**所有**均线（以前是两条；现在条数不定，所以按"整体"来）
       toggleAllEmaRef.current = function () {
         setEmas(function (prev) {
@@ -2569,7 +5339,18 @@ window.__ModuleLoader__.load({
       }, []);
 
       React.useEffect(function () {
+        /** 焦点在输入框 / 下拉 / 可编辑区里时，键盘属于表单，不应该被画布快捷键拦截。 */
+        function isEditableTarget(target) {
+          if (target === null || target === undefined) return false;
+          var tag = typeof target.tagName === 'string' ? target.tagName.toLowerCase() : '';
+          if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
+          return target.isContentEditable === true;
+        }
         function onKey(event) {
+          // 输入框里打字时：除了 Esc（收面板）之外一律不处理。
+          // 不守卫的话，下面的数字键 1..6 会切周期并 preventDefault —— 回测面板里
+          // 把数字删掉后就再也敲不进去（真踩过）；Delete 键同理（会被当成删画线）。
+          if (isEditableTarget(event.target) === true && event.key !== 'Escape') return;
           if (event.key === 'Tab') {
             var panel = panelRef.current;
             if (panel === null) return;
@@ -2602,6 +5383,15 @@ window.__ModuleLoader__.load({
             // 均线管理看板开着就先收它，再按才关整个看板
             if (showEmaPanelRef.current === true) {
               setShowEmaPanelRef.current(false);
+              return;
+            }
+            if (showAlertPanelRef.current === true) {
+              setShowAlertPanelRef.current(false);
+              return;
+            }
+            // 回测面板同理：先收它，再按才关整个看板
+            if (showBacktestPanelRef.current === true) {
+              setShowBacktestPanelRef.current(false);
               return;
             }
             closeRef.current();
@@ -2669,6 +5459,39 @@ window.__ModuleLoader__.load({
         savedEmaRef.current = text;
         saveStored(EMA_STORE_KEY, emas);
       }, [emas]);
+
+      // 预警的持久化不在这里 —— 规则 / 记录 / 判据 / 通知开关都由 `ALERT_STORE` 统一读写，
+      // 因为它必须**常驻**（看板关掉也要继续判），不能随着 Dashboard 卸载而丢失。
+
+      /**
+       * 浏览器要求提示音必须在"用户交互过"之后才能响。
+       * 面板里点一下、按一下键都算 —— 挂一次性的监听，交互过就摘掉。
+       */
+      React.useEffect(function () {
+        if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') return undefined;
+        function unlock() {
+          if (audioCtx === null) {
+            try {
+              var Ctor = window.AudioContext || window.webkitAudioContext;
+              if (typeof Ctor === 'function') audioCtx = new Ctor();
+            } catch (error) { /* 不支持就永远不响 */ }
+          }
+          if (audioCtx !== null && audioCtx.state === 'suspended' && typeof audioCtx.resume === 'function') {
+            try { audioCtx.resume(); } catch (error) { /* 忽略 */ }
+          }
+          window.removeEventListener('pointerdown', unlock, true);
+          window.removeEventListener('keydown', unlock, true);
+        }
+        window.addEventListener('pointerdown', unlock, true);
+        window.addEventListener('keydown', unlock, true);
+        return function () {
+          window.removeEventListener('pointerdown', unlock, true);
+          window.removeEventListener('keydown', unlock, true);
+        };
+      }, []);
+
+      // 收线判定**不在这里** —— 它由常驻的 `<AlertEngine />`（挂在 overlay 槽上、只渲染 null）执行，
+      // 所以看板开着或关着都在盯。这里只负责把引擎写进 `ALERT_STORE` 的结果渲染出来。
 
       function undoDrawing() {
         setDrawings(function (prev) { return prev.slice(0, Math.max(0, prev.length - 1)); });
@@ -2745,8 +5568,13 @@ window.__ModuleLoader__.load({
       }
 
       var board = data.board;
-      // 注意：这个变量不能叫 view —— 上面 view 已经是时间轴窗口，同函数作用域的 var 会互相覆盖
-      var quote = price !== null && price.price !== null ? price.price : (board === null ? null : board.price);
+      // 价格行的数据源：**优先用看板载荷里的 ticker**（与 K 线、标的同源，一定是当前合约），
+      // `/price` 只作为兜底。原因：旧版 Host 的 `/price` 不认识 instId（会返回默认标的 BTC），
+      // 如果优先用它，切换 ETH 后 K 线已经是 ETH、左上角价格/24h 却还是 BTC（真踩过）。
+      var priceMatchesInst = price !== null && price !== undefined && normalizeInstId(price.instId) === normalizeInstId(inst);
+      var quote = board !== null && board.price !== null && board.price !== undefined
+        ? board.price
+        : (priceMatchesInst && price.price !== null ? price.price : null);
       var env = board !== null && board.env ? board.env : (price !== null && price.env ? price.env : null);
       var last = quote === null ? null : quote.last;
       var changePct = quote === null ? null : quote.changePct;
@@ -2806,13 +5634,24 @@ window.__ModuleLoader__.load({
 
       // 标题行
       var headKids = [
-        React.createElement('span', { className: 'btcd-title', key: 'title' }, 'OKX BTC 合约看板'),
+        React.createElement('span', { className: 'btcd-title', key: 'title' }, 'OKX ' + instShort(inst) + ' 合约看板'),
         React.createElement('span', { className: 'btcd-chip', key: 'inst' }, board === null ? 'BTC-USDT-SWAP' : board.instId),
         env === null ? null : React.createElement('span', {
           className: 'btcd-chip' + (env.simulated ? ' btcd-demo' : ''),
           key: 'env-chip',
           title: env.note + '（密钥 ' + (env.keyMasked || '未配置') + '）',
         }, (env.simulated ? '模拟环境' : '生产环境') + ' · ' + (env.keyMasked || '无密钥')),
+        React.createElement('div', { className: 'btcd-seg', key: 'instseg' },
+          React.createElement('button', {
+            className: inst === 'BTC-USDT-SWAP' ? 'on' : '',
+            onClick: function () { switchInst('BTC-USDT-SWAP'); },
+            title: '切换到 BTCUSDT 永续',
+          }, 'BTC'),
+          React.createElement('button', {
+            className: inst === 'ETH-USDT-SWAP' ? 'on' : '',
+            onClick: function () { switchInst('ETH-USDT-SWAP'); },
+            title: '切换到 ETHUSDT 永续',
+          }, 'ETH')),
         React.createElement('div', { className: 'btcd-seg', key: 'seg' },
           React.createElement('button', {
             className: env !== null && env.id === 'demo' ? 'on' : '',
@@ -2862,7 +5701,7 @@ window.__ModuleLoader__.load({
           React.createElement('span', null, '24h高 ', React.createElement('b', null, fmtPrice(quote === null ? null : quote.high24h))),
           React.createElement('span', null, '24h低 ', React.createElement('b', null, fmtPrice(quote === null ? null : quote.low24h))),
           React.createElement('span', null, '24h量 ',
-            React.createElement('b', null, fmtVol(quote === null ? null : quote.vol24h) + ' BTC')),
+            React.createElement('b', null, fmtVol(quote === null ? null : quote.vol24h) + ' ' + instShort(inst))),
           React.createElement('span', { title: '最近一根 K 线的收盘时间' }, '更新 ',
             React.createElement('b', null, fmtTime(data.at, 0, true))),
           countdownMs === null ? null : React.createElement('span', {
@@ -2882,7 +5721,12 @@ window.__ModuleLoader__.load({
                 React.createElement('b', { className: line.pct === null || line.pct < 0 ? 'btcd-down' : 'btcd-up' },
                   fmtPct(line.pct)));
             })),
-          submitting ? React.createElement('span', { className: 'btcd-hint' }, '刷新中…') : null),
+          submitting ? React.createElement('span', { className: 'btcd-hint' }, '刷新中…') : null,
+          // 最近一次命中的预警：常驻在价格行里，弹一次 toast 之后还能回看
+          alertLog.length === 0 ? null : React.createElement('span', {
+            key: 'alert', className: 'btcd-alert-chip',
+            title: '收线预警最近命中：' + alertLog[0].text + '（' + fmtTime(alertLog[0].ts, barMs, true) + '）',
+          }, '🔔 ', alertLog[0].text)),
       ];
       children.push(React.createElement('div', { className: 'btcd-price-row', key: 'price' }, priceKids));
 
@@ -2923,6 +5767,37 @@ window.__ModuleLoader__.load({
           onClick: function () { setShowEmaPanel(!showEmaPanel); },
         }, ico(ICON.sliders), React.createElement('span', null,
           emas.length === 0 ? '均线管理' : '均线管理（' + String(emas.length) + '）')),
+        // 收线预警：收盘价穿过均线时提示
+        React.createElement('span', { key: 'lbl2', className: 'btcd-lbl' }, '预警'),
+        React.createElement('button', {
+          key: 'alerts',
+          className: 'btcd-tool btcd-alert-btn' + (showAlertPanel ? ' on' : '')
+            + (alerts.filter(function (a) { return a.on !== false; }).length > 0 ? ' armed' : ''),
+          title: alerts.length === 0
+            ? '收线预警：K 线收线后收盘价穿过指定均线时提示（点这里设置）'
+            : alertLabel(alerts[0]) + (alerts.length > 1 ? ' 等 ' + String(alerts.length) + ' 条规则' : ''),
+          'aria-pressed': showAlertPanel,
+          onClick: function () {
+            var next = !showAlertPanel;
+            setShowAlertPanel(next);
+            // 打开就等于"看过了"：清掉未读数
+            if (next === true) setUnread(0);
+          },
+        }, ico(ICON.bell), React.createElement('span', null,
+          alerts.length === 0 ? '预警' : '预警（' + String(alerts.filter(function (a) { return a.on !== false; }).length) + '）'),
+        unread > 0 ? React.createElement('span', {
+          key: 'dot', className: 'btcd-alert-dot', title: '有 ' + String(unread) + ' 条新预警记录',
+        }, unread > 99 ? '99+' : String(unread)) : null),
+        // 回测入口：工具条上就是「回测」两个字（契约 §4.1 的文案），点开/收起右上角回测面板
+        React.createElement('span', { key: 'lbl3', className: 'btcd-lbl' }, '回测'),
+        React.createElement('button', {
+          key: 'backtest',
+          className: 'btcd-tool' + (showBacktestPanel ? ' on' : ''),
+          title: '回测：选时间范围跑内置策略，看资金曲线 / 指标 / 交易明细',
+          'aria-pressed': showBacktestPanel,
+          'aria-expanded': showBacktestPanel,
+          onClick: function () { setShowBacktestPanel(!showBacktestPanel); },
+        }, React.createElement('span', null, '回测')),
         React.createElement('span', { key: 'sp', className: 'btcd-spacer' }),
       ];
       var TOOLS = [
@@ -2999,8 +5874,7 @@ window.__ModuleLoader__.load({
       // 均线管理看板：新增 / 删除 / 改周期 / 换颜色 / 显隐 / 恢复默认，全在这里。
       // 做成浮层而不是常驻一行：日常只是开关均线（点画布图例就够了），
       // 常驻会把"改周期"这种低频操作一直摆在眼前占地方。
-      if (showEmaPanel) {
-        var emaPanelKids = [
+      if (showEmaPanel) {        var emaPanelKids = [
           React.createElement('div', { className: 'btcd-emapanel-head', key: 'head' },
             React.createElement('span', null, '均线管理'),
             React.createElement('span', { className: 'btcd-spacer' }),
@@ -3070,9 +5944,450 @@ window.__ModuleLoader__.load({
         children.push(React.createElement('div', { className: 'btcd-emapanel', key: 'emapanel' }, emaPanelKids));
       }
 
+      // 收线预警看板：一条规则一行（方向 / 均线周期 / 开关 / 删除），外加最近命中记录。
+      if (showAlertPanel) {
+        var emaPeriods = emas.map(function (e) { return e.period; });
+        var pickPeriod = emaPeriods.length > 0 ? emaPeriods[0] : EMA_DEFAULT_PERIODS[0];
+        var alertKids = [
+          React.createElement('div', { className: 'btcd-emapanel-head', key: 'head' },
+            React.createElement('span', null, '收线预警'),
+            React.createElement('span', { className: 'btcd-spacer' }),
+            React.createElement('button', {
+              key: 'add', className: 'btcd-mini btcd-mini-primary',
+              title: alerts.length >= ALERT_MAX
+                ? '最多 ' + String(ALERT_MAX) + ' 条规则'
+                : '加一条：选一个均线周期 + 上穿/下穿',
+              disabled: alerts.length >= ALERT_MAX,
+              onClick: function () {
+                // 周期还没取到就别建规则：建出来也是"周期未知"，哪个周期都不判，
+                // 只会让用户以为是坏了。宁可让他等一下再说。
+                if (bar === null || bar === undefined || bar === '') {
+                  setToast('还在取数，等这一根周期出来再加规则');
+                  return;
+                }
+                if (emaPeriods.length === 0) {
+                  setToast('先加一条均线（均线管理），规则要绑在均线上');
+                  return;
+                }
+                setAlerts(function (prev) {
+                  var next = alertAdd(prev, pickPeriod, 'up', bar);
+                  // 同一条规则别重复加（均线周期 + 方向 + 周期三样都一样时把新加的去掉）
+                  var dup = next.filter(function (a) {
+                    return a.emaPeriod === pickPeriod && a.dir === 'up' && a.bar === bar;
+                  });
+                  if (dup.length > 1) {
+                    setToast('这条规则已经有了');
+                    return prev;
+                  }
+                  return next;
+                });
+              },
+            }, '＋ 新增规则'),
+            React.createElement('button', {
+              key: 'close', className: 'btcd-mini',
+              title: '收起（Esc 也可以）',
+              onClick: function () { setShowAlertPanel(false); },
+            }, '收起')),
+          // 自检：把"能不能判"的条件直接摆出来。
+          // 预警的失败模式是"什么都不发生"，没有这块就只能靠猜（真踩过：宿主少发一位 done）
+          (function () {
+            // 引擎可能还没跑过（比如刚装上、或规则还没建），此时用看板自己的载荷算健康度，
+            // 自检块就不会是空的 —— "看得见"这件事不该依赖引擎的状态。
+            var mine = board !== null && Array.isArray(board.candles) ? candleHealth(board.candles) : null;
+            var h = diag !== null && diag.health !== null && diag.health !== undefined ? diag.health : mine;
+            if (h === null) return null;
+            var ready = h.ready === true;
+            // 引擎还没产出 meta 时（刚装上 / 还没建规则），用健康度自己推一个结论出来，
+            // 别显示空白 —— 缺 done 这种硬阻塞必须立刻看得见
+            var reason = diag === null ? (ready ? 'waiting' : 'no-done') : diag.reason;
+            var reasonText = reason === 'failed'
+              ? '⚠️ 判定过程抛错了：' + String(diag.error) + '（这一条也记进判据日志了）'
+              : (reason === 'no-done'
+                ? '⚠️ K 线载荷里没有 done 标记（每根的第 7 位缺了），收线判定无法进行 —— 需要重启宿主'
+                : (reason === 'no-rules'
+                  ? '还没有规则，先加一条'
+                  : (reason === 'waiting'
+                    ? '已就绪，正在等下一根收线'
+                    : (reason === 'armed'
+                      ? '已就绪：游标停在最近一根已收盘的 K 线上，等下一根收线就会判'
+                      : (reason === 'hit'
+                        ? '刚命中 ' + String(diag.hits) + ' 条'
+                        : (ready !== true
+                          // 结论只有一个"条件不满足"，但原因必须说清 —— 否则用户只会看到"没反应"
+                          ? '⚠️ K 线载荷里没有 done 标记（每根的第 7 位缺了），收线判定无法进行'
+                          : '已判过 ' + String(diag === null ? 0 : diag.fires) + ' 次收线，最近一次没穿越'))))));
+            return React.createElement('div', {
+              className: 'btcd-emapanel-foot btcd-alert-diag' + (ready ? '' : ' btcd-alert-diag-bad'),
+              key: 'diag',
+              title: '收线预警要能工作，需要：① 载荷每根带 done ② 至少一根已收盘 ③ 有一条绑在当前周期的启用规则',
+            },
+            React.createElement('span', null, '自检  '),
+            React.createElement('span', { className: ready ? 'btcd-alert-up' : 'btcd-alert-down' },
+              ready ? '条件就绪' : '条件不满足'),
+            React.createElement('span', { className: 'btcd-hint' },
+              '  · K 线 ' + String(h.count) + ' 根'
+              + '（带 done ' + String(h.withDone) + '，已收盘 ' + String(h.doneCount) + '）'
+              + ' · 应判 ' + String(diag.expect === undefined ? 0 : diag.expect)
+              + ' / 判定 ' + String(diag.fires === undefined ? 0 : diag.fires)
+              + ' · 最近检查 ' + (diag.at === undefined || diag.at === null
+                ? '（还没检查）' : fmtTime(diag.at, 0, true) + '.' + String(new Date(diag.at).getSeconds()).padStart(2, '0'))
+              + (h.lastDoneTs === null ? '' : ' · 最近收线 ' + fmtTime(h.lastDoneTs, barMs, true))),
+            React.createElement('span', { className: 'btcd-hint' }, '  · ' + reasonText));
+          })(),
+          // 通知渠道：面板内提示已经有了，这里补"人不在看屏幕"时也能察觉的两条
+          React.createElement('div', { className: 'btcd-emapanel-row', key: 'channels' },
+            React.createElement('span', { className: 'btcd-hint' }, '提醒方式'),
+            React.createElement('button', {
+              key: 'desktop',
+              className: 'btcd-mini' + (notify.desktop === true ? ' on' : ''),
+              title: notifyAvailable() !== true
+                ? '这个环境不支持桌面通知'
+                : (notifyPermission() === 'denied'
+                  ? '浏览器已经拒绝了通知权限，要在地址栏左边的站点设置里改回来'
+                  : '标签页在后台时弹系统通知（需要授权）'),
+              disabled: notifyAvailable() !== true,
+              onClick: function () {
+                if (notify.desktop === true) {
+                  setNotify(Object.assign({}, notify, { desktop: false }));
+                  return;
+                }
+                setNotify(Object.assign({}, notify, { desktop: true }));
+                // 打开开关时才去申请授权（不在页面加载时就弹框骚扰）
+                if (notifyAvailable() === true && notifyPermission() === 'default') {
+                  try {
+                    var req = window.Notification.requestPermission();
+                    if (req !== null && typeof req.then === 'function') {
+                      req.then(function (result) {
+                        if (result !== 'granted') setToast('桌面通知没拿到授权，只能在面板里提示');
+                      }).catch(function () { /* 忽略 */ });
+                    }
+                  } catch (error) { /* 老浏览器回调式，忽略 */ }
+                }
+              },
+            }, '桌面通知 ' + (notify.desktop === true ? '开' : '关')),
+            React.createElement('button', {
+              key: 'sound',
+              className: 'btcd-mini' + (notify.sound === true ? ' on' : ''),
+              title: '收线预警时响一声（WebAudio 合成，不用音频文件）',
+              onClick: function () { setNotify(Object.assign({}, notify, { sound: notify.sound !== true })); },
+            }, '提示音 ' + (notify.sound === true ? '开' : '关')),
+            React.createElement('button', {
+              key: 'try', className: 'btcd-mini',
+              title: '试一下：响一声 + 弹一条桌面通知（用来确认这两个通道是通的）',
+              onClick: function () {
+                var okSound = playAlertSound();
+                var okDesk = sendDesktopNotice(instShort(inst) + ' 收线预警 · 测试', '这是一条测试通知：收线上穿 EMA20 · 收盘 84,724.6 / 均线 84,300.1');
+                var parts = [];
+                parts.push(okDesk ? '桌面通知已发' : (notifyAvailable() !== true ? '不支持桌面通知'
+                  : (notifyPermission() === 'granted' ? '桌面通知发送失败' : '桌面通知未授权（先打开上面的开关）')));
+                parts.push(okSound ? '响了' : '没响（浏览器要求先与页面交互过：点一下面板任意处再试）');
+                // 邮件：配好了就顺手发一封测试邮件，一条按钮把三个通道都验掉
+                var mail = alertStoreGet('email');
+                if (mail.enabled === true) {
+                  setEmailBusy(true);
+                  sendTestEmail().then(function (out) {
+                    setEmailBusy(false);
+                    if (out.ok === true) {
+                      setToast(parts.join(' · ') + ' · 测试邮件已发往 ' + String(out.to === undefined ? mail.to : out.to));
+                    } else {
+                      setToast(parts.join(' · ') + ' · 测试邮件没发出去：' + out.error);
+                    }
+                  });
+                } else {
+                  setToast(parts.join(' · '));
+                }
+              },
+            }, '试一下')),
+        ];
+        // 邮件通道：填地址 → 确认一次 → 之后每封预警自动发往该地址。
+        // 授权时机在这里（宿主没有 agent/turn，走不了 approval 服务）。
+        (function () {
+          var email = alertStoreGet('email');
+          var busy = emailBusy === true;
+          // 输入框的值：用户**没在编辑**时一律跟着服务端的值走 ——
+          // 这样重开面板、或后台拉回新配置都会自动回填；正在编辑才保留用户敲的内容。
+          var draft = emailEditedRef.current === true && emailDraft !== null ? emailDraft : email.to;
+          /**
+           * 按钮只有两种状态，按**当前真实情况**决定：
+           *   `active` = 邮件提醒开着 **且** 当前地址已经被确认过。
+           * 否则一律显示"开启"（红色）—— 包括"开着但地址变了、授权已失效"这种中间态：
+           * 那时候点下去要**重新确认并开启**，而不是"关闭"。
+           * 早先的按钮只看 `enabled`，于是"开着但授权失效"时按钮写的是"关闭"，
+           * 点一下只会把 enabled 设成 false，用户看到的就是"填了地址却没有开启的按钮"。
+           */
+          var active = email.enabled === true && email.authorized === true;
+          var label = active ? '关闭邮件提醒' : '开启邮件提醒';
+          var rows = [];
+          rows.push(React.createElement('div', { className: 'btcd-emapanel-row', key: 'email-top' },
+            React.createElement('span', { className: 'btcd-hint' }, '邮件提醒'),
+            React.createElement('input', {
+              key: 'to', className: 'btcd-levels btcd-email-to', value: draft,
+              spellCheck: false, placeholder: '收件邮箱，如 me@qq.com', 'aria-label': '预警邮件收件地址',
+              title: '预警触发时把信息发到这个邮箱（可填多个，逗号分隔）',
+              disabled: busy,
+              onChange: function (event) {
+                emailEditedRef.current = true;
+                setEmailDraft(event.target.value);
+              },
+            }),
+            React.createElement('button', {
+              key: 'save',
+              className: 'btcd-mini btcd-email-btn ' + (active ? 'btcd-email-btn-on' : 'btcd-email-btn-off'),
+              disabled: busy,
+              'aria-pressed': active,
+              title: active
+                ? '邮件提醒已开启（绿色）；点一下关闭 —— 地址会保留'
+                : (email.enabled === true && email.authorized !== true
+                  ? '开关是开的，但当前地址还没被确认；点一下重新确认并开启'
+                  : '邮件提醒当前关闭（红色）；填好地址后点这里开启，会先请你确认一次'),
+              onClick: function () {
+                var wantOn = active !== true;
+                var to = draft.trim();
+                if (wantOn && to === '') { setToast('先填一个收件邮箱地址'); return; }
+                // 要开启、且地址与已确认的不一致（含"开着但授权失效"）→ 先弹确认
+                var same = email.confirmed !== '' && email.confirmed.toLowerCase() === to.toLowerCase();
+                if (wantOn && same !== true) {
+                  var ask = '开启后，每条命中的预警都会自动发到：\n\n' + to
+                    + '\n\n发件人是当前已授权的 QQ 邮箱。确认用这个地址接收吗？';
+                  var agreed = true;
+                  try {
+                    agreed = typeof window === 'undefined' || typeof window.confirm !== 'function'
+                      ? true : window.confirm(ask);
+                  } catch (error) { agreed = true; }
+                  if (agreed !== true) { setToast('已取消，没有开启邮件提醒'); return; }
+                }
+                setEmailBusy(true);
+                // 关闭时**不带地址**：后端在地址为空时原样保留已存的值，
+                // 前端也不该做"关闭 = 清空地址"这种自作主张（真踩过）。
+                // 开启时 confirm 只在"地址需要重新授权"时才置 true。
+                saveEmailConfig(
+                  { enabled: wantOn, to: wantOn ? to : '' },
+                  wantOn && same !== true,
+                ).then(function (out) {
+                  setEmailBusy(false);
+                  if (out.ok !== true) {
+                    // **失败时保留用户刚敲的地址**：这时候清掉草稿会把输入框打回
+                    // 服务端的旧值（甚至空值），看起来就是"地址丢了"（真踩过）。
+                    setToast('邮件设置没保存：' + out.error);
+                    return;
+                  }
+                  // 成功才交回控制权给服务端的值
+                  emailEditedRef.current = false;
+                  setEmailDraft(null);
+                  setToast(wantOn ? '邮件提醒已开启 → ' + out.email.to : '邮件提醒已关闭（地址保留）');
+                }).catch(function (error) {
+                  // 双保险：`saveEmailConfig` 自己已经 catch 过了，这里再兜一层，
+                  // 保证按钮**无论如何**都会恢复可点（卡在 disabled 太难查了）。
+                  setEmailBusy(false);
+                  setToast('邮件设置没保存：' + String((error && error.message) || error));
+                });
+              },
+            }, label)),
+          );
+          if (email.enabled !== true && email.confirmed !== '') {
+            rows.push(React.createElement('div', { className: 'btcd-emapanel-foot', key: 'email-off' },
+              '已确认地址：' + email.confirmed + '（邮件提醒当前关闭，地址保留着）'));
+          }
+          if (email.enabled === true || email.to !== '') {
+            var state = email.enabled !== true
+              ? '邮件提醒当前关闭 —— 地址已填好，点右边的按钮开启'
+              : (email.available !== true
+                ? '⚠️ 没有找到 qqEmail 服务 —— 请先启用 dsh-qq-email 插件（它提供发信能力）'
+                : (email.authorized === true
+                  ? '✅ 收件地址已确认，命中时会自动发送'
+                  : '⚠️ 当前地址还没被确认（地址改过？）—— 点右边的「开启邮件提醒」重新确认'));
+            var ok = email.enabled === true && email.available === true && email.authorized === true;
+            rows.push(React.createElement('div', {
+              className: 'btcd-emapanel-foot' + (ok ? '' : (email.enabled === true ? ' btcd-alert-diag-bad' : '')),
+              key: 'email-state',
+            },
+            state,
+            email.sentCount > 0 ? ' · 已发 ' + String(email.sentCount) + ' 封' : '',
+            email.lastSentAt === null ? '' : ' · 最近 ' + fmtTime(email.lastSentAt, 0, true),
+            email.lastError === null ? '' : ' · 最近一次失败：' + email.lastError));
+          }
+          alertKids.push(React.createElement('div', { className: 'btcd-email-block', key: 'email' }, rows));
+        })();
+        for (var ai = 0; ai < alerts.length; ai += 1) {
+          var boundHere = alerts[ai].bar === bar && alerts[ai].bar !== '';
+          alertKids.push(React.createElement('div', { className: 'btcd-emapanel-row', key: 'r' + alerts[ai].id },
+            React.createElement('button', {
+              key: 'dir',
+              className: 'btcd-mini' + (alerts[ai].dir === 'down' ? ' btcd-alert-down' : ' btcd-alert-up'),
+              title: '切换方向：上穿 / 下穿',
+              onClick: function (id, dir) {
+                return function () { setAlerts(function (p) { return alertSetDir(p, id, dir === 'up' ? 'down' : 'up'); }); };
+              }(alerts[ai].id, alerts[ai].dir),
+            }, alertDirInfo(alerts[ai].dir).arrow + ' ' + alertDirInfo(alerts[ai].dir).label),
+            // 绑哪条均线：点一下在"当前所有均线"里轮换（用户报过"只能绑 EMA20"）
+            React.createElement('button', {
+              key: 'ema',
+              className: 'btcd-mini' + (emaPeriods.indexOf(alerts[ai].emaPeriod) >= 0 ? ' on' : ' btcd-alert-down'),
+              title: emaPeriods.length === 0
+                ? '还没有均线：先去「均线管理」加一条，规则才绑得上'
+                : (emaPeriods.length === 1
+                  ? '只有一条均线（EMA' + String(emaPeriods[0]) + '）'
+                  : '点一下换绑另一条均线：' + emaPeriods.map(function (p) { return 'EMA' + String(p); }).join(' / ')),
+              onClick: function (id, current) {
+                return function () {
+                  setAlerts(function (p) { return alertSetPeriod(p, id, alertNextPeriod(current, emaPeriods)); });
+                };
+              }(alerts[ai].id, alerts[ai].emaPeriod),
+            }, 'EMA' + String(alerts[ai].emaPeriod)),
+            React.createElement('span', {
+              key: 'at',
+              className: 'btcd-hint' + (boundHere ? '' : ' btcd-alert-elsewhere'),
+              title: boundHere
+                ? '这条规则在当前周期（' + String(alerts[ai].bar) + '）上生效'
+                : '这条规则绑在 ' + (alerts[ai].bar === '' ? '未知周期' : alerts[ai].bar) + ' 上，切过去才会判',
+            }, boundHere ? '本周期 ' + String(alerts[ai].bar) : (alerts[ai].bar === '' ? '周期未知' : String(alerts[ai].bar))),
+            React.createElement('span', { key: 'sp', className: 'btcd-spacer' }),
+            React.createElement('button', {
+              key: 'on', className: 'btcd-mini' + (alerts[ai].on !== false ? ' on' : ''),
+              title: alerts[ai].on !== false ? '已启用，点击暂停' : '已暂停，点击启用',
+              onClick: function (id) { return function () { setAlerts(function (p) { return alertToggle(p, id); }); }; }(alerts[ai].id),
+            }, alerts[ai].on !== false ? '已启用' : '已暂停'),
+            React.createElement('button', {
+              key: 'del', className: 'btcd-mini btcd-danger',
+              title: '删除这条规则',
+              onClick: function (id) { return function () { setAlerts(function (p) { return alertRemove(p, id); }); }; }(alerts[ai].id),
+            }, '删除')));
+        }
+        if (alerts.length === 0) {
+          alertKids.push(React.createElement('div', { className: 'btcd-emapanel-row', key: 'empty' },
+            React.createElement('span', { className: 'btcd-hint' },
+              '还没有预警规则。点右上角「＋ 新增规则」加一条；'
+              + '没有均线时先去「均线管理」加一条（规则要绑在一条均线上）。')));
+        }
+        // 预警记录：持久化的那份（刷新/重开都还在），支持清空
+        if (alertLog.length > 0) {
+          var logWrapKids = [];
+          for (var li = 0; li < Math.min(12, alertLog.length); li += 1) {
+            var rec = alertLog[li];
+            logWrapKids.push(React.createElement('div', {
+              className: 'btcd-emapanel-row btcd-alert-logrow', key: 'l' + rec.id,
+              title: rec.text + (rec.bar === '' ? '' : '（' + rec.bar + ' 周期）'),
+            },
+            React.createElement('span', {
+              key: 'd', className: rec.dir === 'down' ? 'btcd-alert-down' : 'btcd-alert-up',
+            }, alertDirInfo(rec.dir).arrow),
+            React.createElement('span', { key: 't', className: 'btcd-alert-logtime' },
+              alertLogTime(rec, barMs)),
+            React.createElement('span', { key: 'x', className: 'btcd-alert-logtext' },
+              (rec.bar === '' ? '' : rec.bar + ' ') + rec.text)));
+          }
+          if (alertLog.length > 12) {
+            logWrapKids.push(React.createElement('div', { className: 'btcd-hint', key: 'logmore' },
+              '还有 ' + String(alertLog.length - 12) + ' 条更早的记录（存储里都在，这里只显示最近 12 条）'));
+          }
+          alertKids.push(React.createElement('div', { className: 'btcd-emapanel-foot btcd-alert-loghead', key: 'loghead' },
+            React.createElement('span', null, '预警记录（' + String(alertLog.length) + ' 条，最多留 ' + String(ALERT_MAX_HISTORY) + '）'),
+            React.createElement('span', { className: 'btcd-spacer' }),
+            React.createElement('button', {
+              key: 'clear', className: 'btcd-mini btcd-danger',
+              title: '清空全部预警记录（不可撤销）',
+              onClick: function () {
+                setAlertLog([]);
+                setUnread(0);
+                setToast('预警记录已清空');
+              },
+            }, '清空记录')));
+          alertKids.push(React.createElement('div', { className: 'btcd-alert-logwrap', key: 'logwrap' }, logWrapKids));
+        } else {
+          alertKids.push(React.createElement('div', { className: 'btcd-emapanel-foot', key: 'logempty' },
+            '还没有预警记录。命中一次就会记一条在这里，关掉看板、刷新页面都还在。'));
+        }
+
+        // 判据日志：每次判定为什么中/不中。这是"没告警"时唯一能查的东西。
+        alertKids.push(React.createElement('div', { className: 'btcd-emapanel-foot btcd-alert-loghead', key: 'evalhead' },
+          React.createElement('span', null, '判据日志（' + String(evalLog.length) + ' 条，最多留 ' + String(ALERT_MAX_EVALS) + '）'),
+          React.createElement('span', { className: 'btcd-spacer' }),
+          React.createElement('button', {
+            key: 'copy', className: 'btcd-mini',
+            title: '把自检 + 判据 + 规则整理成文本复制到剪贴板（排障时贴给别人看）',
+            onClick: function () {
+              var text = formatEvalDiag({
+                at: Date.now(), bar: bar, rules: alerts.length,
+                health: diag === null ? null : diag.health,
+                cursor: diag === null ? null : diag.cursor,
+                fires: diag === null ? 0 : diag.fires,
+                expect: diag === null ? 0 : diag.expect,
+                error: diag === null ? null : diag.error,
+                evals: evalLog.slice(0, 20),
+              });
+              copyToClipboard(text).then(function (ok) {
+                setToast(ok ? '自检信息已复制到剪贴板' : '复制失败（可展开下面自己抄）');
+              });
+            },
+          }, '复制自检'),
+          React.createElement('button', {
+            key: 'clreval', className: 'btcd-mini btcd-danger',
+            title: '清空判据日志',
+            onClick: function () { setEvalLog([]); setToast('判据日志已清空'); },
+          }, '清空')));
+        if (evalLog.length === 0) {
+          alertKids.push(React.createElement('div', { className: 'btcd-emapanel-foot', key: 'evalempty' },
+            '还没有判据。等下一次收线就会记一条：那根的时间、前收/今收、前均/今均，以及为什么中/不中。'
+            + '（判定由常驻引擎执行 —— 这个看板关着也会继续判。）'));
+        } else {
+          // 按"收线时刻"分组：一次收线给每条规则各写一条，平铺看起来像重复；
+          // 分组后一根一行，缺哪几分钟、断档多久都直接看得出来。
+          var groups = groupVerdicts(evalLog);
+          var evalKids = [];
+          for (var gi = 0; gi < Math.min(8, groups.length); gi += 1) {
+            var g2 = groups[gi];
+            var anyHit = false;
+            for (var ii = 0; ii < g2.items.length; ii += 1) if (g2.items[ii].verdict === 'hit') anyHit = true;
+            evalKids.push(React.createElement('div', {
+              className: 'btcd-alert-evalrow', key: 'g' + g2.key,
+            },
+            React.createElement('span', {
+              key: 'v', className: anyHit ? 'btcd-alert-up' : 'btcd-alert-elsewhere',
+            }, anyHit ? '✔' : '·'),
+            React.createElement('span', { key: 't', className: 'btcd-alert-logtime' },
+              (g2.bar === '' ? '' : g2.bar + ' ') + fmtTime(g2.at, 0, true)),
+            React.createElement('span', { key: 'x', className: 'btcd-alert-logtext' },
+              '收线 ' + fmtTime(g2.ts, barMs, true)
+              + (g2.nowClose === null ? '' : ' 今收 ' + fmtPrice(g2.nowClose) + ' / 今均 ' + fmtPrice(g2.nowEma)
+                + '（前收 ' + fmtPrice(g2.prevClose) + ' / 前均 ' + fmtPrice(g2.prevEma) + '）')),
+            React.createElement('span', { key: 'sp', className: 'btcd-spacer' }),
+            // 断档：与上一根（更早那根）之间的间隔，超过 1.5 根就标出来
+            (function () {
+              var gap = verdictGapMs(groups, gi);
+              if (gap === null || barMs === 0) return null;
+              return gap > barMs * 1.5
+                ? React.createElement('span', { key: 'gap', className: 'btcd-alert-gap' },
+                  '上一根在 ' + fmtDur(gap) + ' 前')
+                : null;
+            })()));
+            // 逐条规则的原因不再平铺 —— 一根一行就够看。
+            // 判据仍然完整存在数据里（`evalLog` 与「复制自检」导出都带着 verdict 与四个数字），
+            // 需要查"为什么没中"时用导出，不占界面。
+          }
+          if (groups.length > 8) {
+            evalKids.push(React.createElement('div', { className: 'btcd-hint', key: 'evalmore' },
+              '还有 ' + String(groups.length - 8) + ' 根更早的判据（存储里都在，共 '
+              + String(evalLog.length) + ' 条）'));
+          }
+          alertKids.push(React.createElement('div', { className: 'btcd-alert-logwrap', key: 'evalwrap' }, evalKids));
+        }
+        children.push(React.createElement('div', { className: 'btcd-emapanel btcd-alertpanel', key: 'alertpanel' }, alertKids));
+      }
+
+      // 回测面板：自包含组件（表单 / 策略列表 / job 轮询 / 结果都在它内部）。
+      // 只在这一行挂载：关掉就卸载，下次打开由它自己 GET status 恢复上次结果。
+      if (showBacktestPanel) {
+        children.push(React.createElement(BacktestBoard, {
+          key: 'btpanel',
+          onClose: function () { setShowBacktestPanel(false); },
+          instId: inst,
+        }));
+      }
+
       // 图表：拖动平移、滚轮缩放、双击回最新（触摸同样走 pointer 事件）
       var chartWrapKids = [React.createElement(Chart, {
         key: 'chart',
+        instId: inst,
         candles: fullCandles,
         // 均线：整条序列（含预热）在这里算好，Chart 负责按窗口切片。
         // 不再取 Host 发来的 ema20/ema480 —— 那是写死两条、且只有展示窗口那一段。
@@ -3173,7 +6488,7 @@ window.__ModuleLoader__.load({
         className: 'btcd-panel',
         role: 'dialog',
         'aria-modal': 'true',
-        'aria-label': 'OKX BTC 合约价格看板',
+        'aria-label': 'OKX ' + instShort(inst) + ' 合约价格看板',
         tabIndex: -1,
         ref: panelRef,
       }, children));
@@ -3182,24 +6497,45 @@ window.__ModuleLoader__.load({
     // ------------------------------------------------------------------ 侧边栏入口
 
     function SidebarButton(props) {
-      var price = usePrice(false);
-      var summary = price === null || price.price === null ? null : price.price;
+      var inst = useInstStore();
+      var price = usePrice(false, inst);
+      var alerts = useAlertStore('alerts');
+      var unread = useAlertStore('unread');
+      var armed = 0;
+      for (var i = 0; i < alerts.length; i += 1) if (alerts[i].on !== false) armed += 1;
+      // 旧版 Host 的 /price 不认识 instId（会回 BTC）：标的对不上时宁可不显示价格，
+      // 也不要把 BTC 的价格挂在 ETH 按钮上。
+      var priceMatchesInst = price !== null && price !== undefined && normalizeInstId(price.instId) === inst;
+      var summary = priceMatchesInst && price.price !== null && price.price !== undefined ? price.price : null;
       var up = summary === null || summary.changePct === null ? true : summary.changePct >= 0;
       var text = summary === null
-        ? '📊 BTC'
+        ? '📊 ' + instShort(inst)
         : '📊 ' + Math.round(summary.last).toLocaleString('en-US') + ' ' + (up ? '▲' : '▼') + Math.abs(summary.changePct).toFixed(2) + '%';
+      var title = instShort(inst) + ' 合约 K 线看板（OKX）：最新价 + 1m/3m/15m/1h/4h/1D + EMA20/EMA480'
+        + (armed > 0 ? '；收线预警常驻执行中（' + String(armed) + ' 条规则）' : '');
       return React.createElement('button', {
         type: 'button',
         className: 'btcd-ico',
-        title: 'BTC 合约 K 线看板（OKX）：最新价 + 1m/3m/15m/1h/4h/1D + EMA20/EMA480',
+        title: title,
         onClick: props.toggle,
       }, React.createElement('span', { key: 'text', className: up ? 'btcd-up' : 'btcd-down' },
-        (props.wide === true ? text : '📊')));    }
+        (props.wide === true ? text : '📊')),
+      unread > 0
+        ? React.createElement('span', {
+          key: 'dot', className: 'btcd-alert-dot',
+          title: String(unread) + ' 条未读预警',
+        }, unread > 99 ? '99+' : String(unread))
+        : null);
+    }
 
     // ------------------------------------------------------------------ apply
 
     function apply(ctx) {
       injectCss();
+      // 预警存储在这里就读一次：两个视图（侧边栏按钮 / 看板）谁先挂载都能拿到同一份数据。
+      alertStoreLoad();
+      // 当前标的同理：侧边栏按钮与看板读到同一个选择（默认 BTC）
+      instStoreLoad();
       var store = { open: false, listeners: new Set() };
       store.setOpen = function (value) {
         store.open = value;
@@ -3235,8 +6571,17 @@ window.__ModuleLoader__.load({
             { name: 'shell.overlay', id: 'btc-dashboard', order: 70, label: 'BTC 合约价格看板' },
             function () {
               var open = useOpen();
-              if (!open) return null;
-              return React.createElement(Dashboard, { close: function () { store.setOpen(false); } });
+              // 引擎**永远挂着**（它只渲染 null），看板才是按需挂载的。
+              // 两者写的是同一份 `ALERT_STORE`，所以关掉看板不影响判定。
+              // 放在 overlay 槽里而不是侧边栏：overlay 的生命周期跟着插件走，
+              // 侧边栏槽位在某些布局下会被卸载（收窄侧边栏时），不适合承载常驻任务。
+              return React.createElement(React.Fragment, null,
+                React.createElement(AlertEngine, { key: 'engine' }),
+                open === true
+                  ? React.createElement(Dashboard, {
+                    key: 'panel', close: function () { store.setOpen(false); },
+                  })
+                  : null);
             });
         });
       }, 'dsh-btc-dashboard: overlay');
@@ -3249,7 +6594,23 @@ window.__ModuleLoader__.load({
       debug: {
         drawChart: drawChart,
         Chart: Chart,
+        AlertEngine: AlertEngine,
+        ALERT_STORE: ALERT_STORE,
+        alertStoreLoad: alertStoreLoad,
+        runAlertEngine: runAlertEngine,
+        alertStoreGet: alertStoreGet,
+        alertStoreSet: alertStoreSet,
         Dashboard: Dashboard,
+        // 回测面板（自包含组件 + 纯函数）：离线测试可以直接渲染 / 断言换算
+        BacktestBoard: BacktestBoard,
+        btBuildForm: btBuildForm,
+        btDateMs: btDateMs,
+        btDateText: btDateText,
+        btRateFromPercent: btRateFromPercent,
+        btBarMs: btBarMs,
+        btKpiItems: btKpiItems,
+        btDrawEquityChart: btDrawEquityChart,
+        BT_STORE_KEY: BT_STORE_KEY,
         SidebarButton: SidebarButton,
         windowOf: windowOf,
         viewWindow: viewWindow,
@@ -3274,6 +6635,7 @@ window.__ModuleLoader__.load({
         TICK_STEPS: TICK_STEPS,
         hitTolerance: hitTolerance,
         snapPriceToOhlc: snapPriceToOhlc,
+        snapToViewOhlc: snapToViewOhlc,
         ohlcLabelOf: ohlcLabelOf,
         measureStats: measureStats,
         emaLegendItems: emaLegendItems,
@@ -3297,6 +6659,52 @@ window.__ModuleLoader__.load({
         EMA_PERIOD_MAX: EMA_PERIOD_MAX,
         EMA_PERIOD_MIN: EMA_PERIOD_MIN,
         EMA_STORE_KEY: EMA_STORE_KEY,
+        // 收线预警：规则模型 / 穿越判定 / 游标
+        ALERT_STORE_KEY: ALERT_STORE_KEY,
+        ALERT_LOG_KEY: ALERT_LOG_KEY,
+        EMAIL_STORE_KEY: EMAIL_STORE_KEY,
+        ALERT_EVAL_KEY: ALERT_EVAL_KEY,
+        normalizeEmail: normalizeEmail,
+        alertEmailPayload: alertEmailPayload,
+        ALERT_MAX_EVALS: ALERT_MAX_EVALS,
+        normalizeEvalLog: normalizeEvalLog,
+        evalLogAdd: evalLogAdd,
+        groupVerdicts: groupVerdicts,
+        verdictGapMs: verdictGapMs,
+        formatEvalDiag: formatEvalDiag,
+        evalAlertVerdict: evalAlertVerdict,
+        verdictText: verdictText,
+        VERDICT_TEXT: VERDICT_TEXT,
+        copyToClipboard: copyToClipboard,
+        ALERT_MAX_HISTORY: ALERT_MAX_HISTORY,
+        alertRecordKey: alertRecordKey,
+        normalizeAlertLog: normalizeAlertLog,
+        alertLogAdd: alertLogAdd,
+        alertLogTime: alertLogTime,
+        ALERT_MAX: ALERT_MAX,
+        ALERT_DIRS: ALERT_DIRS,
+        ALERT_MIN_BARS: ALERT_MIN_BARS,
+        candleHealth: candleHealth,
+        alertDirInfo: alertDirInfo,
+        alertNewId: alertNewId,
+        normalizeAlerts: normalizeAlerts,
+        alertAdd: alertAdd,
+        alertRemove: alertRemove,
+        alertToggle: alertToggle,
+        alertSetDir: alertSetDir,
+        alertSetPeriod: alertSetPeriod,
+        alertNextPeriod: alertNextPeriod,
+        alertLabel: alertLabel,
+        evalAlert: evalAlert,
+        evalAlerts: evalAlerts,
+        closedAlertCursor: closedAlertCursor,
+        // 通知渠道（桌面通知 / 提示音）
+        NOTIFY_STORE_KEY: NOTIFY_STORE_KEY,
+        normalizeNotify: normalizeNotify,
+        notifyAvailable: notifyAvailable,
+        notifyPermission: notifyPermission,
+        sendDesktopNotice: sendDesktopNotice,
+        playAlertSound: playAlertSound,
         emaFor: emaFor,
         emaSeries: emaSeries,
         emaWindow: emaWindow,
