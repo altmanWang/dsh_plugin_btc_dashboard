@@ -6,15 +6,13 @@ OKX BTC / ETH 合约价格看板的 DSH 插件工程。
 .env                                    # OKX 密钥（生产 + 模拟/调试），仅用于确认「配了哪把钥匙」
 .env.example                            # 密钥模板（只有占位符；行情接口本身不需要密钥）
 .dashboard/state.json                   # 插件持久化的选择（环境 + 周期），已被 .gitignore 忽略
-plugin/dsh-btc-dashboard/               # 插件本体（就是安装进 profile 的那份代码）
-  ├─ index.js                           # Host 半：取数、代理隧道、EMA、路由
+package.json                            # 包清单：dsh.bundle.patch + dsh.client（npm / GitHub 安装的入口）
+plugin/dsh-btc-dashboard/               # 插件代码（包根在仓库根；安装后位于包内）
+  ├─ index.js                           # Host 半：取数、代理隧道、EMA、路由、回测 job
   ├─ client.js                          # 浏览器半：canvas 看图 + 周期/环境切换 + 画线
-  ├─ package.json                       # dsh.bundle.patch + dsh.client 声明
   ├─ cordis.patch.yml                   # bundle 层：把 Host 半挂进 profile
-  ├─ screenshots.json                   # 市场截图清单（dsh-market 详情页用；路径相对本文件）
-  ├─ assets/screenshots/                # 截图：dashboard / alert / backtest
   └─ README.md                          # 实现细节、参数、路由、环境语义
-backtest/                               # 回测框架（独立于看板；默认只读公开行情，不需要 API key）
+backtest/                               # 回测框架（随 npm 包一起发布；CLI 与看板共用同一份）
   ├─ run.mjs                            # CLI 入口（--strategy/--start/--end/--bar/--leverage/--maker/--taker…）
   ├─ lib/                               # config / data / transport / engine / metrics / report / strategy
   ├─ strategies/                        # 内置策略：buy-hold（基线）、sma-cross（示例）、
@@ -26,7 +24,9 @@ backtest/                               # 回测框架（独立于看板；默�
   ├─ data/                              # 历史 K 线缓存（运行时生成，gitignore）
   └─ reports/                           # 回测报告产物（运行时生成，gitignore）
 tests/                                  # 离线自检脚本（含 backtest-*.mjs 九个）
+screenshots.json                        # 市场截图清单（dsh-market 详情页用）
 assets/icon-180.png                     # 插件市场卡片图标（awesome-dsh-plugin 条目的 icon）
+assets/screenshots/                     # 市场截图：dashboard / alert / backtest
 docs/awesome-entry.yml                  # 提交到 awesome-dsh-plugin 的条目 YAML（复制进 data/plugins/）
 ```
 
@@ -52,22 +52,21 @@ docs/awesome-entry.yml                  # 提交到 awesome-dsh-plugin 的条目
 
 ## 安装
 
-### 从 npm（推荐）
+发布到 npm 后：
 
 ```powershell
 dsh plugin --profile web add dsh-btc-dashboard
 # --profile 换成你的 profile 名（如 web）；装完重启该 profile，浏览器刷新页面即可
 ```
 
-### 从 GitHub（不经过 npm）
-
-插件本体在 `plugin/dsh-btc-dashboard/`（仓库根不是 npm 包，所以安装命令要带 `#path:`）：
+也可以直接从 GitHub 源码装（仓库根就是包根，`backtest/` 会一起带上）：
 
 ```powershell
-dsh plugin --profile web add "github:altmanWang/dsh_plugin_btc_dashboard#path:/plugin/dsh-btc-dashboard"
+dsh plugin --profile web add "github:altmanWang/dsh_plugin_btc_dashboard"
 ```
 
 - 只读 OKX 公开行情（ticker / candles），**不需要 API key**，不读账户与持仓；
+- **回测框架 `backtest/` 随包发布**，装完就能在面板里跑回测；K 线缓存与报告写到 `<工作区>/.dashboard/backtest/`（首次跑会联网抓数据）；
 - 可选：把 `.env.example` 复制成 `.env` 填上密钥，面板才会显示当前环境「配了哪把钥匙」的掩码（不填也能正常看行情）；
 - **邮件提醒是可选通道**：依赖 [dsh-qq-email](https://github.com/altmanWang/dsh-qq-email) 插件（已上架 DSH 插件市场，`插件 → 发现 / Discover` 可搜到）。
   **不装它插件照常启动**，看板/均线/画线/回测都不受影响；要用邮件时预警面板会直接提示去安装，装完重启宿主即可；
@@ -75,7 +74,8 @@ dsh plugin --profile web add "github:altmanWang/dsh_plugin_btc_dashboard#path:/p
 
 ## 本地开发安装 / 卸载
 
-在本仓库里开发时，用 `plugin_manager` 的 `install_bundle` 把 `plugin/dsh-btc-dashboard` 链接进 profile。
+在本仓库里开发时，用 `plugin_manager` 的 `install_bundle`（或 `dsh plugin add`）把**仓库根**链接进 profile
+（包根在仓库根；不要只指到 `plugin/dsh-btc-dashboard`，否则 `backtest/` 不会跟着走）。
 profile 里的依赖是链接形式，所以这个目录就是线上代码：改客户端半刷新页面即可，改 Host 半需要重启宿主。
 
 > 当前磁盘上是 **1.8.1**。1.8.1 只改了邮件通道的**可选依赖提示**：没装 `dsh-qq-email` 时插件照常启动，

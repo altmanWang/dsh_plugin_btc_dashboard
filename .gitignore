@@ -14,5 +14,6 @@ backtest/reports/
 node_modules/
 .pnpm-store/
 *.log
+*.tgz
 .DS_Store
 Thumbs.db

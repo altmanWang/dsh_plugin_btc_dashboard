@@ -9,16 +9,10 @@
   "bugs": {
     "url": "https://github.com/altmanWang/dsh_plugin_btc_dashboard/issues"
   },
-  "files": [
-    "index.js",
-    "client.js",
-    "cordis.patch.yml"
-  ],
   "description": "OKX 合约价格看板（BTC / ETH 永续可切换）：最新价 + 1m/3m/15m/1h/4h/1D K 线 + 可调周期 EMA（整条序列现算）+ 收线预警（穿均线提示，可桌面通知/提示音/邮件/留记录，判定常驻执行）+ 最新价线与收盘倒计时 + 可编辑画线 + 生产/模拟环境切换 + 回测面板（内置 backtest/ 框架：可选标的/策略/周期/时间范围/资金/杠杆/费率，面板内看资金曲线与交易明细）",
   "repository": {
     "type": "git",
-    "url": "https://github.com/altmanWang/dsh_plugin_btc_dashboard.git",
-    "directory": "plugin/dsh-btc-dashboard"
+    "url": "https://github.com/altmanWang/dsh_plugin_btc_dashboard.git"
   },
   "keywords": [
     "dsh-plugin",
@@ -29,15 +23,27 @@
     "kline",
     "backtest"
   ],
+  "files": [
+    "plugin/dsh-btc-dashboard/index.js",
+    "plugin/dsh-btc-dashboard/client.js",
+    "plugin/dsh-btc-dashboard/cordis.patch.yml",
+    "backtest/run.mjs",
+    "backtest/lib",
+    "backtest/strategies",
+    "backtest/tools",
+    "backtest/SPEC.md",
+    "backtest/INTEGRATION-SPEC.md",
+    "backtest/README.md"
+  ],
   "type": "module",
   "exports": {
-    ".": "./index.js",
-    "./client": "./client.js",
+    ".": "./plugin/dsh-btc-dashboard/index.js",
+    "./client": "./plugin/dsh-btc-dashboard/client.js",
     "./package.json": "./package.json"
   },
   "dsh": {
     "bundle": {
-      "patch": "./cordis.patch.yml"
+      "patch": "./plugin/dsh-btc-dashboard/cordis.patch.yml"
     },
     "client": {
       "platform": "web",

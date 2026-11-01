@@ -1,7 +1,7 @@
 # dsh-btc-dashboard
 
 > 安装（npm）：`dsh plugin --profile web add dsh-btc-dashboard`；也可以从
-> [GitHub 源码安装](https://github.com/altmanWang/dsh_plugin_btc_dashboard#安装)（仓库根不是 npm 包，命令带 `#path:`）。
+> [GitHub 源码安装](https://github.com/altmanWang/dsh_plugin_btc_dashboard#安装)（仓库根就是包根，`backtest/` 会一起带上，不需要 `#path:`）。
 > 装完重启 profile，浏览器刷新页面即可。只读 OKX 公开行情、**不需要 API key**；
 > 邮件提醒需要另装 [`dsh-qq-email`](https://github.com/altmanWang/dsh-qq-email)，不装它不影响启动。
 
@@ -143,7 +143,7 @@ DSH 插件：**OKX 合约价格看板（BTC / ETH 永续）**。侧边栏一个�
   点「开始回测」就在看板里看结果（KPI + 资金曲线（含 Buy&Hold 基准与回撤）+ 交易明细），
   还能「打开完整报告」（自包含 HTML，含**价格 K 线图 + 持仓底纹 + 开/平仓标记**、资金/回撤曲线、交易表）
   和「下载 JSON」。
-  - 底层就是仓库里的 `backtest/` 框架，Host 半按需动态 import，**不是第二份实现**：
+  - 底层就是包内（仓库根）的 `backtest/` 框架，Host 半按需动态 import，**不是第二份实现**：
     标的白名单 `BTC-USDT-SWAP` / `ETH-USDT-SWAP`（面板「标的」下拉，默认跟随看板当前合约；
     数据缓存与报告按所选标的自动分目录/命名），周期 1m–1D，默认 **1 倍杠杆、挂单 0.0200% / 吃单 0.0500%**
   - **资金费率（funding，1.7.0 起）默认计入**：每 8 小时结算一次（多头付/空头收）；历史费率来自 OKX
@@ -157,8 +157,9 @@ DSH 插件：**OKX 合约价格看板（BTC / ETH 永续）**。侧边栏一个�
     参数与结果口径见 [backtest/README.md 的「内置策略与推荐预设」](../../backtest/README.md#内置策略与推荐预设)
   - 回测是 Host 侧**异步 job**：POST 立刻返回 jobId，浏览器 800ms 轮询进度
     （抓取页数 → 回放 K 线 → 算指标 → 生成报告）；同一时间只允许一个回测，可取消
-  - 历史 K 线走 `backtest/data/` 磁盘缓存：同一段区间第二次跑秒出；首次长区间要等抓取
-    （面板会给「预计 N 根 K 线」提示）
+  - 历史 K 线走磁盘缓存：同一段区间第二次跑秒出；首次长区间要等抓取（面板会给「预计 N 根 K 线」提示）。
+    源码 checkout 缓存在 `backtest/data/`；npm/GitHub 安装时缓存在 `<工作区>/.dashboard/backtest/data/`
+    （包目录不写，升级/重装不会丢）
   - 表单存 localStorage `dsh-btc-dashboard:backtest`；报告 HTML 响应带严格 CSP，
     客户端拿 **blob URL** 在新标签打开（报告里的内容不在本站源里执行）
   - ⚠️ **Host 半新增了 5 条路由，升级到 1.6.0 后必须重启宿主；1.7.0 的回测服务也改了 Host 半，
@@ -169,14 +170,14 @@ DSH 插件：**OKX 合约价格看板（BTC / ETH 永续）**。侧边栏一个�
 
 ## 安装状态
 
-通过 `plugin_manager` 的 `install_bundle`（或 `dsh plugin add`）装进 profile 后，profile 的
-`package.json` 里是一条链接依赖，`link:` 指向你 clone 下来的仓库路径：
+包根就是仓库根（`package.json` 在仓库根，插件代码在 `plugin/dsh-btc-dashboard/`，回测框架在
+`backtest/`，npm 包会把三者一起发布）。装进 profile 后本地开发是链接依赖，`link:` 指向仓库根：
 
 ```
-dsh-btc-dashboard  link:<仓库根目录>/plugin/dsh-btc-dashboard
+dsh-btc-dashboard  link:<仓库根目录>
 ```
 
-所以**改这个目录里的代码就是改线上插件**（客户端半由宿主按原样读取文件字节发给浏览器，改完刷新页面即可；Host 半是已加载的 ESM 模块，代码改动需要重启宿主才生效）。
+所以**改仓库里的代码就是改线上插件**（客户端半由宿主按原样读取文件字节发给浏览器，改完刷新页面即可；Host 半是已加载的 ESM 模块，代码改动需要重启宿主才生效）。
 
 - 卸载：`plugin_manager` → `remove_bundle`，target `dsh-btc-dashboard`
 - 临时停用：`set_bundle` / `set_plugin`，enabled=false
@@ -376,7 +377,7 @@ Host 侧取 1800 根 = `/market/candles` 最近 300 根 + `/market/history-candl
 
 
 
-## 回测面板（1.7.0，接的是仓库里的 `backtest/` 框架）
+## 回测面板（1.7.0，接的是包内的 `backtest/` 框架）
 
 看板工具条「预警」右边是「回测」按钮。点开是一个浮层面板：策略 / 周期 / 时间范围（含近 7/30/90 天、
 近一年快捷）/ 初始资金 / 杠杆 / 挂单费率 / 吃单费率，参数按策略动态渲染；点「开始回测」后
@@ -388,8 +389,9 @@ Host 侧取 1800 根 = `/market/candles` 最近 300 根 + `/market/history-candl
 - 「打开完整报告」（自包含 HTML：内联 SVG、零脚本零外链）与「下载 JSON」（全量曲线/成交/交易）
 
 **为什么不是"在浏览器里跑回测"**：回测要读几百页历史 K 线、跑引擎、生成报告，这些都在 Host 侧做；
-浏览器只负责表单与轮询。Host 半**动态 import** 仓库里的 `backtest/lib/*.mjs`（CLI 与看板是同一份实现，
-策略只写一遍），路径按 `DSH_BTC_BACKTEST_DIR` → `<工作区>/backtest` → 插件上两级/backtest 找。
+浏览器只负责表单与轮询。Host 半**动态 import** 包内的 `backtest/lib/*.mjs`（CLI 与看板是同一份实现，
+策略只写一遍；npm/GitHub 安装的包自带 `backtest/`，不需要额外目录），路径按
+`DSH_BTC_BACKTEST_DIR` → 包根/backtest → `<工作区>/backtest` 找。
 
 ### 5 条路由（全部过信任栅栏）
 

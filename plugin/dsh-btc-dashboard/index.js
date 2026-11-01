@@ -39,8 +39,9 @@ function readOwnVersion() {
     // 而 `const HERE` 那时还在 TDZ —— 连 `typeof HERE` 都会抛 ReferenceError
     // （`typeof` 只对"未声明的变量"安全，对 TDZ 里的 let/const 会抛）。
     // 这个坑让 version 一直返回 'unknown'，真踩过。
+    // 包根在插件目录上两级：源码仓库里是仓库根，npm/GitHub 安装后是 node_modules/dsh-btc-dashboard。
     const dir = dirname(fileURLToPath(import.meta.url))
-    const file = join(dir, 'package.json')
+    const file = join(dir, '..', '..', 'package.json')
     const pkg = JSON.parse(readFileSync(file, 'utf8'))
     if (pkg !== null && typeof pkg.version === 'string' && pkg.version !== '') {
       // 带上 package.json 的修改时间做"构建指纹"：改了代码没重启，指纹不会变。
@@ -58,15 +59,15 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 /**
  * 工作区（`.env` 与 `.dashboard/` 的所在目录）按这个顺序找：
  *   1. `DSH_BTC_WORKSPACE` —— 显式指定，优先级最高；
- *   2. 插件往上两级 —— 插件放在 `<workspace>/plugin/dsh-btc-dashboard`，
- *      所以这里能同时看到 `.env` 或 `plugin/` 就认定是工作区；
- *   3. 当前工作目录 —— 兜底，这样把仓库 clone 到任何路径都能直接跑，
- *      不依赖任何本机绝对路径。
+ *   2. 包根往上两级 —— 源码仓库里它就是仓库根；只有确认是源码 checkout（有 `.git`）
+ *      或仓库根放了 `.env` 时才当工作区；
+ *   3. 当前工作目录 —— 兜底。npm/GitHub 安装后包根在 node_modules 里，
+ *      工作区应当是宿主进程的 cwd，而不是包目录（否则会把状态写进包/缓存目录）。
  */
 function pickWorkspace() {
   if (process.env.DSH_BTC_WORKSPACE) return process.env.DSH_BTC_WORKSPACE
-  const parent = resolve(HERE, '..', '..')
-  if (existsSync(join(parent, '.env')) || existsSync(join(parent, 'plugin'))) return parent
+  const packageRoot = resolve(HERE, '..', '..')
+  if (existsSync(join(packageRoot, '.git')) || existsSync(join(packageRoot, '.env'))) return packageRoot
   return process.cwd()
 }
 
@@ -943,15 +944,16 @@ function query(req, name) {
 // ------------------------------------------------------------------ 回测（驱动 backtest/ 框架）
 //
 // 设计要点（改之前先看一眼）：
-//   1. 回测框架是仓库里的独立目录 `backtest/`，插件**不复制**它的代码，而是按需动态 import：
-//      CLI 与看板跑的是同一份实现（策略只写一遍、撮合口径只有一处）。
+//   1. 回测框架是包内的独立目录 `backtest/`（npm 包会一起发布；CLI 与看板跑同一份实现）：
+//      插件**不复制**它的代码，而是按需动态 import。
 //   2. 回测是长任务（首次抓一年 1h 要几十秒），所以做成 job：POST run 立刻返回 jobId，
 //      浏览器轮询 status 拿进度。同一时间只允许一个 job —— 复用同一条代理隧道池，
 //      并发跑只会互相抢限速，还让"报告属于哪一次"变得难以解释。
 //   3. 宿主与看板共用插件里的 keep-alive 隧道池，所以回测 fetcher 必须
 //      `closeTunnels:false`：回测收尾把隧道关了，可能让正在进行的看板刷新一起失败。
-//   4. 找目录的候选顺序：`DSH_BTC_BACKTEST_DIR` → `<工作区>/backtest` → 插件上两级/backtest。
-//      找不到就给中文错误，不影响看板其它功能（有人可能只安装了插件目录）。
+//   4. 找目录顺序：`DSH_BTC_BACKTEST_DIR` → 包根/backtest → `<工作区>/backtest`。
+//      数据缓存/报告默认写 backtest/data|reports；但从 npm/GitHub 安装时包目录不该写，
+//      会改落到 `<工作区>/.dashboard/backtest/`（见 start() 里的覆盖）。
 //   5. 安全边界：浏览器只能传**内置策略名 + 参数 + 周期 + 数字**；不接受路径、dataDir、outDir。
 //      报告 HTML 是只读生成的，响应带严格 CSP（报告本身零脚本/零外链）。
 
@@ -973,15 +975,17 @@ const BACKTEST_MAX_PAGES = 2_000
 const BACKTEST_HTML_CSP = "default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
 
 /**
- * 找仓库里的回测框架目录。按"越显式越优先"的顺序试，
- * 最后兜底用插件自己的位置往上两级 —— 插件装在 `<workspace>/plugin/dsh-btc-dashboard` 时正好对上。
+ * 找回测框架目录。按"越显式越优先"的顺序试：
+ *   1. `DSH_BTC_BACKTEST_DIR`（用户显式指定）；
+ *   2. 包内自带的 `<包根>/backtest` —— npm/GitHub 安装后就是 `node_modules/dsh-btc-dashboard/backtest`；
+ *   3. 工作区里的 `<cwd>/backtest` —— 只有旧布局/手工放了一份时才用得上。
  */
 function findBacktestRoot() {
   const candidates = []
   const fromEnv = setting('DSH_BTC_BACKTEST_DIR')
   if (typeof fromEnv === 'string' && fromEnv !== '') candidates.push(resolve(fromEnv))
-  candidates.push(join(WORKSPACE, 'backtest'))
   candidates.push(resolve(HERE, '..', '..', 'backtest'))
+  candidates.push(join(WORKSPACE, 'backtest'))
   for (const dir of candidates) {
     if (existsSync(join(dir, 'lib', 'engine.mjs')) && existsSync(join(dir, 'lib', 'data.mjs'))) return dir
   }
@@ -999,7 +1003,7 @@ function loadBacktestLib() {
   backtestLibPromise = (async () => {
     const root = findBacktestRoot()
     if (root === null) {
-      throw new Error('找不到回测框架目录（backtest/）：请在仓库里保留该目录，或用 DSH_BTC_BACKTEST_DIR 指定位置')
+      throw new Error('找不到回测框架目录（backtest/）：npm/GitHub 安装的包应自带该目录，请重装插件；或用 DSH_BTC_BACKTEST_DIR 指定位置')
     }
     const load = (name) => import(pathToFileURL(join(root, 'lib', name)).href)
     const modules = await Promise.all([
@@ -1467,6 +1471,15 @@ export function createBacktestService(options = {}) {
       })
     } catch (error) {
       return { ok: false, error: describe(error) }
+    }
+
+    // 从 npm / GitHub 安装时，backtest/ 在包的（pnpm store 里的）目录内：缓存和报告不能写进包，
+    // 否则升级/重装就没了。把工作区 != 包根一律落到 <工作区>/.dashboard/backtest/。
+    // 源码 checkout 里工作区就是包根，保持 backtest/data|reports 的旧默认值。
+    const packageRoot = resolve(HERE, '..', '..')
+    if (resolve(WORKSPACE) !== packageRoot) {
+      config.dataDir = join(WORKSPACE, '.dashboard', 'backtest', 'data')
+      config.outDir = join(WORKSPACE, '.dashboard', 'backtest', 'reports')
     }
 
     // 2.5) 规模防呆：数据层单次最多翻 BACKTEST_MAX_PAGES 页（每页 100 根）。

@@ -83,7 +83,8 @@ function workspaceDir() {
   const fromEnv = process.env.DSH_BTC_WORKSPACE
   if (typeof fromEnv === 'string' && fromEnv.trim() !== '') return resolve(fromEnv.trim())
   const root = resolve(HERE, '..', '..')
-  if (existsSync(join(root, '.env')) || existsSync(join(root, 'plugin'))) return root
+  // 源码仓库根有 .git（或用户放了 .env）；npm/GitHub 安装后包根在 node_modules 里，两者都没有 → 用 cwd。
+  if (existsSync(join(root, '.git')) || existsSync(join(root, '.env'))) return root
   return process.cwd()
 }
 
