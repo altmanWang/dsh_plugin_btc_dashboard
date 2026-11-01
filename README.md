@@ -11,6 +11,8 @@ plugin/dsh-btc-dashboard/               # 插件本体（就是安装进 profile
   ├─ client.js                          # 浏览器半：canvas 看图 + 周期/环境切换 + 画线
   ├─ package.json                       # dsh.bundle.patch + dsh.client 声明
   ├─ cordis.patch.yml                   # bundle 层：把 Host 半挂进 profile
+  ├─ screenshots.json                   # 市场截图清单（dsh-market 详情页用；路径相对本文件）
+  ├─ assets/screenshots/                # 截图：dashboard / alert / backtest
   └─ README.md                          # 实现细节、参数、路由、环境语义
 backtest/                               # 回测框架（独立于看板；默认只读公开行情，不需要 API key）
   ├─ run.mjs                            # CLI 入口（--strategy/--start/--end/--bar/--leverage/--maker/--taker…）
