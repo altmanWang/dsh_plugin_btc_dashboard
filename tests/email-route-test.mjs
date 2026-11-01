@@ -256,9 +256,18 @@ try {
     '测试邮件正文含"触发那根 K 线"（与真实预警同一组装路径）',
     sends.length > 0 ? String(sends[0].request.body).length + ' 字符' : '')
 
-  console.log('\n--- 8) 没装 dsh-qq-email 时 ---')
+  console.log('\n--- 8) 没装 dsh-qq-email 时（插件仍须正常启动）---')
   const bare = makeHost({ noService: true })
   disposers.push(bare.dispose)
+  // ⚠️ 邮件是**可选依赖**：没有 qqEmail 服务时插件必须照常启动、路由全在 ——
+  // 否则用户装上看板却因为没装 dsh-qq-email 而整片起不来。这是本节最重要的回归。
+  check((bare.routes.get(EMAIL) || []).length === 1 && (bare.routes.get(NOTIFY) || []).length === 1,
+    '没有 dsh-qq-email 时插件照常启动，email / notify-email 路由都注册上了',
+    JSON.stringify([...bare.routes.keys()]))
+  const healthBare = await callHandler(bare.handlerAt('/dsh-btc/health', 0), { method: 'GET', url: '/dsh-btc/health' })
+  check(healthBare.parsed !== null && healthBare.parsed.ok === true,
+    '没有 dsh-qq-email 时 /health 正常（插件整体可用，只是没有邮件服务）',
+    JSON.stringify(healthBare.parsed === null ? healthBare.text : { ok: healthBare.parsed.ok, env: healthBare.parsed.env && healthBare.parsed.env.id }))
   writeFileSync(STATE, JSON.stringify({ env: 'prod', bar: '1m' }, null, 1), 'utf8')
   const b1 = await callHandler(bare.handlerAt(EMAIL, 0), {
     method: 'POST', url: EMAIL,
@@ -268,10 +277,29 @@ try {
     && String(b1.parsed.error).indexOf('qqEmail') >= 0,
   '没有 qqEmail 服务时明确报错（不假装成功）',
   JSON.stringify(b1.parsed === null ? b1.text : b1.parsed.error))
+  // 报错要**可执行**：说清装哪个插件、去哪装、装完要重启，而不是只说"没有服务"。
+  const b1Error = b1.parsed === null ? '' : String(b1.parsed.error)
+  check(b1Error.indexOf('dsh-qq-email') >= 0 && b1Error.indexOf('插件市场') >= 0
+    && b1Error.indexOf('重启') >= 0,
+    '缺依赖报错里给出可执行提示（dsh-qq-email + 插件市场 + 重启宿主）', b1Error)
   const b2 = await callHandler(bare.handlerAt(EMAIL, 0), { method: 'GET', url: EMAIL })
   check(b2.parsed !== null && b2.parsed.email.available === false,
     'GET 里 available:false（界面据此给可执行的提示）',
     JSON.stringify(b2.parsed === null ? b2.text : b2.parsed.email.available))
+  // 发信路径同样要给药方：临时写入"已确认地址"，再走 notify-email（缺服务 → skipped=no-service）
+  writeFileSync(STATE, JSON.stringify({
+    env: 'prod', bar: '1m',
+    email: { enabled: true, to: 'me@qq.com', confirmed: 'me@qq.com', confirmedAt: Date.now() },
+  }, null, 1), 'utf8')
+  const b3 = await callHandler(bare.handlerAt(NOTIFY, 0), {
+    method: 'POST', url: NOTIFY, body: JSON.stringify({ test: true }),
+  })
+  check(b3.parsed !== null && b3.parsed.ok === false && b3.parsed.skipped === 'no-service',
+    '发信路径缺依赖时 skipped=no-service（不假装成功）',
+    JSON.stringify(b3.parsed === null ? b3.text : { skipped: b3.parsed.skipped }))
+  check(b3.parsed !== null && String(b3.parsed.error).indexOf('插件市场') >= 0,
+    '发信路径的报错也带安装提示', JSON.stringify(b3.parsed === null ? b3.text : b3.parsed.error))
+  writeFileSync(STATE, JSON.stringify({ env: 'prod', bar: '1m' }, null, 1), 'utf8')
 
   console.log('\n--- 9) 路由注册容错（重载 / 陈旧占用）---')
   const shared = new Map()

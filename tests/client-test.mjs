@@ -1369,6 +1369,8 @@ function createInteractiveDom(options) {
     lastSentAt: null,
     lastError: null,
     sentCount: 0,
+    /** 宿主有没有 qqEmail 服务（dsh-qq-email 装没装）：false 用来测"缺依赖时的提示" */
+    available: true,
   }
   const emailPosts = []
   const notified = []
@@ -1379,7 +1381,7 @@ function createInteractiveDom(options) {
     to: emailState.to,
     confirmed: emailState.confirmed,
     authorized: emailState.confirmed !== '' && emailState.confirmed.toLowerCase() === emailState.to.toLowerCase(),
-    available: true,
+    available: emailState.available !== false,
     confirmedAt: emailState.confirmedAt,
     lastSentAt: emailState.lastSentAt,
     lastError: emailState.lastError,
@@ -4313,6 +4315,46 @@ function buildPluginCss() {
         '请求数 ' + String(postsBefore) + ' → ' + String(dom20.emailPosts().length)
         + '，disabled=' + String(emailBtn().disabled))
       await dom20.unmount()
+    }
+  }
+
+  // ---- 邮件是可选依赖：宿主没装 dsh-qq-email 时，面板要直接给"去哪装"的提示；
+  //      点「开启」也不能白弹确认框 / 发无意义的保存请求（用户 2026-11 提的验收点）
+  {
+    const dom21 = createInteractiveDom()
+    if (dom21 === null) {
+      console.log('     跳过「邮件缺依赖提示」测试：环境里找不到 jsdom')
+    } else {
+      const win21 = dom21.win()
+      let confirmAsked21 = 0
+      win21.confirm = function () { confirmAsked21 += 1; return true }
+      const st21 = dom21.emailState()
+      st21.available = false
+      await dom21.mount()
+      const docEl = dom21.container().ownerDocument
+      for (const b of docEl.querySelectorAll('button')) {
+        if (b.textContent.trim().indexOf('预警') === 0) { dom21.click(b); break }
+      }
+      await dom21.settle(400)
+      const emailInput = docEl.querySelector('.btcd-email-to')
+      const emailBtn = docEl.querySelector('.btcd-email-btn')
+      check(emailInput !== null && emailBtn !== null, '缺依赖时邮件控件照样渲染（面板不崩）')
+      check(docEl.body.textContent.indexOf('dsh-qq-email') >= 0,
+        '缺依赖时面板直接提示要装 dsh-qq-email')
+      check(docEl.body.textContent.indexOf('插件市场') >= 0,
+        '提示里给出安装去处（插件市场 / 发现）')
+      dom21.type(emailInput, 'me@qq.com')
+      await dom21.settle(200)
+      const postsBefore21 = dom21.emailPosts().length
+      dom21.click(emailBtn)
+      await dom21.settle(500)
+      check(dom21.emailPosts().length === postsBefore21,
+        '缺依赖时点「开启」不发保存请求（先提示安装）',
+        '请求数 ' + String(postsBefore21) + ' → ' + String(dom21.emailPosts().length))
+      check(confirmAsked21 === 0, '缺依赖时点「开启」不白弹一次确认框', String(confirmAsked21))
+      check(docEl.body.textContent.indexOf('dsh-qq-email') >= 0,
+        '点「开启」后的提示里带着 dsh-qq-email（可执行）')
+      await dom21.unmount()
     }
   }
 

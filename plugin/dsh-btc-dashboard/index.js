@@ -1591,6 +1591,14 @@ const EMAIL_MAX_SUBJECT_CHARS = 300;
 /** 宽松但足够严格的地址形状校验（与 qqEmail 自己的规则一致）。 */
 const EMAIL_ADDRESS_RE = /^[^\s@,;<>"()[\]]+@[^\s@,;<>"()[\]]+\.[^\s@,;<>"()[\]]+$/;
 
+/**
+ * 邮件通道是**可选依赖**：Host 半只在路由里用 `ctx.get('qqEmail')` 惰性取服务，
+ * 模块加载与 apply 都不依赖它 —— 没装 `dsh-qq-email` 时插件照常启动，只有邮件通道不可用。
+ * 用户真要开邮件提醒时才给这条可执行提示：装哪个、去哪装、装完做什么、不影响什么。
+ */
+const QQ_EMAIL_MISSING_HINT = '邮件提醒依赖 dsh-qq-email 插件（已在 DSH 插件市场上架）：当前宿主没有找到它提供的 qqEmail 服务。'
+  + '请在「插件 → 发现 / Discover」里安装并启用 dsh-qq-email，然后重启宿主；不装它不影响看板、均线、回测等其它功能。';
+
 /** 地址串按逗号 / 分号 / 空白切分，去重、去空。 */
 function parseEmailList(input) {
   const raw = Array.isArray(input) ? input.join(',') : String(input === undefined || input === null ? '' : input);
@@ -2075,7 +2083,7 @@ export function apply(ctx, options) {
         }
         const service = qqEmailService()
         if (service === null) {
-          json(res, { ok: false, error: '没有找到 qqEmail 服务：请先启用 dsh-qq-email 插件（它会提供 ctx.qqEmail）' })
+          json(res, { ok: false, error: QQ_EMAIL_MISSING_HINT, missingPlugin: 'dsh-qq-email' })
           return
         }
         confirmedText = toText;
@@ -2129,7 +2137,7 @@ export function apply(ctx, options) {
       }
       const service = qqEmailService()
       if (service === null) {
-        json(res, { ok: false, skipped: 'no-service', error: '没有找到 qqEmail 服务：请先启用 dsh-qq-email 插件' })
+        json(res, { ok: false, skipped: 'no-service', error: QQ_EMAIL_MISSING_HINT, missingPlugin: 'dsh-qq-email' })
         return
       }
       const isTest = payload !== null && typeof payload === 'object' && payload.test === true

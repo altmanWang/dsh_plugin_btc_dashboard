@@ -984,6 +984,13 @@ window.__ModuleLoader__.load({
     // 宿主那边为什么不用 DSH 的 approval：见 index.js 里"确认模型"那段说明
     // （approval.request() 要求打开的 turn，而预警是自动触发的，没有 turn 可依附）。
 
+    /**
+     * 邮件通道依赖 `dsh-qq-email` 插件（**可选依赖**）：没有它时本插件照常启动、其它功能不受影响。
+     * 只在用户真的要开邮件提醒时才给出这条可执行提示 —— 去哪装、装完要做什么、哪些功能不受影响。
+     */
+    var EMAIL_MISSING_PLUGIN_HINT = '邮件提醒需要 dsh-qq-email 插件（在「插件 → 发现 / Discover」里可安装）：装好并启用后重启宿主即可用；不装它不影响看板、均线、回测等其它功能。';
+    var EMAIL_MISSING_PLUGIN_STATE = '⚠️ 邮件提醒不可用：需要先安装并启用 dsh-qq-email 插件（插件市场「发现 / Discover」可搜到），装完重启宿主；桌面通知/提示音不受影响。';
+
     /** 邮件配置的规范化（本地缓存这份；宿主的权威值通过 /email 接口对齐）。 */
     function normalizeEmail(input) {
       var source = input !== null && typeof input === 'object' ? input : {};
@@ -6081,8 +6088,13 @@ window.__ModuleLoader__.load({
                 parts.push(okDesk ? '桌面通知已发' : (notifyAvailable() !== true ? '不支持桌面通知'
                   : (notifyPermission() === 'granted' ? '桌面通知发送失败' : '桌面通知未授权（先打开上面的开关）')));
                 parts.push(okSound ? '响了' : '没响（浏览器要求先与页面交互过：点一下面板任意处再试）');
-                // 邮件：配好了就顺手发一封测试邮件，一条按钮把三个通道都验掉
+                // 邮件：配好了就顺手发一封测试邮件，一条按钮把三个通道都验掉。
+                // 邮件是可选依赖：宿主没有 qqEmail 服务时不去空发请求，直接把"要装 dsh-qq-email"说清楚。
                 var mail = alertStoreGet('email');
+                if (mail.enabled === true && mail.available !== true) {
+                  setToast(parts.join(' · ') + ' · 测试邮件发不出去：需要 dsh-qq-email 插件（插件市场可安装），装好并重启宿主后重试');
+                  return;
+                }
                 if (mail.enabled === true) {
                   setEmailBusy(true);
                   sendTestEmail().then(function (out) {
@@ -6135,14 +6147,18 @@ window.__ModuleLoader__.load({
               className: 'btcd-mini btcd-email-btn ' + (active ? 'btcd-email-btn-on' : 'btcd-email-btn-off'),
               disabled: busy,
               'aria-pressed': active,
-              title: active
-                ? '邮件提醒已开启（绿色）；点一下关闭 —— 地址会保留'
-                : (email.enabled === true && email.authorized !== true
-                  ? '开关是开的，但当前地址还没被确认；点一下重新确认并开启'
-                  : '邮件提醒当前关闭（红色）；填好地址后点这里开启，会先请你确认一次'),
+              title: email.available !== true
+                ? '邮件提醒不可用：需要安装并启用 dsh-qq-email 插件（插件市场「发现 / Discover」可搜到），装完重启宿主'
+                : (active
+                  ? '邮件提醒已开启（绿色）；点一下关闭 —— 地址会保留'
+                  : (email.enabled === true && email.authorized !== true
+                    ? '开关是开的，但当前地址还没被确认；点一下重新确认并开启'
+                    : '邮件提醒当前关闭（红色）；填好地址后点这里开启，会先请你确认一次')),
               onClick: function () {
                 var wantOn = active !== true;
                 var to = draft.trim();
+                // 邮件是可选依赖：缺 qqEmail 服务时不弹确认、不发请求，直接给可执行的安装提示。
+                if (wantOn && email.available !== true) { setToast(EMAIL_MISSING_PLUGIN_HINT); return; }
                 if (wantOn && to === '') { setToast('先填一个收件邮箱地址'); return; }
                 // 要开启、且地址与已确认的不一致（含"开着但授权失效"）→ 先弹确认
                 var same = email.confirmed !== '' && email.confirmed.toLowerCase() === to.toLowerCase();
@@ -6188,15 +6204,19 @@ window.__ModuleLoader__.load({
             rows.push(React.createElement('div', { className: 'btcd-emapanel-foot', key: 'email-off' },
               '已确认地址：' + email.confirmed + '（邮件提醒当前关闭，地址保留着）'));
           }
-          if (email.enabled === true || email.to !== '') {
+          // 邮件是可选依赖：没有 qqEmail 服务时**不等用户踩坑才发现**，面板里直接给安装提示。
+          if (email.available !== true) {
+            rows.push(React.createElement('div', {
+              className: 'btcd-emapanel-foot btcd-alert-diag-bad',
+              key: 'email-state',
+            }, EMAIL_MISSING_PLUGIN_STATE));
+          } else if (email.enabled === true || email.to !== '') {
             var state = email.enabled !== true
               ? '邮件提醒当前关闭 —— 地址已填好，点右边的按钮开启'
-              : (email.available !== true
-                ? '⚠️ 没有找到 qqEmail 服务 —— 请先启用 dsh-qq-email 插件（它提供发信能力）'
-                : (email.authorized === true
-                  ? '✅ 收件地址已确认，命中时会自动发送'
-                  : '⚠️ 当前地址还没被确认（地址改过？）—— 点右边的「开启邮件提醒」重新确认'));
-            var ok = email.enabled === true && email.available === true && email.authorized === true;
+              : (email.authorized === true
+                ? '✅ 收件地址已确认，命中时会自动发送'
+                : '⚠️ 当前地址还没被确认（地址改过？）—— 点右边的「开启邮件提醒」重新确认');
+            var ok = email.enabled === true && email.authorized === true;
             rows.push(React.createElement('div', {
               className: 'btcd-emapanel-foot' + (ok ? '' : (email.enabled === true ? ' btcd-alert-diag-bad' : '')),
               key: 'email-state',

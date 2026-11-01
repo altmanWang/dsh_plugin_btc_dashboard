@@ -61,6 +61,8 @@ dsh plugin --profile web add "github:altmanWang/dsh_plugin_btc_dashboard#path:/p
 
 - 只读 OKX 公开行情（ticker / candles），**不需要 API key**，不读账户与持仓；
 - 可选：把 `.env.example` 复制成 `.env` 填上密钥，面板才会显示当前环境「配了哪把钥匙」的掩码（不填也能正常看行情）；
+- **邮件提醒是可选通道**：依赖 [dsh-qq-email](https://github.com/altmanWang/dsh-qq-email) 插件（已上架 DSH 插件市场，`插件 → 发现 / Discover` 可搜到）。
+  **不装它插件照常启动**，看板/均线/画线/回测都不受影响；要用邮件时预警面板会直接提示去安装，装完重启宿主即可；
 - 零第三方 npm 依赖，Node 版本跟随宿主；卸载：`dsh plugin --profile web remove @local/dsh-btc-dashboard`。
 
 ## 本地开发安装 / 卸载
@@ -68,7 +70,10 @@ dsh plugin --profile web add "github:altmanWang/dsh_plugin_btc_dashboard#path:/p
 在本仓库里开发时，用 `plugin_manager` 的 `install_bundle` 把 `plugin/dsh-btc-dashboard` 链接进 profile。
 profile 里的依赖是链接形式，所以这个目录就是线上代码：改客户端半刷新页面即可，改 Host 半需要重启宿主。
 
-> 当前磁盘上是 **1.8.0**。**Host 半有改动，需要重启宿主** —— 1.8.0 增加了 `ETH-USDT-SWAP`：
+> 当前磁盘上是 **1.8.1**。1.8.1 只改了邮件通道的**可选依赖提示**：没装 `dsh-qq-email` 时插件照常启动，
+> 预警面板会提示去「插件 → 发现 / Discover」安装；Host 半（提示文案）有改动，需要重启宿主。
+>
+> **Host 半有改动，需要重启宿主** —— 1.8.0 增加了 `ETH-USDT-SWAP`：
 > 看板顶部 `BTC / ETH` 切换、侧边栏价格跟随、回测面板「标的」下拉（Host 半新增
 > `SUPPORTED_INSTS` 白名单，board/price/backtest/health 都按白名单走）。
 > 1.7.1 给回测周期加了 `5m`
