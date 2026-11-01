@@ -12,6 +12,7 @@ backtest/reports/
 
 # 依赖与杂项
 node_modules/
+.pnpm-store/
 *.log
 .DS_Store
 Thumbs.db

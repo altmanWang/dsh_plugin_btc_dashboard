@@ -1,9 +1,22 @@
 {
   "name": "@local/dsh-btc-dashboard",
   "version": "1.8.0",
-  "private": true,
   "license": "MIT",
   "description": "OKX 合约价格看板（BTC / ETH 永续可切换）：最新价 + 1m/3m/15m/1h/4h/1D K 线 + 可调周期 EMA（整条序列现算）+ 收线预警（穿均线提示，可桌面通知/提示音/邮件/留记录，判定常驻执行）+ 最新价线与收盘倒计时 + 可编辑画线 + 生产/模拟环境切换 + 回测面板（内置 backtest/ 框架：可选标的/策略/周期/时间范围/资金/杠杆/费率，面板内看资金曲线与交易明细）",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/altmanWang/dsh_plugin_btc_dashboard.git",
+    "directory": "plugin/dsh-btc-dashboard"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "okx",
+    "crypto",
+    "trading",
+    "kline",
+    "backtest"
+  ],
   "type": "module",
   "exports": {
     ".": "./index.js",
