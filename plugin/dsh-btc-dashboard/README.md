@@ -1,5 +1,10 @@
 # dsh-btc-dashboard
 
+> 安装（npm）：`dsh plugin --profile web add dsh-btc-dashboard`；也可以从
+> [GitHub 源码安装](https://github.com/altmanWang/dsh_plugin_btc_dashboard#安装)（仓库根不是 npm 包，命令带 `#path:`）。
+> 装完重启 profile，浏览器刷新页面即可。只读 OKX 公开行情、**不需要 API key**；
+> 邮件提醒需要另装 [`dsh-qq-email`](https://github.com/altmanWang/dsh-qq-email)，不装它不影响启动。
+
 DSH 插件：**OKX 合约价格看板（BTC / ETH 永续）**。侧边栏一个按钮，点开是一个全屏面板：
 
 - **多合约**：`BTC-USDT-SWAP` / `ETH-USDT-SWAP`，顶部 `BTC / ETH` 分段按钮切换；
@@ -164,16 +169,16 @@ DSH 插件：**OKX 合约价格看板（BTC / ETH 永续）**。侧边栏一个�
 
 ## 安装状态
 
-通过 `plugin_manager` 的 `install_bundle` 装进 profile 后，profile 的 `package.json` 里是一条
-链接依赖，`link:` 指向你 clone 下来的仓库路径：
+通过 `plugin_manager` 的 `install_bundle`（或 `dsh plugin add`）装进 profile 后，profile 的
+`package.json` 里是一条链接依赖，`link:` 指向你 clone 下来的仓库路径：
 
 ```
-@local/dsh-btc-dashboard  link:<仓库根目录>/plugin/dsh-btc-dashboard
+dsh-btc-dashboard  link:<仓库根目录>/plugin/dsh-btc-dashboard
 ```
 
 所以**改这个目录里的代码就是改线上插件**（客户端半由宿主按原样读取文件字节发给浏览器，改完刷新页面即可；Host 半是已加载的 ESM 模块，代码改动需要重启宿主才生效）。
 
-- 卸载：`plugin_manager` → `remove_bundle`，target `@local/dsh-btc-dashboard`
+- 卸载：`plugin_manager` → `remove_bundle`，target `dsh-btc-dashboard`
 - 临时停用：`set_bundle` / `set_plugin`，enabled=false
 
 ## 两个环境的语义（重要，别被「密钥」误导）

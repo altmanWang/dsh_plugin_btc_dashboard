@@ -89,7 +89,7 @@ const fakeDocument = {
 sandbox(fakeWindow, function () { return Promise.resolve({ json: function () { return Promise.resolve({ ok: false }); } }); }, fakeDocument, undefined, undefined)
 
 check(captured !== null, '__ModuleLoader__.load 被调用')
-check(captured.id === '@local/dsh-btc-dashboard', 'bundle id 等于包名', 'id=' + captured.id)
+check(captured.id === 'dsh-btc-dashboard', 'bundle id 等于包名', 'id=' + captured.id)
 
 const mod = captured.factory(function (spec) {
   if (spec === 'react') return React

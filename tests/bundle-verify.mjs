@@ -14,7 +14,7 @@ import { readFileSync } from 'node:fs'
 import { CLIENT_FILE, authHeaders, fenceHint } from './_paths.mjs'
 
 const BASE = (process.env.DSH_BTC_BASE || 'http://127.0.0.1:3080').replace(/\/$/, '')
-const ID = '@local/dsh-btc-dashboard'
+const ID = 'dsh-btc-dashboard'
 const CLIENT = CLIENT_FILE
 
 let failed = 0

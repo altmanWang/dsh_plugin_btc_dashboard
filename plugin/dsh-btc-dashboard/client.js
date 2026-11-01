@@ -3,13 +3,13 @@
  *
  * 注意两件事，它们由 DSH 的客户端模块机制定死：
  *   1. 这个文件不是 ESM：必须用 window.__ModuleLoader__.load({ id, factory }) 注册惰性工厂，
- *      且 id 必须等于包名（@local/dsh-btc-dashboard）。宿主按原样把这些字节发给浏览器，不做构建。
+ *      且 id 必须等于包名（dsh-btc-dashboard）。宿主按原样把这些字节发给浏览器，不做构建。
  *   2. 只能 require 平台种子表里的模块（这里用 react），其它一律不准 —— 所以图表用原生 canvas 画。
  *
  * 数据全部来自 Host 半注册的同源路由 /dsh-btc/*：没有 CORS，密钥也永远不进浏览器。
  */
 window.__ModuleLoader__.load({
-  id: '@local/dsh-btc-dashboard',
+  id: 'dsh-btc-dashboard',
   factory: function (require) {
     var module = { exports: {} };
     var exports = module.exports;

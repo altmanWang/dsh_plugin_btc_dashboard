@@ -52,18 +52,26 @@ docs/awesome-entry.yml                  # 提交到 awesome-dsh-plugin 的条目
 
 ## 安装
 
-插件本体在 `plugin/dsh-btc-dashboard/`（仓库根不是 npm 包，所以安装命令要带 `#path:`）。装进任意 DSH profile：
+### 从 npm（推荐）
+
+```powershell
+dsh plugin --profile web add dsh-btc-dashboard
+# --profile 换成你的 profile 名（如 web）；装完重启该 profile，浏览器刷新页面即可
+```
+
+### 从 GitHub（不经过 npm）
+
+插件本体在 `plugin/dsh-btc-dashboard/`（仓库根不是 npm 包，所以安装命令要带 `#path:`）：
 
 ```powershell
 dsh plugin --profile web add "github:altmanWang/dsh_plugin_btc_dashboard#path:/plugin/dsh-btc-dashboard"
-# --profile 换成你的 profile 名（如 web）；装完重启该 profile，浏览器刷新页面即可
 ```
 
 - 只读 OKX 公开行情（ticker / candles），**不需要 API key**，不读账户与持仓；
 - 可选：把 `.env.example` 复制成 `.env` 填上密钥，面板才会显示当前环境「配了哪把钥匙」的掩码（不填也能正常看行情）；
 - **邮件提醒是可选通道**：依赖 [dsh-qq-email](https://github.com/altmanWang/dsh-qq-email) 插件（已上架 DSH 插件市场，`插件 → 发现 / Discover` 可搜到）。
   **不装它插件照常启动**，看板/均线/画线/回测都不受影响；要用邮件时预警面板会直接提示去安装，装完重启宿主即可；
-- 零第三方 npm 依赖，Node 版本跟随宿主；卸载：`dsh plugin --profile web remove @local/dsh-btc-dashboard`。
+- 零第三方 npm 依赖，Node 版本跟随宿主；卸载：`dsh plugin --profile web remove dsh-btc-dashboard`。
 
 ## 本地开发安装 / 卸载
 
@@ -116,7 +124,7 @@ profile 里的依赖是链接形式，所以这个目录就是线上代码：改
 > 现在派发事件统一用 `flushSync` 包一层。
 > 详见[插件 README 的「踩过的坑」](plugin/dsh-btc-dashboard/README.md#踩过的坑改这块之前先看一眼)。
 
-- 卸载：`plugin_manager` → `remove_bundle` → `@local/dsh-btc-dashboard`
+- 卸载：`plugin_manager` → `remove_bundle` → `dsh-btc-dashboard`
 - 停用：`plugin_manager` → `set_plugin` → `btc-dashboard`（或 `set_bundle`），enabled=false
 
 ## 回测（backtest/）

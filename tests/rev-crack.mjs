@@ -14,7 +14,7 @@ function framed(domain, parts) {
 }
 
 const cases = [
-  ['btc-dashboard', '@local/dsh-btc-dashboard', 'client.js', CLIENT_FILE],
+  ['btc-dashboard', 'dsh-btc-dashboard', 'client.js', CLIENT_FILE],
 ]
 if (BRAND_CLIENT !== null) {
   cases.push(['brand-official', '@deepseek-ai/dsh-client-ui-brand-official', 'lib/client.js', BRAND_CLIENT])
